@@ -18,6 +18,8 @@ create table if not exists public.partners (
 create index if not exists partners_order_idx     on public.partners (order_index);
 create index if not exists partners_published_idx on public.partners (published);
 
+-- Drop + recreate trigger to keep the migration idempotent
+drop trigger if exists partners_set_updated_at on public.partners;
 create trigger partners_set_updated_at
   before update on public.partners
   for each row execute function public.tg_set_updated_at();
@@ -26,11 +28,13 @@ create trigger partners_set_updated_at
 alter table public.partners enable row level security;
 
 -- Public can read published partners
+drop policy if exists "public read partners" on public.partners;
 create policy "public read partners"
   on public.partners for select
   using (published = true);
 
 -- Editor / owner can write
+drop policy if exists "editors write partners" on public.partners;
 create policy "editors write partners"
   on public.partners for all
   using (is_editor_or_owner()) with check (is_editor_or_owner());
