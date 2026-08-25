@@ -40,8 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# scratch (PDF / brand extraction tools)
+# scratch (PDF / brand extraction / verification tools)
 _*.py
+_*.js
+_*.mjs
+_*.cjs
 _*.txt
 *.bak
 *.deprecated
