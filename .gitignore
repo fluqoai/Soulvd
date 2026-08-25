@@ -39,3 +39,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scratch (PDF / brand extraction tools)
+_*.py
+_*.txt
+*.bak
+*.deprecated
+*.leaked
+Userskhayrat*
+.devout.log
+.devout.log.old
+.deverr.log
+.deverr.log.old
+public/brand/extracted/
+public/brand/pages/
+public/brand/concepts/
+
+# secrets (extra safety)
+*.pem
+*.key
+.env
+.env.*

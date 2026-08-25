@@ -1,1 +1,122 @@
 @import "tailwindcss";
+
+/* ============================================================
+   Design tokens — Soulvd brand
+   muted sage · warm linen · warm wood · deep ink
+   ============================================================ */
+@theme {
+  /* sage — primary brand */
+  --color-sage-50:  #F4F6F4;
+  --color-sage-100: #E5EBE6;
+  --color-sage-200: #C9D5CC;
+  --color-sage-300: #A8B9AC;
+  --color-sage-400: #8FA495;
+  --color-sage-500: #7A9080;
+  --color-sage-600: #5F7565;
+  --color-sage-700: #485A4D;
+  --color-sage-800: #34413A;
+  --color-sage-900: #1F2823;
+
+  /* linen — surface */
+  --color-linen-50:  #FAF7F0;
+  --color-linen-100: #F5F0E4;
+  --color-linen-200: #EDE6D6;
+  --color-linen-300: #DCD0B6;
+  --color-linen-400: #C7B591;
+
+  /* wood — accent */
+  --color-wood-300: #D9BD96;
+  --color-wood-400: #C7A77B;
+  --color-wood-500: #A8855B;
+  --color-wood-700: #6F5638;
+
+  /* ink — text */
+  --color-ink-500: #6B655C;
+  --color-ink-600: #56504A;
+  --color-ink-700: #4A463E;
+  --color-ink-800: #353129;
+  --color-ink-900: #2C2A26;
+
+  /* semantic */
+  --color-paper:   #FAF7F0;
+  --color-ink:     #2C2A26;
+
+  /* font families — bound to next/font CSS variables */
+  --font-sans:    var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-arabic:  var(--font-plex-arabic), "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-display: var(--font-fraunces), "Fraunces", Georgia, serif;
+
+  /* max-width */
+  --container-page: 80rem;
+
+  /* easings */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.65;
+  }
+
+  /* Arabic: switch to Plex Sans Arabic */
+  html[lang="ar"] body {
+    font-family: var(--font-arabic);
+  }
+
+  /* Use display serif for Latin headings (Arabic headings stay sans) */
+  html[lang="en"] h1, html[lang="en"] h2, html[lang="en"] h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background-color: var(--color-sage-200);
+    color: var(--color-ink-900);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  .container-page {
+    width: 100%;
+    max-width: var(--container-page);
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: 2rem;
+    }
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "site": {
+    "name": "Soulvd",
+    "tagline": "We turn WhatsApp conversations into sales",
+    "description": "A comprehensive AI automation platform, designed for the Saudi market."
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "sectors": "Sectors",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Official Meta Partner — 2026",
+      "title": "We turn WhatsApp conversations into sales",
+      "subtitle": "An integrated AI platform for Saudi businesses. It understands local dialect, replies 24/7, and converts leads into real deals.",
+      "cta_primary": "Contact us",
+      "cta_secondary": "Explore services"
+    },
+    "why": {
+      "title": "Why Soulvd?",
+      "subtitle": "Real value for your business"
+    },
+    "values": [
+      {
+        "key": "instant",
+        "title": "24/7 instant replies",
+        "description": "Replies to your customers within seconds, around the clock, even on weekends."
+      },
+      {
+        "key": "convert",
+        "title": "Conversions, not just answers",
+        "description": "More than a chatbot — it qualifies leads and closes deals on autopilot when needed."
+      },
+      {
+        "key": "dialect",
+        "title": "Speaks Saudi dialect",
+        "description": "Trained on local Saudi dialects with high accuracy — it sounds like your customers actually talk."
+      },
+      {
+        "key": "analytics",
+        "title": "Real-time analytics",
+        "description": "A full dashboard tracking every interaction, conversion rate, and campaign performance in real time."
+      },
+      {
+        "key": "no-code",
+        "title": "Live in two weeks",
+        "description": "Weekly improvements — no developer or technical expert required."
+      },
+      {
+        "key": "licensed",
+        "title": "Officially licensed",
+        "description": "Official WhatsApp Business partner — secure and trusted, fully certified by Meta."
+      },
+      {
+        "key": "integrations",
+        "title": "100+ integrations",
+        "description": "Direct integrations with Shopify, HubSpot, Salesforce, Zapier, Stripe, Google, and more."
+      }
+    ],
+    "services": {
+      "title": "Our services",
+      "subtitle": "Comprehensive AI solutions tailored for the Saudi market, covering the entire customer journey — from first contact to closed deal."
+    },
+    "serviceList": [
+      {
+        "key": "bot",
+        "title": "Smart WhatsApp bot",
+        "description": "A 24/7 custom bot in Arabic and English, trained on your data and local dialects to answer customers and close deals."
+      },
+      {
+        "key": "campaigns",
+        "title": "WhatsApp marketing campaigns",
+        "description": "Send targeted messages with real-time tracking of campaign performance, engagement, and conversion."
+      },
+      {
+        "key": "inbox",
+        "title": "Unified inbox",
+        "description": "Manage all conversations from a single platform, auto-routed to the right team for fast response."
+      },
+      {
+        "key": "flows",
+        "title": "No-code flow builder",
+        "description": "Build conversation paths with drag-and-drop using ready-made templates — no developer needed."
+      },
+      {
+        "key": "analytics",
+        "title": "Real-time analytics",
+        "description": "Detailed dashboards tracking message performance, campaigns, and response times with exportable reports."
+      },
+      {
+        "key": "integrations",
+        "title": "100+ integrations",
+        "description": "Direct integration with 100+ platforms like Shopify, HubSpot, Zapier, and more."
+      }
+    ],
+    "sectors": {
+      "title": "Sectors we serve",
+      "subtitle": "Soulvd works with diverse sectors across the Kingdom of Saudi Arabia. Here are real examples of how our smart bot works in each."
+    },
+    "sectorList": [
+      {
+        "key": "nonprofit",
+        "title": "Non-profit",
+        "description": "Beneficiary requests and campaign marketing."
+      },
+      {
+        "key": "public",
+        "title": "Public sector",
+        "description": "Public inquiries and e-services."
+      },
+      {
+        "key": "restaurants",
+        "title": "Restaurants",
+        "description": "Orders, reservations, and complaint handling."
+      },
+      {
+        "key": "real-estate",
+        "title": "Real estate",
+        "description": "Property inquiries, viewing scheduling, and offer delivery."
+      },
+      {
+        "key": "education",
+        "title": "Education & universities",
+        "description": "Online registration, schedules, and academic guidance."
+      },
+      {
+        "key": "healthcare",
+        "title": "Healthcare",
+        "description": "Appointment booking, follow-up reminders, and inquiry replies."
+      }
+    ],
+    "stats": {
+      "title": "Our achievements",
+      "subtitle": "Numbers that reflect our clients' trust and the speed of our impact"
+    },
+    "statList": [
+      { "value": "+8", "label": "Sectors served" },
+      { "value": "+100", "label": "Integrations" },
+      { "value": "98%", "label": "Customer satisfaction" },
+      { "value": "2", "label": "Weeks to launch" }
+    ],
+    "cta": {
+      "title": "Ready to transform your customer experience?",
+      "subtitle": "Launch in two weeks with Meta's officially certified partner in the Kingdom of Saudi Arabia.",
+      "button": "Contact us"
+    }
+  },
+  "about": {
+    "vision": {
+      "title": "Our vision",
+      "text": "To be the #1 technical partner for every Saudi company seeking customer experience automation and full digital transformation — through innovative AI solutions that meet local market needs with high accuracy and competitive cost."
+    },
+    "mission": {
+      "title": "Our mission",
+      "text": "Deliver AI tools that help companies of all sizes improve service and reduce operating costs while ensuring exceptional customer experiences across all digital channels."
+    }
+  },
+  "footer": {
+    "description": "Soulvd is a Saudi company specializing in AI automation solutions for businesses in the Kingdom of Saudi Arabia. Officially licensed by Meta, 2026.",
+    "rights": "© 2026 Soulvd. All rights reserved.",
+    "built_in_sa": "Made in Saudi Arabia"
+  },
+  "lang": {
+    "ar": "العربية",
+    "en": "English",
+    "switch": "Switch language"
+  }
+}
