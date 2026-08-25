@@ -132,16 +132,6 @@
         "description": "Appointment booking, follow-up reminders, and inquiry replies."
       }
     ],
-    "stats": {
-      "title": "Our achievements",
-      "subtitle": "Numbers that reflect our clients' trust and the speed of our impact"
-    },
-    "statList": [
-      { "value": "+8", "label": "Sectors served" },
-      { "value": "+100", "label": "Integrations" },
-      { "value": "98%", "label": "Customer satisfaction" },
-      { "value": "2", "label": "Weeks to launch" }
-    ],
     "cta": {
       "title": "Ready to transform your customer experience?",
       "subtitle": "Launch in two weeks with Meta's officially certified partner in the Kingdom of Saudi Arabia.",

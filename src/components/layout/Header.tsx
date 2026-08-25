@@ -28,9 +28,9 @@ export async function Header() {
           <Image
             src="/brand/soulvd-logo.png"
             alt={tSite('name')}
-            width={140}
-            height={32}
-            className="h-7 md:h-8 w-auto"
+            width={200}
+            height={48}
+            className="h-9 md:h-11 w-auto"
             priority
           />
         </Link>

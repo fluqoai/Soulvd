@@ -42,13 +42,13 @@ export async function Hero() {
           </FadeIn>
 
           <FadeIn delay={0.15} className="md:col-span-5">
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-linen-100 border border-ink-900/5">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-linen-100 border border-ink-900/5 p-6">
               <Image
                 src="/brand/soulvd-mark.png"
                 alt={tSite('name')}
                 fill
                 sizes="(min-width: 768px) 40vw, 90vw"
-                className="object-contain p-10"
+                className="object-contain p-2"
               />
               <div className="absolute inset-x-6 bottom-6 rounded-lg bg-paper/95 backdrop-blur-sm border border-ink-900/5 p-3 shadow-sm">
                 <div className="flex items-center gap-3">
