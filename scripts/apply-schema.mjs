@@ -1,6 +1,8 @@
 // scripts/apply-schema.mjs
 //
-// Applies supabase/migrations/0001_initial_schema.sql to the configured Supabase project.
+// Applies every supabase/migrations/*.sql file in numeric order to the configured
+// Supabase project. Each file is idempotent (uses `create … if not exists` and
+// `on conflict do nothing`) so re-running is safe.
 //
 // Usage:
 //   node scripts/apply-schema.mjs                  # uses SUPABASE_DB_PASSWORD from .env
@@ -11,7 +13,7 @@
 // service-role JWT as a password. Get yours from:
 //   Supabase dashboard -> Project Settings -> Database -> Connection string
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import pg from 'pg';
@@ -61,14 +63,21 @@ const port = 5432;
 const database = 'postgres';
 const user = 'postgres';
 
-const sqlPath = join(projRoot, 'supabase', 'migrations', '0001_initial_schema.sql');
-const sql = readFileSync(sqlPath, 'utf8');
+const migrationsDir = join(projRoot, 'supabase', 'migrations');
+const migrationFiles = readdirSync(migrationsDir)
+  .filter((f) => f.endsWith('.sql'))
+  .sort();
+
+if (migrationFiles.length === 0) {
+  console.error('ERROR: no .sql files found in', migrationsDir);
+  process.exit(1);
+}
 
 console.log('---');
 console.log('Project:    ', ref);
 console.log('Connecting: ', `postgresql://${user}@${host}:${port}/${database}`);
-console.log('Migration:  ', sqlPath);
-console.log('SQL length: ', sql.length, 'chars');
+console.log('Migrations: ', migrationFiles.length, 'file(s)');
+for (const f of migrationFiles) console.log('  -', f);
 console.log('---');
 
 const client = new pg.Client({
@@ -83,12 +92,15 @@ const client = new pg.Client({
 
 try {
   await client.connect();
-  console.log('Connected. Applying schema...');
-  // We split on the do $$ block at the end which contains raise notice — pg can handle
-  // multi-statement SQL but a single .query() works for our file.
-  await client.query(sql);
-  console.log('---');
-  console.log('Schema applied successfully.');
+  console.log('Connected. Applying migrations...');
+  for (const file of migrationFiles) {
+    const sql = readFileSync(join(migrationsDir, file), 'utf8');
+    console.log(`\n[${file}] (${sql.length} chars)`);
+    await client.query(sql);
+    console.log(`  ✓ applied`);
+  }
+  console.log('\n---');
+  console.log('All migrations applied successfully.');
   console.log('---');
   // Quick verification
   const { rows: tables } = await client.query(`
@@ -111,3 +123,4 @@ try {
 } finally {
   await client.end();
 }
+

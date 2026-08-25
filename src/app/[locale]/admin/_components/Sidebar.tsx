@@ -13,6 +13,7 @@ import {
   PlugZap,
   Quote,
   Star,
+  Handshake,
   Users,
   Inbox,
   UserSquare2,
@@ -45,6 +46,7 @@ const ICONS: Record<string, LucideIcon> = {
   case_studies: Quote,
   testimonials: Star,
   team: Users,
+  partners: Handshake,
   leads: Inbox,
   clients: UserSquare2,
   templates: FileText,
@@ -81,6 +83,7 @@ export async function Sidebar({
     { href: `/${locale}/admin/case-studies`, labelKey: 'case_studies', icon: ICONS.case_studies },
     { href: `/${locale}/admin/testimonials`, labelKey: 'testimonials', icon: ICONS.testimonials },
     { href: `/${locale}/admin/team`, labelKey: 'team', icon: ICONS.team },
+    { href: `/${locale}/admin/partners`, labelKey: 'partners', icon: ICONS.partners },
   ];
 
   const adminItems: NavItem[] = [

@@ -14,7 +14,7 @@ There are three ways. Pick one.
 4. Copy the entire contents of `migrations/0001_initial_schema.sql` and paste it in.
 5. Click **Run**.
 
-The whole script is idempotent (`create … if not exists`, `on conflict do nothing` / `do update set …`), so you can re-run it safely if anything fails.
+The whole script is idempotent (`create … if not exists`, `on conflict do nothing` / `do update set …`), so you can re-run it safely if anything fails. Apply the additional migration files in numeric order (`0002_partners.sql`, etc.) the same way.
 
 ### Option B — via `psql`
 
@@ -58,6 +58,7 @@ The script reads `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_DB_PASSWORD` from `.en
 | `case_studies` | Real client stories, optionally tied to a sector |
 | `testimonials` | Client quotes |
 | `team_members` | The /about team section |
+| `partners` | Logos + links for the home page partner strip |
 | `media` | Reference table for files in the `media` storage bucket |
 
 **Auth & admin:**
@@ -89,7 +90,7 @@ The script reads `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_DB_PASSWORD` from `.en
 
 All tables have RLS enabled. Summary:
 
-- **Public read** (anon + authenticated): `site_settings`, published content in `pages`, `services`, `sectors`, `stats`, `value_props`, `integrations`, `case_studies`, `testimonials`, `team_members`.
+- **Public read** (anon + authenticated): `site_settings`, published content in `pages`, `services`, `sectors`, `stats`, `value_props`, `integrations`, `case_studies`, `testimonials`, `team_members`, `partners`.
 - **Editor + owner write**: all of the above content tables, plus `media` (insert + read).
 - **Owner only**: `users`, `leads` (read/update/delete), `clients`, `templates`, `invoices`, `quotes`, `activity_log`, `media` (delete).
 - **Anyone can insert** a `lead` (the contact form is public).
@@ -120,7 +121,8 @@ After the schema is applied:
 supabase/
 ├── README.md                          (this file)
 └── migrations/
-    └── 0001_initial_schema.sql        (everything in one file)
+    ├── 0001_initial_schema.sql        (18 tables, 3 buckets, RLS, helper fns)
+    └── 0002_partners.sql              (partners table for the home page partner strip)
 scripts/
 └── apply-schema.mjs                   (Node script — Option C)
 ```

@@ -19,7 +19,7 @@ export async function Header() {
 
   return (
     <header className="sticky top-0 z-40 bg-paper/80 backdrop-blur-md border-b border-ink-900/5">
-      <div className="container-page h-16 md:h-20 flex items-center justify-between gap-4">
+      <div className="container-page h-20 md:h-24 flex items-center justify-between gap-4">
         <Link
           href="/"
           className="flex items-center gap-2 shrink-0"
@@ -28,9 +28,9 @@ export async function Header() {
           <Image
             src="/brand/soulvd-logo.png"
             alt={tSite('name')}
-            width={200}
-            height={48}
-            className="h-9 md:h-11 w-auto"
+            width={240}
+            height={64}
+            className="h-12 md:h-14 w-auto"
             priority
           />
         </Link>

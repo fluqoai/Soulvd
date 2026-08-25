@@ -16,9 +16,9 @@ export async function Footer() {
             <Image
               src="/brand/soulvd-logo-white.png"
               alt={tSite('name')}
-              width={200}
-              height={48}
-              className="h-11 w-auto mb-4"
+              width={240}
+              height={64}
+              className="h-14 w-auto mb-4"
             />
             <p className="text-sm leading-relaxed text-linen-300 max-w-sm">
               {t('description')}
