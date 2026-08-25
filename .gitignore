@@ -50,10 +50,10 @@ _*.txt
 *.deprecated
 *.leaked
 Userskhayrat*
-.devout.log
-.devout.log.old
-.deverr.log
-.deverr.log.old
+*.log
+*.log.old
+.pro*
+.dev*
 public/brand/extracted/
 public/brand/pages/
 public/brand/concepts/

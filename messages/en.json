@@ -149,6 +149,9 @@
     }
   },
   "about": {
+    "title": "About Soulvd",
+    "subtitle": "Your technical partner in digital transformation",
+    "intro": "Soulvd is a Saudi company specializing in AI automation solutions for businesses in the Kingdom of Saudi Arabia. Officially licensed by Meta as a WhatsApp Business partner since 2026, we serve organizations of all sizes across more than 8 sectors.",
     "vision": {
       "title": "Our vision",
       "text": "To be the #1 technical partner for every Saudi company seeking customer experience automation and full digital transformation — through innovative AI solutions that meet local market needs with high accuracy and competitive cost."
@@ -156,7 +159,235 @@
     "mission": {
       "title": "Our mission",
       "text": "Deliver AI tools that help companies of all sizes improve service and reduce operating costs while ensuring exceptional customer experiences across all digital channels."
+    },
+    "licenses": {
+      "title": "Certifications & partnerships",
+      "items": [
+        { "label": "Official WhatsApp Business partner", "value": "Meta 2026" },
+        { "label": "Time to launch", "value": "2 weeks" },
+        { "label": "Ready integrations", "value": "100+ platforms" },
+        { "label": "Support", "value": "24/7" }
+      ]
+    },
+    "values": {
+      "title": "Our values",
+      "subtitle": "The principles behind everything we build",
+      "items": [
+        { "key": "local", "title": "Local market first", "description": "We design for the Saudi market specifically — its dialects, consumption patterns, and business culture." },
+        { "key": "trust", "title": "Trust over features", "description": "Official Meta certification, secure infrastructure, and full transparency in everything we do." },
+        { "key": "outcomes", "title": "Measurable outcomes", "description": "We don't ship a feature without a clear impact on conversion, customer satisfaction, or operational efficiency." },
+        { "key": "partnership", "title": "Long-term partnership", "description": "We improve weekly with our clients. Every deployment is the start of a relationship, not the end of a project." }
+      ]
     }
+  },
+  "services": {
+    "title": "Our services",
+    "subtitle": "Comprehensive AI solutions tailored for the Saudi market, covering the entire customer journey — from first contact to closed deal.",
+    "detailedList": [
+      {
+        "key": "bot",
+        "icon": "Bot",
+        "title": "Smart WhatsApp bot",
+        "subtitle": "A 24/7 bot that understands local dialects and closes deals.",
+        "description": "A custom bot in Arabic and English, trained on your data and local dialects. It replies instantly, answers customer questions, and converts the conversation into a sale when needed.",
+        "features": [
+          "Works 24/7 in Arabic and English",
+          "Trained on Saudi and local dialects",
+          "Auto-converts conversations into sales",
+          "Learns and improves from your team's interactions"
+        ]
+      },
+      {
+        "key": "campaigns",
+        "icon": "Megaphone",
+        "title": "WhatsApp marketing campaigns",
+        "subtitle": "Targeted campaigns with real-time tracking and high engagement.",
+        "description": "Send targeted messages to your audience with real-time tracking of campaign performance, engagement, and conversion. We support smart templates, personalization, and A/B testing.",
+        "features": [
+          "Customizable message templates",
+          "Track open, engagement, and conversion rates",
+          "A/B testing for messages",
+          "Detailed, exportable performance reports"
+        ]
+      },
+      {
+        "key": "inbox",
+        "icon": "Inbox",
+        "title": "Unified inbox",
+        "subtitle": "Every conversation in one place, with smart routing to the right team.",
+        "description": "Manage all conversations from a single platform, auto-routed to the right team for fast response. Integrates with your agents, with a complete customer history.",
+        "features": [
+          "Unified inbox across all channels",
+          "Smart routing based on content or department",
+          "Complete customer profile per contact",
+          "Alerts on delayed responses"
+        ]
+      },
+      {
+        "key": "flows",
+        "icon": "Workflow",
+        "title": "No-code flow builder",
+        "subtitle": "Build complex conversation paths with drag-and-drop.",
+        "description": "Build conversation paths easily using a visual drag-and-drop editor. Ready-made templates for every sector, full customization, no code required.",
+        "features": [
+          "Visual drag-and-drop editor",
+          "Ready-made templates per sector",
+          "Test paths before publishing",
+          "Multiple bots for the same company"
+        ]
+      },
+      {
+        "key": "analytics",
+        "icon": "LineChart",
+        "title": "Real-time analytics",
+        "subtitle": "Everything you need to know about your bot's performance, in one dashboard.",
+        "description": "Detailed dashboard tracking message performance, campaigns, and response times. Exportable reports, smart alerts, and actual ROI measurement.",
+        "features": [
+          "Interactive dashboard",
+          "Conversion and response time tracking",
+          "Exportable reports (PDF / Excel)",
+          "Smart alerts on regressions"
+        ]
+      },
+      {
+        "key": "integrations",
+        "icon": "PlugZap",
+        "title": "100+ integrations",
+        "subtitle": "Connect Soulvd to your existing systems in minutes.",
+        "description": "Direct integration with 100+ platforms and systems: Shopify, HubSpot, Salesforce, Zapier, Stripe, Google Calendar, and many more.",
+        "features": [
+          "100+ ready integrations",
+          "Flexible API for custom solutions",
+          "Bi-directional sync",
+          "Real-time data flow"
+        ]
+      }
+    ]
+  },
+  "sectors": {
+    "title": "Sectors we serve",
+    "subtitle": "Real examples of how our smart WhatsApp bot works across sectors in the Saudi market.",
+    "notFound": "We couldn't find this sector.",
+    "backToList": "← Back to all sectors",
+    "contactForSector": "Talk to us about your case",
+    "detailedList": [
+      {
+        "key": "nonprofit",
+        "icon": "Heart",
+        "title": "Non-profit",
+        "subtitle": "Beneficiary requests, campaign marketing, and donations.",
+        "description": "Integrated solutions for charities and non-profit organizations to manage beneficiary requests, donation campaigns, and donor communications around the clock.",
+        "useCases": [
+          "Receive beneficiary requests 24/7",
+          "Auto-confirm and follow up on requests",
+          "Market donation campaigns and answer inquiries",
+          "Manage recurring donations and reminders"
+        ]
+      },
+      {
+        "key": "public",
+        "icon": "Building2",
+        "title": "Public sector",
+        "subtitle": "Public inquiries and e-services.",
+        "description": "Streamline government communication with the public via WhatsApp: inquiries, e-services, appointment booking, and case tracking.",
+        "useCases": [
+          "Public inquiries and e-services",
+          "Appointment booking at government offices",
+          "Case and complaint tracking",
+          "Important notifications and alerts"
+        ]
+      },
+      {
+        "key": "restaurants",
+        "icon": "UtensilsCrossed",
+        "title": "Restaurants",
+        "subtitle": "Orders, reservations, and complaint handling.",
+        "description": "Specialized solutions for restaurants: receiving orders, table reservations, menu management, and responding to customer reviews.",
+        "useCases": [
+          "Order intake and delivery",
+          "Table reservations and reminders",
+          "Menu and pricing display",
+          "Complaints and returns handling"
+        ]
+      },
+      {
+        "key": "real-estate",
+        "icon": "Home",
+        "title": "Real estate",
+        "subtitle": "Property inquiries, viewing scheduling, and offers.",
+        "description": "Automate communication with property buyers: inquiries, viewing scheduling, sending offers, and lead follow-up.",
+        "useCases": [
+          "Buyer inquiries on available properties",
+          "Viewing scheduling and reminders",
+          "Send price quotes and documents",
+          "Automatic lead follow-up"
+        ]
+      },
+      {
+        "key": "education",
+        "icon": "GraduationCap",
+        "title": "Education & universities",
+        "subtitle": "Online registration, schedules, and academic guidance.",
+        "description": "Solutions for schools and universities: online registration, class schedules, student guidance, and academic inquiries.",
+        "useCases": [
+          "Online registration and inquiries",
+          "Class schedules and lectures",
+          "Academic advising and admissions",
+          "Attendance and grade tracking"
+        ]
+      },
+      {
+        "key": "healthcare",
+        "icon": "HeartPulse",
+        "title": "Healthcare",
+        "subtitle": "Appointment booking, follow-up reminders, and medical inquiries.",
+        "description": "Automate clinic and hospital communication with patients: appointment booking, medication reminders, general medical inquiries, and post-visit follow-up.",
+        "useCases": [
+          "Book and cancel appointments",
+          "Medication and visit reminders",
+          "General medical inquiries",
+          "Post-visit follow-up"
+        ]
+      }
+    ]
+  },
+  "contact": {
+    "title": "Get in touch",
+    "subtitle": "We reply within 24 hours on business days. For urgent matters, reach us on WhatsApp.",
+    "form": {
+      "name": "Full name",
+      "name_placeholder": "Mohammed Al-Otaibi",
+      "email": "Email",
+      "email_placeholder": "you@company.sa",
+      "phone": "Phone",
+      "phone_placeholder": "+966 5X XXX XXXX",
+      "company": "Company (optional)",
+      "company_placeholder": "Example Co.",
+      "message": "How can we help?",
+      "message_placeholder": "Tell us about your business and what you need...",
+      "submit": "Send message",
+      "submitting": "Sending...",
+      "required_note": "Fields marked with * are required.",
+      "success_title": "Thanks for reaching out!",
+      "success_description": "We received your message. Our team will get back to you within 24 hours.",
+      "error_title": "Something went wrong",
+      "error_description": "We couldn't send your message. Try again, or reach us on WhatsApp."
+    },
+    "info": {
+      "title": "Other ways to reach us",
+      "email_label": "Email",
+      "phone_label": "Phone",
+      "whatsapp_label": "WhatsApp",
+      "address_label": "Office",
+      "address": "Riyadh, Kingdom of Saudi Arabia",
+      "hours_label": "Working hours",
+      "hours": "Sunday - Thursday: 9 AM - 6 PM"
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for may have been moved or deleted.",
+    "cta": "Back to home"
   },
   "footer": {
     "description": "Soulvd is a Saudi company specializing in AI automation solutions for businesses in the Kingdom of Saudi Arabia. Officially licensed by Meta, 2026.",
