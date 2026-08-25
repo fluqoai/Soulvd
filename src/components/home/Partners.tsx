@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { createClient } from '@supabase/supabase-js';
 import { Section } from '@/components/ui/Section';
 import { ScrollReveal } from '@/components/motion/Motion';
+import { Marquee } from '@/components/ui/Marquee';
 import { Link } from '@/i18n/routing';
 
 type Partner = {
@@ -38,21 +39,19 @@ export async function Partners() {
   }
 
   return (
-    <Section tone="paper" size="md" className="border-y border-ink-900/5">
+    <Section tone="paper" size="sm" className="border-y border-ink-900/5">
       <ScrollReveal>
-        <p className="text-xs md:text-sm font-medium uppercase tracking-[0.25em] text-ink-500 text-center mb-10 md:mb-14">
+        <p className="text-xs md:text-sm font-medium uppercase tracking-[0.25em] text-ink-500 text-center mb-8 md:mb-12">
           {t('eyebrow')}
         </p>
       </ScrollReveal>
 
       <ScrollReveal delay={0.05}>
-        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-x-8 gap-y-10 items-center">
+        <Marquee speed={40}>
           {partners.map((partner) => (
-            <li key={partner.id} className="flex items-center justify-center">
-              <PartnerLogo partner={partner} />
-            </li>
+            <PartnerLogo key={partner.id} partner={partner} />
           ))}
-        </ul>
+        </Marquee>
       </ScrollReveal>
     </Section>
   );
@@ -60,17 +59,17 @@ export async function Partners() {
 
 function PartnerLogo({ partner }: { partner: Partner }) {
   const inner = partner.logo_url ? (
-    <span className="relative block h-8 md:h-10 w-full max-w-[140px] opacity-70 hover:opacity-100 transition-opacity grayscale hover:grayscale-0">
+    <span className="relative block h-7 md:h-9 w-32 md:w-40 mx-6 md:mx-10 opacity-70 grayscale">
       <Image
         src={partner.logo_url}
         alt={partner.name}
         fill
-        sizes="140px"
+        sizes="160px"
         className="object-contain"
       />
     </span>
   ) : (
-    <span className="block text-base md:text-lg font-semibold tracking-tight text-ink-700/70 hover:text-ink-900 transition-colors">
+    <span className="mx-6 md:mx-10 text-base md:text-lg font-semibold tracking-tight text-ink-700/70 whitespace-nowrap">
       {partner.name}
     </span>
   );
@@ -82,11 +81,11 @@ function PartnerLogo({ partner }: { partner: Partner }) {
         target="_blank"
         rel="noreferrer noopener"
         aria-label={partner.name}
-        className="block w-full"
+        className="block shrink-0"
       >
         {inner}
       </Link>
     );
   }
-  return inner;
+  return <span className="shrink-0">{inner}</span>;
 }

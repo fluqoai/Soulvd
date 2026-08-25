@@ -120,3 +120,60 @@
     }
   }
 }
+
+/* ============================================================
+   Marquee (continuous logo strip — home page partners / clients)
+   The track is the children rendered twice; the keyframe moves
+   it by -50% so when the first copy scrolls out, the duplicate
+   is in the exact same position — no visible jump.
+   Direction follows the document: LTR = scroll left, RTL = scroll right.
+   ============================================================ */
+@layer components {
+  .marquee-mask {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      black 6%,
+      black 94%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      black 6%,
+      black 94%,
+      transparent 100%
+    );
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    animation: marquee-scroll var(--marquee-duration, 36s) linear infinite;
+  }
+
+  /* In RTL, the reading flow is right-to-left — the logos should
+     scroll in that direction, not against it. */
+  [dir="rtl"] .marquee-track {
+    animation-name: marquee-scroll-rtl;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation-play-state: paused;
+    }
+  }
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes marquee-scroll-rtl {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
