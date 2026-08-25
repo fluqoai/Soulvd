@@ -389,6 +389,85 @@
     "description": "The page you are looking for may have been moved or deleted.",
     "cta": "Back to home"
   },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Access the admin dashboard.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "brand_eyebrow": "Soulvd Admin",
+      "brand_title": "Manage content, leads, and documents from one place.",
+      "brand_subtitle": "Restricted to authorized account holders."
+    },
+    "errors": {
+      "invalid_credentials": "Invalid email or password.",
+      "no_role": "This account is not authorized to access the dashboard.",
+      "email_invalid": "Invalid email address.",
+      "password_too_short": "Password must be at least 6 characters."
+    }
+  },
+  "admin": {
+    "nav": {
+      "groups": {
+        "content": "Content",
+        "admin": "Admin",
+        "system": "System"
+      },
+      "dashboard": "Dashboard",
+      "home": "Home content",
+      "services": "Services",
+      "sectors": "Sectors",
+      "stats": "Stats",
+      "value_props": "Value props",
+      "integrations": "Integrations",
+      "case_studies": "Case studies",
+      "testimonials": "Testimonials",
+      "team": "Team",
+      "leads": "Leads",
+      "clients": "Clients",
+      "templates": "Templates",
+      "invoices": "Invoices",
+      "quotes": "Quotes",
+      "users": "Users",
+      "activity_log": "Activity log",
+      "settings": "Settings"
+    },
+    "common": {
+      "logout": "Sign out",
+      "view_site": "View site",
+      "back_to_site": "Back to site",
+      "coming_soon": "Coming soon",
+      "coming_soon_description": "This page will be available in the next update."
+    },
+    "role": {
+      "owner": "Owner",
+      "editor": "Editor"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome, {name}",
+      "subtitle": "Overview of site performance and operations.",
+      "stats": {
+        "new_leads": "New leads",
+        "total_leads": "Total leads",
+        "open_invoices": "Open invoices",
+        "templates_count": "Templates ready"
+      },
+      "recent_leads": {
+        "title": "Recent leads",
+        "view_all": "View all",
+        "empty": "No leads yet."
+      },
+      "quick_actions": {
+        "title": "Quick actions",
+        "view_site": "View public site",
+        "edit_home": "Edit home content",
+        "manage_templates": "Manage templates"
+      }
+    }
+  },
   "footer": {
     "description": "Soulvd is a Saudi company specializing in AI automation solutions for businesses in the Kingdom of Saudi Arabia. Officially licensed by Meta, 2026.",
     "rights": "© 2026 Soulvd. All rights reserved.",
