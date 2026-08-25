@@ -35,6 +35,8 @@ end;
 $$;
 
 -- Now safe to attach users' updated_at trigger
+drop trigger if exists users_set_updated_at on public.users;
+
 create trigger users_set_updated_at
   before update on public.users
   for each row execute function public.tg_set_updated_at();
@@ -60,6 +62,8 @@ begin
   return new;
 end;
 $$;
+
+drop trigger if exists on_auth_user_created on auth.users;
 
 create trigger on_auth_user_created
   after insert on auth.users
@@ -123,6 +127,8 @@ create table if not exists public.site_settings (
   updated_at        timestamptz not null default now()
 );
 
+drop trigger if exists site_settings_set_updated_at on public.site_settings;
+
 create trigger site_settings_set_updated_at
   before update on public.site_settings
   for each row execute function public.tg_set_updated_at();
@@ -141,6 +147,8 @@ create table if not exists public.pages (
   updated_at   timestamptz not null default now()
 );
 create index if not exists pages_published_idx on public.pages (published);
+
+drop trigger if exists pages_set_updated_at on public.pages;
 
 create trigger pages_set_updated_at
   before update on public.pages
@@ -163,6 +171,8 @@ create table if not exists public.services (
 );
 create index if not exists services_order_idx on public.services (order_index);
 create index if not exists services_published_idx on public.services (published);
+
+drop trigger if exists services_set_updated_at on public.services;
 
 create trigger services_set_updated_at
   before update on public.services
@@ -187,6 +197,8 @@ create table if not exists public.sectors (
 create index if not exists sectors_order_idx on public.sectors (order_index);
 create index if not exists sectors_published_idx on public.sectors (published);
 
+drop trigger if exists sectors_set_updated_at on public.sectors;
+
 create trigger sectors_set_updated_at
   before update on public.sectors
   for each row execute function public.tg_set_updated_at();
@@ -205,6 +217,8 @@ create table if not exists public.stats (
 );
 create index if not exists stats_order_idx on public.stats (order_index);
 create index if not exists stats_published_idx on public.stats (published);
+
+drop trigger if exists stats_set_updated_at on public.stats;
 
 create trigger stats_set_updated_at
   before update on public.stats
@@ -227,6 +241,8 @@ create table if not exists public.value_props (
 create index if not exists value_props_order_idx on public.value_props (order_index);
 create index if not exists value_props_published_idx on public.value_props (published);
 
+drop trigger if exists value_props_set_updated_at on public.value_props;
+
 create trigger value_props_set_updated_at
   before update on public.value_props
   for each row execute function public.tg_set_updated_at();
@@ -248,6 +264,8 @@ create table if not exists public.integrations (
 create index if not exists integrations_order_idx on public.integrations (order_index);
 create index if not exists integrations_category_idx on public.integrations (category);
 create index if not exists integrations_published_idx on public.integrations (published);
+
+drop trigger if exists integrations_set_updated_at on public.integrations;
 
 create trigger integrations_set_updated_at
   before update on public.integrations
@@ -272,6 +290,8 @@ create table if not exists public.case_studies (
 create index if not exists case_studies_sector_idx on public.case_studies (sector_id);
 create index if not exists case_studies_published_idx on public.case_studies (published);
 
+drop trigger if exists case_studies_set_updated_at on public.case_studies;
+
 create trigger case_studies_set_updated_at
   before update on public.case_studies
   for each row execute function public.tg_set_updated_at();
@@ -294,6 +314,8 @@ create table if not exists public.testimonials (
 create index if not exists testimonials_order_idx on public.testimonials (order_index);
 create index if not exists testimonials_published_idx on public.testimonials (published);
 
+drop trigger if exists testimonials_set_updated_at on public.testimonials;
+
 create trigger testimonials_set_updated_at
   before update on public.testimonials
   for each row execute function public.tg_set_updated_at();
@@ -315,6 +337,8 @@ create table if not exists public.team_members (
 );
 create index if not exists team_members_order_idx on public.team_members (order_index);
 create index if not exists team_members_published_idx on public.team_members (published);
+
+drop trigger if exists team_members_set_updated_at on public.team_members;
 
 create trigger team_members_set_updated_at
   before update on public.team_members
@@ -359,6 +383,8 @@ create table if not exists public.leads (
 create index if not exists leads_status_idx on public.leads (status);
 create index if not exists leads_created_idx on public.leads (created_at desc);
 
+drop trigger if exists leads_set_updated_at on public.leads;
+
 create trigger leads_set_updated_at
   before update on public.leads
   for each row execute function public.tg_set_updated_at();
@@ -379,6 +405,8 @@ create table if not exists public.clients (
   updated_at  timestamptz not null default now()
 );
 create index if not exists clients_name_idx on public.clients (name);
+
+drop trigger if exists clients_set_updated_at on public.clients;
 
 create trigger clients_set_updated_at
   before update on public.clients
@@ -407,6 +435,8 @@ create table if not exists public.templates (
   updated_at   timestamptz not null default now()
 );
 create index if not exists templates_type_idx on public.templates (type);
+
+drop trigger if exists templates_set_updated_at on public.templates;
 
 create trigger templates_set_updated_at
   before update on public.templates
@@ -443,6 +473,8 @@ create index if not exists invoices_status_idx on public.invoices (status);
 create index if not exists invoices_issue_date_idx on public.invoices (issue_date desc);
 create index if not exists invoices_client_idx on public.invoices (client_id);
 
+drop trigger if exists invoices_set_updated_at on public.invoices;
+
 create trigger invoices_set_updated_at
   before update on public.invoices
   for each row execute function public.tg_set_updated_at();
@@ -477,6 +509,8 @@ create table if not exists public.quotes (
 create index if not exists quotes_status_idx on public.quotes (status);
 create index if not exists quotes_issue_date_idx on public.quotes (issue_date desc);
 create index if not exists quotes_client_idx on public.quotes (client_id);
+
+drop trigger if exists quotes_set_updated_at on public.quotes;
 
 create trigger quotes_set_updated_at
   before update on public.quotes
@@ -523,51 +557,193 @@ alter table public.quotes               enable row level security;
 alter table public.activity_log         enable row level security;
 
 -- PUBLIC read on content tables (anon + authenticated)
-create policy "public read site_settings"  on public.site_settings  for select using (true);
-create policy "public read pages"          on public.pages          for select using (published = true);
-create policy "public read services"       on public.services       for select using (published = true);
-create policy "public read sectors"        on public.sectors        for select using (published = true);
-create policy "public read stats"          on public.stats          for select using (published = true);
-create policy "public read value_props"    on public.value_props    for select using (published = true);
-create policy "public read integrations"   on public.integrations   for select using (published = true);
-create policy "public read case_studies"   on public.case_studies   for select using (published = true);
-create policy "public read testimonials"   on public.testimonials   for select using (published = true);
-create policy "public read team_members"   on public.team_members   for select using (published = true);
+drop policy if exists "public read site_settings" on public.site_settings;
+
+drop policy if exists "public read site_settings" on public.site_settings;
+
+create policy "public read site_settings" on public.site_settings  for select using (true);
+drop policy if exists "public read pages" on public.pages;
+
+drop policy if exists "public read pages" on public.pages;
+
+create policy "public read pages" on public.pages          for select using (published = true);
+drop policy if exists "public read services" on public.services;
+
+drop policy if exists "public read services" on public.services;
+
+create policy "public read services" on public.services       for select using (published = true);
+drop policy if exists "public read sectors" on public.sectors;
+
+drop policy if exists "public read sectors" on public.sectors;
+
+create policy "public read sectors" on public.sectors        for select using (published = true);
+drop policy if exists "public read stats" on public.stats;
+
+drop policy if exists "public read stats" on public.stats;
+
+create policy "public read stats" on public.stats          for select using (published = true);
+drop policy if exists "public read value_props" on public.value_props;
+
+drop policy if exists "public read value_props" on public.value_props;
+
+create policy "public read value_props" on public.value_props    for select using (published = true);
+drop policy if exists "public read integrations" on public.integrations;
+
+drop policy if exists "public read integrations" on public.integrations;
+
+create policy "public read integrations" on public.integrations   for select using (published = true);
+drop policy if exists "public read case_studies" on public.case_studies;
+
+drop policy if exists "public read case_studies" on public.case_studies;
+
+create policy "public read case_studies" on public.case_studies   for select using (published = true);
+drop policy if exists "public read testimonials" on public.testimonials;
+
+drop policy if exists "public read testimonials" on public.testimonials;
+
+create policy "public read testimonials" on public.testimonials   for select using (published = true);
+drop policy if exists "public read team_members" on public.team_members;
+
+drop policy if exists "public read team_members" on public.team_members;
+
+create policy "public read team_members" on public.team_members   for select using (published = true);
 
 -- EDITOR/OWNER write on content tables
-create policy "editors write site_settings"  on public.site_settings  for all using (is_editor_or_owner()) with check (is_editor_or_owner());
-create policy "editors write pages"          on public.pages          for all using (is_editor_or_owner()) with check (is_editor_or_owner());
-create policy "editors write services"       on public.services       for all using (is_editor_or_owner()) with check (is_editor_or_owner());
-create policy "editors write sectors"        on public.sectors        for all using (is_editor_or_owner()) with check (is_editor_or_owner());
-create policy "editors write stats"          on public.stats          for all using (is_editor_or_owner()) with check (is_editor_or_owner());
-create policy "editors write value_props"    on public.value_props    for all using (is_editor_or_owner()) with check (is_editor_or_owner());
-create policy "editors write integrations"   on public.integrations   for all using (is_editor_or_owner()) with check (is_editor_or_owner());
-create policy "editors write case_studies"   on public.case_studies   for all using (is_editor_or_owner()) with check (is_editor_or_owner());
-create policy "editors write testimonials"   on public.testimonials   for all using (is_editor_or_owner()) with check (is_editor_or_owner());
-create policy "editors write team_members"   on public.team_members   for all using (is_editor_or_owner()) with check (is_editor_or_owner());
+drop policy if exists "editors write site_settings" on public.site_settings;
+
+drop policy if exists "editors write site_settings" on public.site_settings;
+
+create policy "editors write site_settings" on public.site_settings  for all using (is_editor_or_owner()) with check (is_editor_or_owner());
+drop policy if exists "editors write pages" on public.pages;
+
+drop policy if exists "editors write pages" on public.pages;
+
+create policy "editors write pages" on public.pages          for all using (is_editor_or_owner()) with check (is_editor_or_owner());
+drop policy if exists "editors write services" on public.services;
+
+drop policy if exists "editors write services" on public.services;
+
+create policy "editors write services" on public.services       for all using (is_editor_or_owner()) with check (is_editor_or_owner());
+drop policy if exists "editors write sectors" on public.sectors;
+
+drop policy if exists "editors write sectors" on public.sectors;
+
+create policy "editors write sectors" on public.sectors        for all using (is_editor_or_owner()) with check (is_editor_or_owner());
+drop policy if exists "editors write stats" on public.stats;
+
+drop policy if exists "editors write stats" on public.stats;
+
+create policy "editors write stats" on public.stats          for all using (is_editor_or_owner()) with check (is_editor_or_owner());
+drop policy if exists "editors write value_props" on public.value_props;
+
+drop policy if exists "editors write value_props" on public.value_props;
+
+create policy "editors write value_props" on public.value_props    for all using (is_editor_or_owner()) with check (is_editor_or_owner());
+drop policy if exists "editors write integrations" on public.integrations;
+
+drop policy if exists "editors write integrations" on public.integrations;
+
+create policy "editors write integrations" on public.integrations   for all using (is_editor_or_owner()) with check (is_editor_or_owner());
+drop policy if exists "editors write case_studies" on public.case_studies;
+
+drop policy if exists "editors write case_studies" on public.case_studies;
+
+create policy "editors write case_studies" on public.case_studies   for all using (is_editor_or_owner()) with check (is_editor_or_owner());
+drop policy if exists "editors write testimonials" on public.testimonials;
+
+drop policy if exists "editors write testimonials" on public.testimonials;
+
+create policy "editors write testimonials" on public.testimonials   for all using (is_editor_or_owner()) with check (is_editor_or_owner());
+drop policy if exists "editors write team_members" on public.team_members;
+
+drop policy if exists "editors write team_members" on public.team_members;
+
+create policy "editors write team_members" on public.team_members   for all using (is_editor_or_owner()) with check (is_editor_or_owner());
 
 -- USERS: read own, owner manages all
-create policy "users read own"     on public.users for select using (auth.uid() = id);
+drop policy if exists "users read own" on public.users;
+
+drop policy if exists "users read own" on public.users;
+
+create policy "users read own" on public.users for select using (auth.uid() = id);
+drop policy if exists "owner manage users" on public.users;
+
+drop policy if exists "owner manage users" on public.users;
+
+drop policy if exists "owner manage users" on public.users;
+
 create policy "owner manage users" on public.users for all    using (is_owner()) with check (is_owner());
 
 -- LEADS: anyone can insert (anon form), only owner can read/manage
-create policy "anyone insert leads"  on public.leads for insert with check (true);
-create policy "owner read leads"     on public.leads for select using (is_owner());
-create policy "owner update leads"   on public.leads for update using (is_owner());
-create policy "owner delete leads"   on public.leads for delete using (is_owner());
+drop policy if exists "anyone insert leads" on public.leads;
+
+drop policy if exists "anyone insert leads" on public.leads;
+
+create policy "anyone insert leads" on public.leads for insert with check (true);
+drop policy if exists "owner read leads" on public.leads;
+
+drop policy if exists "owner read leads" on public.leads;
+
+create policy "owner read leads" on public.leads for select using (is_owner());
+drop policy if exists "owner update leads" on public.leads;
+
+drop policy if exists "owner update leads" on public.leads;
+
+create policy "owner update leads" on public.leads for update using (is_owner());
+drop policy if exists "owner delete leads" on public.leads;
+
+drop policy if exists "owner delete leads" on public.leads;
+
+create policy "owner delete leads" on public.leads for delete using (is_owner());
 
 -- CLIENTS, TEMPLATES, INVOICES, QUOTES: owner only
-create policy "owner manage clients"   on public.clients   for all using (is_owner()) with check (is_owner());
+drop policy if exists "owner manage clients" on public.clients;
+
+drop policy if exists "owner manage clients" on public.clients;
+
+create policy "owner manage clients" on public.clients   for all using (is_owner()) with check (is_owner());
+drop policy if exists "owner manage templates" on public.templates;
+
+drop policy if exists "owner manage templates" on public.templates;
+
+drop policy if exists "owner manage templates" on public.templates;
+
 create policy "owner manage templates" on public.templates for all using (is_owner()) with check (is_owner());
-create policy "owner manage invoices"  on public.invoices  for all using (is_owner()) with check (is_owner());
-create policy "owner manage quotes"    on public.quotes    for all using (is_owner()) with check (is_owner());
+drop policy if exists "owner manage invoices" on public.invoices;
+
+drop policy if exists "owner manage invoices" on public.invoices;
+
+create policy "owner manage invoices" on public.invoices  for all using (is_owner()) with check (is_owner());
+drop policy if exists "owner manage quotes" on public.quotes;
+
+drop policy if exists "owner manage quotes" on public.quotes;
+
+create policy "owner manage quotes" on public.quotes    for all using (is_owner()) with check (is_owner());
 
 -- MEDIA: editors read + insert, owner delete
-create policy "editors read media"    on public.media for select using (is_editor_or_owner());
-create policy "editors insert media"  on public.media for insert with check (is_editor_or_owner());
-create policy "owner delete media"    on public.media for delete using (is_owner());
+drop policy if exists "editors read media" on public.media;
+
+drop policy if exists "editors read media" on public.media;
+
+create policy "editors read media" on public.media for select using (is_editor_or_owner());
+drop policy if exists "editors insert media" on public.media;
+
+drop policy if exists "editors insert media" on public.media;
+
+create policy "editors insert media" on public.media for insert with check (is_editor_or_owner());
+drop policy if exists "owner delete media" on public.media;
+
+drop policy if exists "owner delete media" on public.media;
+
+create policy "owner delete media" on public.media for delete using (is_owner());
 
 -- ACTIVITY LOG: owner only
+drop policy if exists "owner read activity" on public.activity_log;
+
+drop policy if exists "owner read activity" on public.activity_log;
+
+drop policy if exists "owner read activity" on public.activity_log;
+
 create policy "owner read activity" on public.activity_log for select using (is_owner());
 
 -- ============================================================
@@ -586,18 +762,34 @@ on conflict (id) do nothing;
 
 -- Storage policies
 -- templates bucket: owner only
-create policy "owner read templates"  on storage.objects for select using (bucket_id = 'templates' and is_owner());
+drop policy if exists "owner read templates" on storage.objects;
+
+create policy "owner read templates" on storage.objects for select using (bucket_id = 'templates' and is_owner());
+drop policy if exists "owner write templates" on storage.objects;
+
 create policy "owner write templates" on storage.objects for all    using (bucket_id = 'templates' and is_owner()) with check (bucket_id = 'templates' and is_owner());
 
 -- documents bucket: public read, owner write
+drop policy if exists "public read documents" on storage.objects;
+
 create policy "public read documents" on storage.objects for select using (bucket_id = 'documents');
+drop policy if exists "owner write documents" on storage.objects;
+
 create policy "owner write documents" on storage.objects for all    using (bucket_id = 'documents' and is_owner()) with check (bucket_id = 'documents' and is_owner());
 
 -- media bucket: public read, editors can upload, owner can delete
-create policy "public read media"     on storage.objects for select using (bucket_id = 'media');
-create policy "editor write media"    on storage.objects for insert with check (bucket_id = 'media' and is_editor_or_owner());
-create policy "owner update media"    on storage.objects for update using (bucket_id = 'media' and is_owner());
-create policy "owner delete media"    on storage.objects for delete using (bucket_id = 'media' and is_owner());
+drop policy if exists "public read media" on storage.objects;
+
+create policy "public read media" on storage.objects for select using (bucket_id = 'media');
+drop policy if exists "editor write media" on storage.objects;
+
+create policy "editor write media" on storage.objects for insert with check (bucket_id = 'media' and is_editor_or_owner());
+drop policy if exists "owner update media" on storage.objects;
+
+create policy "owner update media" on storage.objects for update using (bucket_id = 'media' and is_owner());
+drop policy if exists "owner delete media" on storage.objects;
+
+create policy "owner delete media" on storage.objects for delete using (bucket_id = 'media' and is_owner());
 
 -- ============================================================
 -- 22. Seed data
