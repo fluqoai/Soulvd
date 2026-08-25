@@ -39,7 +39,7 @@ export async function Partners() {
   }
 
   return (
-    <Section tone="paper" size="sm" className="border-y border-ink-900/5">
+    <Section id="partners" tone="paper" size="sm" className="border-y border-ink-900/5">
       <ScrollReveal>
         <p className="text-xs md:text-sm font-medium uppercase tracking-[0.25em] text-ink-500 text-center mb-8 md:mb-12">
           {t('eyebrow')}
