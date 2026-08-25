@@ -60,82 +60,139 @@
         "description": "Direct integrations with Shopify, HubSpot, Salesforce, Zapier, Stripe, Google, and more."
       }
     ],
+    "stats": {
+      "label": "By the numbers",
+      "title": "The numbers behind every partnership",
+      "sectors": "Sectors served",
+      "integrations": "Ready integrations",
+      "support": "Support coverage",
+      "satisfaction": "Customer satisfaction"
+    },
     "services": {
-      "title": "Our services",
-      "subtitle": "Comprehensive AI solutions tailored for the Saudi market, covering the entire customer journey — from first contact to closed deal."
+      "label": "What we do",
+      "title": "A complete WhatsApp platform",
+      "subtitle": "Everything a Saudi business needs to run WhatsApp conversations — from AI to campaigns to analytics — in one Meta-certified platform.",
+      "list": [
+        {
+          "key": "bot",
+          "icon": "Bot",
+          "title": "Smart WhatsApp bot",
+          "description": "A 24/7 bot in Arabic and English, trained on your data and local dialects. Closes deals, not just answers.",
+          "accent": "primary"
+        },
+        {
+          "key": "inbox",
+          "icon": "Inbox",
+          "title": "Unified inbox",
+          "description": "All channels in one place, with smart routing and a complete customer history.",
+          "accent": "secondary"
+        },
+        {
+          "key": "campaigns",
+          "icon": "Megaphone",
+          "title": "Marketing campaigns",
+          "description": "Targeted broadcasts, A/B testing, and real-time performance tracking.",
+          "accent": "secondary"
+        },
+        {
+          "key": "flows",
+          "icon": "Workflow",
+          "title": "No-code flow builder",
+          "description": "Build complex conversation paths with drag-and-drop, no developer required.",
+          "accent": "tertiary"
+        },
+        {
+          "key": "analytics",
+          "icon": "LineChart",
+          "title": "Real-time analytics",
+          "description": "Interactive dashboards for every interaction, conversion rate, and response time.",
+          "accent": "tertiary"
+        },
+        {
+          "key": "integrations",
+          "icon": "PlugZap",
+          "title": "100+ integrations",
+          "description": "Shopify, HubSpot, Salesforce, Zapier, Stripe, Google, and more.",
+          "accent": "tertiary"
+        }
+      ]
     },
-    "serviceList": [
-      {
-        "key": "bot",
-        "title": "Smart WhatsApp bot",
-        "description": "A 24/7 custom bot in Arabic and English, trained on your data and local dialects to answer customers and close deals."
-      },
-      {
-        "key": "campaigns",
-        "title": "WhatsApp marketing campaigns",
-        "description": "Send targeted messages with real-time tracking of campaign performance, engagement, and conversion."
-      },
-      {
-        "key": "inbox",
-        "title": "Unified inbox",
-        "description": "Manage all conversations from a single platform, auto-routed to the right team for fast response."
-      },
-      {
-        "key": "flows",
-        "title": "No-code flow builder",
-        "description": "Build conversation paths with drag-and-drop using ready-made templates — no developer needed."
-      },
-      {
-        "key": "analytics",
-        "title": "Real-time analytics",
-        "description": "Detailed dashboards tracking message performance, campaigns, and response times with exportable reports."
-      },
-      {
-        "key": "integrations",
-        "title": "100+ integrations",
-        "description": "Direct integration with 100+ platforms like Shopify, HubSpot, Zapier, and more."
-      }
-    ],
     "sectors": {
-      "title": "Sectors we serve",
-      "subtitle": "Soulvd works with diverse sectors across the Kingdom of Saudi Arabia. Here are real examples of how our smart bot works in each."
+      "label": "Where we work",
+      "title": "Built for the Saudi market",
+      "subtitle": "Specialized solutions for every sector — we understand your customers, their questions, and how deals close in each context.",
+      "list": [
+        {
+          "key": "nonprofit",
+          "icon": "Heart",
+          "title": "Non-profit",
+          "description": "Beneficiary requests, donation campaigns, and ongoing engagement."
+        },
+        {
+          "key": "public",
+          "icon": "Building2",
+          "title": "Public sector",
+          "description": "Citizen inquiries, appointment booking, and case tracking."
+        },
+        {
+          "key": "restaurants",
+          "icon": "UtensilsCrossed",
+          "title": "Restaurants",
+          "description": "Order intake, reservations, and complaint handling."
+        },
+        {
+          "key": "real-estate",
+          "icon": "Home",
+          "title": "Real estate",
+          "description": "Property inquiries, viewing scheduling, and quote delivery."
+        },
+        {
+          "key": "education",
+          "icon": "GraduationCap",
+          "title": "Education & universities",
+          "description": "Online registration, schedules, and academic advising."
+        },
+        {
+          "key": "healthcare",
+          "icon": "HeartPulse",
+          "title": "Healthcare",
+          "description": "Appointment booking, medication reminders, and patient follow-up."
+        }
+      ]
     },
-    "sectorList": [
-      {
-        "key": "nonprofit",
-        "title": "Non-profit",
-        "description": "Beneficiary requests and campaign marketing."
-      },
-      {
-        "key": "public",
-        "title": "Public sector",
-        "description": "Public inquiries and e-services."
-      },
-      {
-        "key": "restaurants",
-        "title": "Restaurants",
-        "description": "Orders, reservations, and complaint handling."
-      },
-      {
-        "key": "real-estate",
-        "title": "Real estate",
-        "description": "Property inquiries, viewing scheduling, and offer delivery."
-      },
-      {
-        "key": "education",
-        "title": "Education & universities",
-        "description": "Online registration, schedules, and academic guidance."
-      },
-      {
-        "key": "healthcare",
-        "title": "Healthcare",
-        "description": "Appointment booking, follow-up reminders, and inquiry replies."
-      }
-    ],
+    "process": {
+      "label": "How we work",
+      "title": "From kickoff to live in 14 days",
+      "subtitle": "A clear, transparent methodology designed to reduce risk and accelerate value.",
+      "steps": [
+        {
+          "num": "01",
+          "title": "Discovery",
+          "description": "We sit with you, understand your product and customers, and prioritize the highest-impact use cases."
+        },
+        {
+          "num": "02",
+          "title": "Build",
+          "description": "We prepare the bot, flows, and integrations. You test with us every week."
+        },
+        {
+          "num": "03",
+          "title": "Launch",
+          "description": "We deploy, train your team, and watch the numbers from day one."
+        },
+        {
+          "num": "04",
+          "title": "Optimize",
+          "description": "Weekly improvements based on real data and live customer feedback."
+        }
+      ]
+    },
     "cta": {
+      "eyebrow": "Let's start",
       "title": "Ready to transform your customer experience?",
-      "subtitle": "Launch in two weeks with Meta's officially certified partner in the Kingdom of Saudi Arabia.",
-      "button": "Contact us"
+      "subtitle": "Launch in two weeks with Meta's officially certified partner in Saudi Arabia. The first conversation is on us — no commitment.",
+      "primary": "Contact us",
+      "secondary": "Explore services"
     },
     "partners": {
       "eyebrow": "Trusted by the platforms we integrate with"

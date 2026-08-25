@@ -1,31 +1,75 @@
 import { PageHeader } from '@/components/admin/PageHeader';
 import { Link } from '@/i18n/routing';
-import { Home, Settings, Users, Inbox, Image as ImageIcon, BarChart3, Wand2, Handshake, MessageCircle, FileText } from 'lucide-react';
+import {
+  Settings,
+  Inbox,
+  Handshake,
+  Briefcase,
+  Layers,
+  BarChart3,
+  ListOrdered,
+  Sparkles,
+} from 'lucide-react';
 
 /**
- * The home page is now built from these content tables directly:
- *   - hero: static (see /admin/settings for tagline/site name)
- *   - partners: /admin/partners
- *   - contact form: built-in (writes to leads)
- *   - the 3D mark is in code (Hero.tsx)
+ * Home admin index — a jump-board to every content table that
+ * feeds the public home page.
  *
- * This page is the home admin "index" — a quick jump-board to the
- * pieces that drive the home page.
+ * Home page composition (top → bottom):
+ *   1. Hero              — static (3D mark + text in code)
+ *   2. Stats             — /admin/stats
+ *   3. Services          — /admin/services
+ *   4. Sectors           — /admin/sectors
+ *   5. Process           — hardcoded in code (4 steps)
+ *   6. Partners          — /admin/partners
+ *   7. CTA               — static in code
+ *   8. Home contact form — built-in (writes to leads)
  */
 export default function HomeAdminPage() {
   const sections = [
-    { href: '/admin/settings', icon: Settings, title: 'Site settings', desc: 'Site name, tagline, contact info, social links' },
-    { href: '/admin/partners', icon: Handshake, title: 'Partners', desc: 'Client logos on the home page scrolling strip' },
-    { href: '/admin/leads', icon: Inbox, title: 'Leads', desc: 'Inbound leads from the home page and /contact forms' },
-    { href: '/admin/value-props', icon: Wand2, title: 'Value props (legacy)', desc: 'The 7 "why Soulvd" feature items on the original home' },
-    { href: '/admin/stats', icon: BarChart3, title: 'Stats (legacy)', desc: 'Big numbers on the original home page' },
+    {
+      href: '/admin/settings',
+      icon: Settings,
+      title: 'Site settings',
+      desc: 'Site name, tagline, contact info, social links',
+    },
+    {
+      href: '/admin/stats',
+      icon: BarChart3,
+      title: 'Stats',
+      desc: 'The 4 big numbers in the "By the numbers" section',
+    },
+    {
+      href: '/admin/services',
+      icon: Briefcase,
+      title: 'Services',
+      desc: 'The 6 cards in the services bento grid',
+    },
+    {
+      href: '/admin/sectors',
+      icon: Layers,
+      title: 'Sectors',
+      desc: 'The 6 sector cards with hex pattern backgrounds',
+    },
+    {
+      href: '/admin/partners',
+      icon: Handshake,
+      title: 'Partners',
+      desc: 'Client logos in the scrolling marquee',
+    },
+    {
+      href: '/admin/leads',
+      icon: Inbox,
+      title: 'Leads',
+      desc: 'Inbound leads from the home and /contact forms',
+    },
   ];
 
   return (
     <div>
       <PageHeader
         title="Home content"
-        description="The current home page is built from the components in code (Hero, Partners, HomeContact) plus the site-wide Settings. Use the links below to manage each part."
+        description="The public home page is composed of these pieces. Use the links below to manage each section."
       />
 
       <div className="grid gap-3 sm:grid-cols-2 max-w-3xl">
@@ -50,11 +94,22 @@ export default function HomeAdminPage() {
       </div>
 
       <div className="mt-8 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-100 max-w-2xl">
-        <p className="font-medium mb-1">Note</p>
-        <p className="text-amber-200/80 text-xs">
-          The home page hero text, eyebrow, and the 3D mark currently live in code (<code className="text-xs">src/components/home/Hero.tsx</code>).
-          Edit the source to change them. The Partners strip, contact form, and site-wide tagline are managed here.
-        </p>
+        <div className="flex items-start gap-2">
+          <Sparkles className="size-4 mt-0.5 shrink-0" />
+          <div>
+            <p className="font-medium mb-1">Hardcoded in code</p>
+            <p className="text-amber-200/80 text-xs leading-relaxed">
+              The Hero (with 3D mark and headline), the Process timeline
+              (4 steps: Discovery → Build → Launch → Optimize), and the
+              closing CTA are written in code for now. The 4 process steps
+              and the CTA copy are translated in&nbsp;
+              <code className="text-xs">messages/{'{ar,en}.json'}</code>
+              &nbsp;under <code className="text-xs">home.process</code> and
+              <code className="text-xs"> home.cta</code>. Edit those to
+              change the content.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
