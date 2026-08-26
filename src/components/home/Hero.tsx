@@ -11,7 +11,7 @@ export async function Hero() {
   const isRtl = locale === 'ar';
 
   return (
-    <section className="relative overflow-hidden bg-paper border-b border-ink-900/5 isolate">
+    <section id="hero" className="relative overflow-hidden bg-paper border-b border-ink-900/5 isolate">
       {/* Subtle gradient wash — linen to paper, creates a soft top-to-bottom rhythm */}
       <div
         className="absolute inset-0 z-0 pointer-events-none"
@@ -70,7 +70,7 @@ export async function Hero() {
                   <ArrowRight className="size-4" aria-hidden />
                 )}
               </ButtonLink>
-              <ButtonLink href="#how-it-works" size="lg" variant="secondary">
+              <ButtonLink href="#case-studies" size="lg" variant="secondary">
                 <Play className="size-3.5" aria-hidden />
                 {t('cta_secondary')}
               </ButtonLink>

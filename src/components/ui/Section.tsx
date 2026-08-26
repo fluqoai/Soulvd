@@ -39,7 +39,7 @@ export function Section({
   ...rest
 }: SectionProps) {
   return (
-    <As className={cn(toneClasses[tone], className)} {...rest}>
+    <As className={cn(toneClasses[tone], sizeClasses[size], className)} {...rest}>
       <div className="container-page">
         {(eyebrow || title || description) && (
           <header
