@@ -586,7 +586,10 @@
     "rights": "© 2026 Soulvd. All rights reserved.",
     "built_in_sa": "Made in Saudi Arabia",
     "cr_label": "Commercial Registration",
-    "tax_label": "VAT Number"
+    "tax_label": "VAT Number",
+    "quick_links": "Quick links",
+    "contact_heading": "Get in touch",
+    "trust_caption": "Officially registered with the Ministry of Commerce"
   },
   "lang": {
     "ar": "العربية",
