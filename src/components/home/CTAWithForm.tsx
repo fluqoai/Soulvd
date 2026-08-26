@@ -23,7 +23,10 @@ export async function CTAWithForm() {
       id="contact"
       tone="ink"
       size="xl"
-      className="relative overflow-hidden scroll-mt-20"
+      // pb-24 / md:pb-28 leaves room for the floating WhatsApp
+      // button (56px circle + 24px offset) so it never covers
+      // the form's submit button.
+      className="relative overflow-hidden scroll-mt-20 pb-24 md:pb-28"
     >
       {/* Faded hex motif — top right */}
       <svg
@@ -82,7 +85,7 @@ export async function CTAWithForm() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.05}>
-            <h2 className="mt-5 md:mt-6 text-3xl md:text-4xl lg:text-5xl xl:text-[3.5rem] font-semibold leading-[1.05] tracking-tight text-paper text-balance">
+            <h2 className="mt-5 md:mt-6 text-3xl md:text-4xl lg:text-5xl xl:text-[3.5rem] font-semibold leading-[1.15] tracking-tight text-paper text-balance">
               {t('title')}
             </h2>
           </ScrollReveal>

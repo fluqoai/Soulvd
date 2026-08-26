@@ -68,7 +68,7 @@ export async function CaseStudies() {
               {t('label')}
             </SectionLabel>
             <ScrollReveal>
-              <h2 className="mt-6 md:mt-8 text-3xl md:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-tight text-ink-900 text-balance">
+              <h2 className="mt-6 md:mt-8 text-3xl md:text-4xl lg:text-5xl font-semibold leading-[1.2] tracking-tight text-ink-900 text-balance">
                 {t('title')}
               </h2>
             </ScrollReveal>

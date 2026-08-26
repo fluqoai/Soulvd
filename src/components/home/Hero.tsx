@@ -43,10 +43,16 @@ export async function Hero() {
             </div>
 
             <h1
-              className={`mt-6 md:mt-7 font-semibold leading-[1.02] tracking-tight text-ink-900 text-balance ${
+              className={`mt-6 md:mt-7 font-semibold tracking-tight text-ink-900 text-balance ${
                 isRtl
-                  ? 'text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[5.25rem]'
-                  : 'text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-display'
+                  // Arabic display headlines need noticeably more
+                  // line-height (1.3) than Latin (1.15) — Arabic glyphs
+                  // carry diacritics and tall ascenders that crowd
+                  // adjacent lines at tight leading. Also a touch
+                  // smaller than the EN hero so the two languages
+                  // read at comparable visual weight.
+                  ? 'text-[2.25rem] sm:text-4xl md:text-5xl lg:text-[4.5rem] leading-[1.3]'
+                  : 'text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-display leading-[1.15]'
               }`}
             >
               {t('title')}

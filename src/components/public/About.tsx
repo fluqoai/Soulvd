@@ -29,7 +29,7 @@ export async function About() {
           <p className="text-xs md:text-sm font-medium uppercase tracking-[0.2em] text-sage-700 mb-3">
             {t('subtitle')}
           </p>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.1] tracking-tight text-ink-900 text-balance">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.2] tracking-tight text-ink-900 text-balance">
             {t('title')}
           </h1>
           <p className="mt-6 text-lg md:text-xl text-ink-600 leading-relaxed text-pretty">

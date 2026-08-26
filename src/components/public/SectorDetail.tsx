@@ -50,17 +50,16 @@ export async function SectorDetail({ slug }: { slug: string }) {
         <FadeIn>
           <Link
             href="/sectors"
-            className="inline-flex items-center gap-2 text-sm font-medium text-ink-700 hover:text-ink-900 mb-6"
+            className="inline-flex items-center gap-2 px-3 py-2 -mx-3 text-sm font-medium text-ink-700 hover:text-ink-900 hover:bg-sage-50 rounded-md mb-6 transition-colors"
           >
             <ArrowRight className="size-4 rtl:hidden" aria-hidden />
-            <ArrowLeft className="size-4 rtl:hidden" aria-hidden />
-            <span className="rtl:hidden">{t('backToList')}</span>
-            <span className="hidden rtl:inline">{t('backToList')}</span>
+            <ArrowLeft className="size-4 ltr:hidden" aria-hidden />
+            {t('backToList')}
           </Link>
           <div className="inline-flex size-14 items-center justify-center rounded-2xl bg-sage-50 text-sage-700 mb-6">
             <Icon className="size-7" aria-hidden />
           </div>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-tight text-ink-900 text-balance">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold leading-[1.2] tracking-tight text-ink-900 text-balance">
             {sector.title}
           </h1>
           <p className="mt-4 text-lg md:text-xl text-ink-600 leading-relaxed max-w-3xl text-pretty">
@@ -72,7 +71,7 @@ export async function SectorDetail({ slug }: { slug: string }) {
       <Section tone="linen" size="md">
         <div className="grid gap-10 md:grid-cols-12">
           <div className="md:col-span-7">
-            <h2 className="text-2xl font-semibold text-ink-900 leading-tight mb-4">
+            <h2 className="text-2xl font-semibold text-ink-900 leading-snug mb-4">
               How it works
             </h2>
             <p className="text-base md:text-lg text-ink-700 leading-relaxed text-pretty">

@@ -14,7 +14,7 @@ export function MobileMenu({ items }: { items: Item[] }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center justify-center size-9 rounded-md text-ink-700 hover:bg-sage-50"
+        className="inline-flex items-center justify-center size-11 rounded-md text-ink-700 hover:bg-sage-50 active:bg-sage-100 transition-colors"
         aria-label="Menu"
         aria-expanded={open}
       >
@@ -30,7 +30,7 @@ export function MobileMenu({ items }: { items: Item[] }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-3 py-3 text-base font-medium text-ink-800 hover:bg-sage-50 rounded-md"
+                className="px-3 py-3.5 text-base font-medium text-ink-800 hover:bg-sage-50 active:bg-sage-100 rounded-md transition-colors"
                 onClick={() => setOpen(false)}
               >
                 {item.label}

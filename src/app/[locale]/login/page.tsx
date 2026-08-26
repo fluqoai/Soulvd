@@ -17,7 +17,7 @@ export default async function LoginPage({
       {/* Left: form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
-          <Link href={`/${locale}`} className="inline-block mb-10">
+          <Link href={`/${locale}`} className="inline-flex items-center mb-10 p-1 -m-1">
             <Image
               src="/brand/soulvd-logo.png"
               alt="Soulvd"

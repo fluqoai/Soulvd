@@ -17,8 +17,8 @@ export function LocaleToggle({ className }: { className?: string }) {
       type="button"
       onClick={() => router.replace(pathname, { locale: next })}
       className={cn(
-        'inline-flex items-center gap-2 h-9 px-3 rounded-md text-sm font-medium',
-        'text-ink-700 hover:text-ink-900 hover:bg-sage-50 transition-colors',
+        'inline-flex items-center gap-2 h-11 px-3 rounded-md text-sm font-medium',
+        'text-ink-700 hover:text-ink-900 hover:bg-sage-50 active:bg-sage-100 transition-colors',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-600',
         className
       )}

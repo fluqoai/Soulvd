@@ -29,29 +29,29 @@ export async function Footer() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-linen-400 mb-4">
               {tNav('home')} · {tNav('services')} · {tNav('sectors')}
             </h3>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-1 text-sm">
               <li>
-                <Link href="/" className="text-linen-200 hover:text-paper transition-colors">
+                <Link href="/" className="block py-2.5 text-linen-200 hover:text-paper transition-colors">
                   {tNav('home')}
                 </Link>
               </li>
               <li>
-                <Link href="/services" className="text-linen-200 hover:text-paper transition-colors">
+                <Link href="/services" className="block py-2.5 text-linen-200 hover:text-paper transition-colors">
                   {tNav('services')}
                 </Link>
               </li>
               <li>
-                <Link href="/sectors" className="text-linen-200 hover:text-paper transition-colors">
+                <Link href="/sectors" className="block py-2.5 text-linen-200 hover:text-paper transition-colors">
                   {tNav('sectors')}
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-linen-200 hover:text-paper transition-colors">
+                <Link href="/about" className="block py-2.5 text-linen-200 hover:text-paper transition-colors">
                   {tNav('about')}
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-linen-200 hover:text-paper transition-colors">
+                <Link href="/contact" className="block py-2.5 text-linen-200 hover:text-paper transition-colors">
                   {tNav('contact')}
                 </Link>
               </li>
@@ -65,14 +65,13 @@ export async function Footer() {
             <p className="text-sm text-linen-200 leading-relaxed">
               <a
                 href="https://wa.me/966500000000"
-                className="hover:text-paper transition-colors"
+                className="block py-2.5 hover:text-paper transition-colors"
               >
                 +966 50 000 0000
               </a>
-              <br />
               <a
                 href="mailto:hello@soulvd.sa"
-                className="hover:text-paper transition-colors"
+                className="block py-2.5 hover:text-paper transition-colors break-all"
               >
                 hello@soulvd.sa
               </a>
