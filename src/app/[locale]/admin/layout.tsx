@@ -101,6 +101,11 @@ export default async function AdminLayout({
     build('/admin/settings', 'settings', 'settings', true),
   ].filter(Boolean) as NavItem[];
 
+  // Help is accessible to BOTH roles (editor and owner).
+  const helpItems = [
+    { href: '/admin/help', label: t('help'), iconName: 'help' },
+  ];
+
   const groups = [
     { title: tGroups('content'), items: content },
     ...(role === 'owner'
@@ -109,6 +114,7 @@ export default async function AdminLayout({
           { title: tGroups('system'), items: systemItems },
         ]
       : []),
+    { title: tGroups('help'), items: helpItems },
   ];
 
   return (

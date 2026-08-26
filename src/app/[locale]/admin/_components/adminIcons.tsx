@@ -52,6 +52,7 @@ export const ADMIN_ICON_MAP: Record<string, LucideIcon> = {
   users: Users,
   activity_log: Activity,
   settings: Settings,
+  help: HelpCircle,
 };
 
 /** Resolve a string name to a Lucide icon, with a safe fallback. */

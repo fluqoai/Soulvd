@@ -92,11 +92,11 @@ export default async function AdminDashboard({
           <Link
             key={s.label}
             href={s.href ?? '#'}
-            className="rounded-2xl bg-paper border border-ink-900/5 p-5 hover:border-sage-300 transition-colors"
+            className="group rounded-2xl bg-paper border border-ink-900/10 p-5 hover:border-sage-400 hover:shadow-sm transition-all"
           >
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <p className="text-xs uppercase tracking-wider text-ink-500">{s.label}</p>
-              {s.href && <ArrowUpRight className="size-3.5 text-ink-400" aria-hidden />}
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-ink-700">{s.label}</p>
+              {s.href && <ArrowUpRight className="size-4 text-ink-400 group-hover:text-sage-700 transition-colors" aria-hidden />}
             </div>
             <p className="text-3xl md:text-4xl font-semibold text-ink-900 tabular-nums">
               {s.value}

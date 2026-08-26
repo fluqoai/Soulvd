@@ -79,7 +79,7 @@ export default async function ServicesAdminPage({
                   {r.title?.en || r.title?.ar || '—'}
                 </div>
                 {r.title?.ar && r.title?.en && (
-                  <div className="text-xs text-linen-400 truncate" dir="rtl">
+                  <div className="text-xs text-ink-600 truncate" dir="rtl">
                     {r.title.ar}
                   </div>
                 )}
@@ -90,13 +90,13 @@ export default async function ServicesAdminPage({
             key: 'key',
             header: 'Key',
             width: '120px',
-            cell: (r) => <code className="text-xs text-linen-300">{r.key}</code>,
+            cell: (r) => <code className="text-xs text-ink-700">{r.key}</code>,
           },
           {
             key: 'icon',
             header: 'Icon',
             width: '100px',
-            cell: (r) => <code className="text-xs text-linen-300">{r.icon}</code>,
+            cell: (r) => <code className="text-xs text-ink-700">{r.icon}</code>,
           },
           {
             key: 'published',
@@ -109,7 +109,7 @@ export default async function ServicesAdminPage({
                   Live
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-ink-700 text-linen-400 text-xs">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-ink-100 text-ink-700 ring-1 ring-ink-900/10 text-xs">
                   <span className="size-1.5 rounded-full bg-linen-400" />
                   Draft
                 </span>

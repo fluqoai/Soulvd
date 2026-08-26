@@ -24,9 +24,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/integrations/${r.id}`} emptyMessage="No integrations yet."
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderIntegration} /> },
-          { key: 'logo', header: 'Logo', width: '80px', cell: (r) => r.logo_url ? <div className="relative h-8 w-16"><Image src={r.logo_url} alt={r.name} fill sizes="64px" className="object-contain" /></div> : <div className="size-8 rounded bg-ink-700/50 grid place-items-center text-xs text-linen-400">{r.name.slice(0, 2)}</div> },
+          { key: 'logo', header: 'Logo', width: '80px', cell: (r) => r.logo_url ? <div className="relative h-8 w-16"><Image src={r.logo_url} alt={r.name} fill sizes="64px" className="object-contain" /></div> : <div className="size-8 rounded bg-sage-50 grid place-items-center text-xs text-ink-600">{r.name.slice(0, 2)}</div> },
           { key: 'name', header: 'Name', cell: (r) => <span className="font-medium">{r.name}</span> },
-          { key: 'category', header: 'Category', width: '120px', cell: (r) => r.category ? <span className="px-2 py-0.5 rounded bg-ink-700/50 text-xs">{r.category}</span> : '—' },
+          { key: 'category', header: 'Category', width: '120px', cell: (r) => r.category ? <span className="px-2 py-0.5 rounded bg-sage-50 text-xs">{r.category}</span> : '—' },
           { key: 'published', header: 'Status', width: '100px', cell: (r) => r.published ? '🟢 Live' : '⚪ Draft' },
         ]}
         rowAction={(r) => <DeleteButton id={r.id} action={deleteIntegration} confirm={`Delete "${r.name}"?`} />}

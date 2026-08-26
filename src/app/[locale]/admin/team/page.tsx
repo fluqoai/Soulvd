@@ -24,7 +24,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderMember} /> },
           { key: 'name', header: 'Name', cell: (r) => <span className="font-medium">{r.full_name}</span> },
-          { key: 'role', header: 'Role', cell: (r) => <span className="text-linen-300">{r.role}</span> },
+          { key: 'role', header: 'Role', cell: (r) => <span className="text-ink-700">{r.role}</span> },
           { key: 'published', header: 'Status', width: '100px', cell: (r) => r.published ? '🟢 Live' : '⚪ Draft' },
         ]}
         rowAction={(r) => <DeleteButton id={r.id} action={deleteMember} confirm={`Delete "${r.full_name}"?`} />}

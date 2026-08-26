@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { Save, ArrowRight, UserPlus } from 'lucide-react';
+import { Save, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Field, Textarea, Select } from '@/components/admin/Field';
 import {
@@ -11,30 +11,30 @@ import {
   convertLeadToClient,
 } from '../actions';
 
-type Props = {
-  id: string;
-  initialStatus: string;
-  locale: 'ar' | 'en';
-};
+const STATUSES = [
+  { value: 'new',        label: 'جديد' },
+  { value: 'contacted',  label: 'تم التواصل' },
+  { value: 'qualified',  label: 'مؤهل' },
+  { value: 'closed',     label: 'مغلق' },
+  { value: 'lost',       label: 'خاسر' },
+] as const;
 
-const STATUSES = ['new', 'contacted', 'qualified', 'closed', 'lost'] as const;
-
-export function LeadStatusForm({ id, initialStatus, locale }: Props) {
+export function LeadStatusForm({ id, initialStatus }: { id: string; initialStatus: string }) {
   const router = useRouter();
   const [status, setStatus] = useState(initialStatus);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <div className="flex items-end gap-2">
-      <Field label="Status" className="flex-1">
+    <div className="flex items-end gap-3">
+      <Field label="الحالة" className="flex-1">
         <Select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           name="_status"
         >
           {STATUSES.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </Select>
       </Field>
@@ -51,14 +51,14 @@ export function LeadStatusForm({ id, initialStatus, locale }: Props) {
         }}
       >
         <Save className="size-4" />
-        Save
+        حفظ
       </Button>
-      {error && <span className="text-xs text-red-300 self-center">{error}</span>}
+      {error && <span className="text-xs text-red-700 self-center bg-red-50 px-2 py-1 rounded">{error}</span>}
     </div>
   );
 }
 
-export function LeadNoteForm({ id, locale }: { id: string; locale: 'ar' | 'en' }) {
+export function LeadNoteForm({ id }: { id: string }) {
   const router = useRouter();
   const [note, setNote] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -81,27 +81,27 @@ export function LeadNoteForm({ id, locale }: { id: string; locale: 'ar' | 'en' }
       }}
       className="space-y-2"
     >
-      <Field label="Add a note" hint="Appended to the timeline with a timestamp">
+      <Field label="إضافة ملاحظة" hint="تضاف إلى السجل مع توقيت تلقائي">
         <Textarea
           name="note"
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={3}
-          placeholder="Called the prospect, they want a demo next Tuesday…"
+          placeholder="تم الاتصال بالعميل، يطلب عرض تجريبي يوم الثلاثاء القادم…"
         />
       </Field>
-      {error && <p className="text-xs text-red-300">{error}</p>}
+      {error && <p className="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">{error}</p>}
       <div className="flex justify-end">
         <Button type="submit" size="sm" disabled={isPending || !note.trim()}>
           <Save className="size-4" />
-          {isPending ? 'Saving…' : 'Add note'}
+          {isPending ? 'جاري الحفظ…' : 'إضافة'}
         </Button>
       </div>
     </form>
   );
 }
 
-export function ConvertButton({ id, locale }: { id: string; locale: 'ar' | 'en' }) {
+export function ConvertButton({ id }: { id: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -109,10 +109,9 @@ export function ConvertButton({ id, locale }: { id: string; locale: 'ar' | 'en' 
     <div>
       <Button
         type="button"
-        variant="secondary"
         disabled={isPending}
         onClick={() => {
-          if (typeof window !== 'undefined' && !window.confirm('Create a client from this lead? The lead will be marked as closed.')) return;
+          if (typeof window !== 'undefined' && !window.confirm('إنشاء عميل من هذا الاستفسار؟ سيتم وسم الاستفسار كمغلق.')) return;
           startTransition(async () => {
             setError(null);
             const r = await convertLeadToClient(id);
@@ -125,9 +124,9 @@ export function ConvertButton({ id, locale }: { id: string; locale: 'ar' | 'en' 
         }}
       >
         <UserPlus className="size-4" />
-        Convert to client
+        تحويل إلى عميل
       </Button>
-      {error && <p className="text-xs text-red-300 mt-2">{error}</p>}
+      {error && <p className="text-xs text-red-700 mt-2 bg-red-50 px-2 py-1 rounded">{error}</p>}
     </div>
   );
 }

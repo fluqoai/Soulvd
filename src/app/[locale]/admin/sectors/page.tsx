@@ -59,10 +59,10 @@ export default async function SectorsAdminPage({
           { key: 'title', header: 'Title', cell: (r) => (
             <div className="min-w-0">
               <div className="font-medium truncate">{r.title?.en || r.title?.ar || '—'}</div>
-              {r.title?.ar && r.title?.en && <div className="text-xs text-linen-400 truncate" dir="rtl">{r.title.ar}</div>}
+              {r.title?.ar && r.title?.en && <div className="text-xs text-ink-600 truncate" dir="rtl">{r.title.ar}</div>}
             </div>
           )},
-          { key: 'key', header: 'Key', width: '120px', cell: (r) => <code className="text-xs text-linen-300">{r.key}</code> },
+          { key: 'key', header: 'Key', width: '120px', cell: (r) => <code className="text-xs text-ink-700">{r.key}</code> },
           { key: 'published', header: 'Status', width: '100px', cell: (r) => r.published ? '🟢 Live' : '⚪ Draft' },
         ]}
         rowAction={(r) => (

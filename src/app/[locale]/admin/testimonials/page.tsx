@@ -23,8 +23,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/testimonials/${r.id}`} emptyMessage="No testimonials yet."
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderTestimonial} /> },
-          { key: 'name', header: 'Client', cell: (r) => <div><div className="font-medium">{r.client_name}</div>{r.client_company && <div className="text-xs text-linen-400">{r.client_company}</div>}</div> },
-          { key: 'quote', header: 'Quote', cell: (r) => <div className="max-w-md text-linen-300 line-clamp-2">{r.quote?.en || r.quote?.ar}</div> },
+          { key: 'name', header: 'Client', cell: (r) => <div><div className="font-medium">{r.client_name}</div>{r.client_company && <div className="text-xs text-ink-600">{r.client_company}</div>}</div> },
+          { key: 'quote', header: 'Quote', cell: (r) => <div className="max-w-md text-ink-700 line-clamp-2">{r.quote?.en || r.quote?.ar}</div> },
           { key: 'published', header: 'Status', width: '100px', cell: (r) => r.published ? '🟢 Live' : '⚪ Draft' },
         ]}
         rowAction={(r) => <DeleteButton id={r.id} action={deleteTestimonial} confirm={`Delete "${r.client_name}"?`} />}

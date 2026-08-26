@@ -24,18 +24,18 @@ export default async function UsersPage() {
           { key: 'user', header: 'User', cell: (r) => (
             <div>
               <div className="font-medium">{r.full_name || r.email}</div>
-              {r.full_name && <div className="text-xs text-linen-400 flex items-center gap-1"><Mail className="size-3" />{r.email}</div>}
+              {r.full_name && <div className="text-xs text-ink-600 flex items-center gap-1"><Mail className="size-3" />{r.email}</div>}
             </div>
           )},
           { key: 'role', header: 'Role', width: '180px', cell: (r) => (
             <RoleSelect userId={r.id} currentRole={r.role} isSelf={acting?.id === r.id} />
           ) },
           { key: 'created', header: 'Joined', width: '140px', cell: (r) => (
-            <span className="text-xs text-linen-400">{new Date(r.created_at).toLocaleDateString()}</span>
+            <span className="text-xs text-ink-600">{new Date(r.created_at).toLocaleDateString()}</span>
           ) },
         ]}
       />
-      <p className="mt-4 text-xs text-linen-500">
+      <p className="mt-4 text-xs text-ink-500">
         <ShieldCheck className="size-3 inline me-1" />
         Owner changes are logged in the activity log. You cannot demote your own account.
       </p>

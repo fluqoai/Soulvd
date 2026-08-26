@@ -23,8 +23,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/value-props/${r.id}`} emptyMessage="No value props yet."
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderVP} /> },
-          { key: 'title', header: 'Title', cell: (r) => <div className="min-w-0"><div className="font-medium truncate">{r.title?.en}</div>{r.title?.ar && <div className="text-xs text-linen-400 truncate" dir="rtl">{r.title.ar}</div>}</div> },
-          { key: 'icon', header: 'Icon', width: '100px', cell: (r) => <code className="text-xs text-linen-300">{r.icon}</code> },
+          { key: 'title', header: 'Title', cell: (r) => <div className="min-w-0"><div className="font-medium truncate">{r.title?.en}</div>{r.title?.ar && <div className="text-xs text-ink-600 truncate" dir="rtl">{r.title.ar}</div>}</div> },
+          { key: 'icon', header: 'Icon', width: '100px', cell: (r) => <code className="text-xs text-ink-700">{r.icon}</code> },
           { key: 'published', header: 'Status', width: '100px', cell: (r) => r.published ? '🟢 Live' : '⚪ Draft' },
         ]}
         rowAction={(r) => <DeleteButton id={r.id} action={deleteVP} confirm={`Delete "${r.title?.en ?? r.key}"?`} />}

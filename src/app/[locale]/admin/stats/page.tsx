@@ -25,7 +25,7 @@ export default async function StatsAdminPage({ params }: { params: Promise<{ loc
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderStatAction} /> },
           { key: 'value', header: 'Value', width: '100px', cell: (r) => <span className="text-xl font-semibold tabular-nums">{r.value}</span> },
-          { key: 'label', header: 'Label', cell: (r) => <div className="min-w-0"><div className="truncate">{r.label?.en}</div>{r.label?.ar && <div className="text-xs text-linen-400 truncate" dir="rtl">{r.label.ar}</div>}</div> },
+          { key: 'label', header: 'Label', cell: (r) => <div className="min-w-0"><div className="truncate">{r.label?.en}</div>{r.label?.ar && <div className="text-xs text-ink-600 truncate" dir="rtl">{r.label.ar}</div>}</div> },
           { key: 'published', header: 'Status', width: '100px', cell: (r) => r.published ? '🟢 Live' : '⚪ Draft' },
         ]}
         rowAction={(r) => <DeleteButton id={r.id} action={deleteStatAction} confirm={`Delete "${r.value}"?`} />}

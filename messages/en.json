@@ -523,8 +523,10 @@
       "groups": {
         "content": "Content",
         "admin": "Admin",
-        "system": "System"
+        "system": "System",
+        "help": "Guide"
       },
+      "help": "Table guide",
       "dashboard": "Dashboard",
       "home": "Home content",
       "services": "Services",

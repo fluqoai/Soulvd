@@ -10,11 +10,11 @@ type Props = {
   id: string;
   /** Confirmation prompt shown in the confirm() dialog. */
   confirm?: string;
-  /** Optional label, e.g. "Delete" or empty to render icon-only. */
+  /** Optional label, e.g. "حذف" or empty to render icon-only. */
   label?: string;
 };
 
-export function DeleteButton({ action, id, confirm = 'Delete this item?', label }: Props) {
+export function DeleteButton({ action, id, confirm = 'هل تريد حذف هذا العنصر؟', label }: Props) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -25,7 +25,7 @@ export function DeleteButton({ action, id, confirm = 'Delete this item?', label 
     startTransition(async () => {
       const result = await action(id);
       if (!result.ok) {
-        setError(result.error ?? 'Delete failed');
+        setError(result.error ?? 'فشل الحذف');
         return;
       }
       setError(null);
@@ -39,7 +39,7 @@ export function DeleteButton({ action, id, confirm = 'Delete this item?', label 
         type="button"
         onClick={onClick}
         disabled={isPending}
-        className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs text-linen-300 hover:text-red-300 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium text-ink-700 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-200 disabled:opacity-50 transition-colors"
         title={error ?? undefined}
       >
         <Trash2 className="size-3.5" aria-hidden />

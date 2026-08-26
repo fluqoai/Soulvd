@@ -56,14 +56,14 @@ export default function HomeAdminPage() {
             <Link
               key={s.href}
               href={s.href}
-              className="flex items-start gap-3 rounded-xl border border-linen-400/10 bg-ink-800/40 p-4 hover:bg-ink-800/70 transition-colors"
+              className="flex items-start gap-3 rounded-xl border border-ink-900/10 bg-sage-50 p-4 hover:bg-sage-100 transition-colors"
             >
               <div className="size-9 rounded-lg bg-sage-500/15 text-sage-300 grid place-items-center shrink-0">
                 <Icon className="size-4" />
               </div>
               <div className="min-w-0">
                 <p className="font-medium text-paper">{s.title}</p>
-                <p className="text-xs text-linen-400 mt-0.5">{s.desc}</p>
+                <p className="text-xs text-ink-600 mt-0.5">{s.desc}</p>
               </div>
             </Link>
           );

@@ -5,15 +5,27 @@ import { DataTable } from '@/components/admin/DataTable';
 
 type Log = { id: string; user_id: string | null; action: string; entity_type: string | null; entity_id: string | null; details: any; created_at: string };
 
+// Light-theme status pills for activity log actions
 const ACTION_STYLES: Record<string, string> = {
-  created: 'bg-sage-500/15 text-sage-300',
-  updated: 'bg-blue-500/15 text-blue-300',
-  deleted: 'bg-red-500/15 text-red-300',
-  login: 'bg-linen-400/15 text-linen-300',
-  role_changed: 'bg-amber-500/15 text-amber-300',
-  status_changed: 'bg-amber-500/15 text-amber-300',
-  note_added: 'bg-ink-700 text-linen-300',
-  converted_to_client: 'bg-sage-500/20 text-sage-200',
+  created: 'bg-sage-100 text-sage-800 ring-1 ring-sage-200',
+  updated: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
+  deleted: 'bg-red-100 text-red-800 ring-1 ring-red-200',
+  login: 'bg-linen-200 text-ink-700 ring-1 ring-linen-300',
+  role_changed: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  status_changed: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  note_added: 'bg-ink-100 text-ink-700 ring-1 ring-ink-900/10',
+  converted_to_client: 'bg-sage-200 text-sage-900 ring-1 ring-sage-300',
+};
+
+const ACTION_LABELS: Record<string, string> = {
+  created: 'إنشاء',
+  updated: 'تعديل',
+  deleted: 'حذف',
+  login: 'دخول',
+  role_changed: 'تغيير دور',
+  status_changed: 'تغيير حالة',
+  note_added: 'إضافة ملاحظة',
+  converted_to_client: 'تحويل لعميل',
 };
 
 export default async function ActivityLogPage() {
@@ -31,30 +43,56 @@ export default async function ActivityLogPage() {
 
   return (
     <div>
-      <PageHeader title="Activity log" description="Recent admin actions across the system. Newest first, max 200." />
+      <PageHeader
+        title="سجل النشاط"
+        description="آخر الإجراءات في النظام. الأحدث أولاً، حتى 200 سجل."
+      />
       <DataTable
         rows={items}
         rowKey={(r) => r.id}
         editHref={() => '#'}
-        emptyMessage="No activity yet."
+        emptyMessage="لا يوجد نشاط بعد."
         columns={[
-          { key: 'when', header: 'When', width: '160px', cell: (r) => (
-            <span className="text-xs text-linen-400 tabular-nums">{new Date(r.created_at).toLocaleString()}</span>
-          )},
-          { key: 'who', header: 'Who', width: '220px', cell: (r) => (
-            <span className="text-xs text-linen-300 truncate">{r.user_id ? (userMap.get(r.user_id) ?? r.user_id.slice(0, 8)) : '—'}</span>
-          )},
-          { key: 'action', header: 'Action', width: '160px', cell: (r) => (
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${ACTION_STYLES[r.action] ?? 'bg-ink-700 text-linen-300'}`}>
-              {r.action}
-            </span>
-          )},
-          { key: 'target', header: 'Target', cell: (r) => (
-            <span className="text-xs text-linen-300">
-              {r.entity_type ? `${r.entity_type}` : '—'}
-              {r.entity_id && <span className="text-linen-500"> · {r.entity_id.slice(0, 8)}</span>}
-            </span>
-          )},
+          {
+            key: 'when',
+            header: 'الوقت',
+            width: '180px',
+            cell: (r) => (
+              <span className="text-xs text-ink-700 tabular-nums">
+                {new Date(r.created_at).toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short' })}
+              </span>
+            ),
+          },
+          {
+            key: 'who',
+            header: 'بواسطة',
+            width: '220px',
+            cell: (r) => (
+              <span className="text-xs text-ink-700 truncate">
+                {r.user_id ? (userMap.get(r.user_id) ?? r.user_id.slice(0, 8)) : <span className="text-ink-400">النظام</span>}
+              </span>
+            ),
+          },
+          {
+            key: 'action',
+            header: 'الفعل',
+            width: '180px',
+            cell: (r) => (
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${ACTION_STYLES[r.action] ?? ACTION_STYLES.updated}`}>
+                {ACTION_LABELS[r.action] ?? r.action}
+              </span>
+            ),
+          },
+          {
+            key: 'target',
+            header: 'الهدف',
+            cell: (r) => (
+              <span className="text-xs text-ink-700">
+                {r.entity_type ?? <span className="text-ink-400">—</span>}
+                {r.entity_id && <span className="text-ink-500"> · {r.entity_id.slice(0, 8)}</span>}
+              </span>
+            ),
+          },
         ]}
       />
     </div>
