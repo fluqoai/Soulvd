@@ -23,7 +23,7 @@ export async function ServicesShowcase() {
   const list = (t.raw('list') as Service[]) ?? [];
 
   return (
-    <Section id="services" tone="linen" size="lg" className="relative overflow-hidden">
+    <Section id="services" tone="paper" size="lg" className="relative overflow-hidden">
       <div className="grid gap-10 md:gap-14 md:grid-cols-12 md:items-end">
         <div className="md:col-span-7">
           <SectionLabel text={{ ar: t('label'), en: t('label') }}>

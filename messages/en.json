@@ -241,7 +241,9 @@
       "title": "Ready to transform your customer experience?",
       "subtitle": "Launch in two weeks with Meta's officially certified partner in Saudi Arabia. The first conversation is on us — no commitment.",
       "primary": "Contact us",
-      "secondary": "Explore services"
+      "secondary": "Explore services",
+      "point_meta": "Official Meta partner — data stays in the Kingdom",
+      "point_reply": "We reply within 24 hours on business days"
     },
     "partners": {
       "eyebrow": "Trusted by the platforms we integrate with"

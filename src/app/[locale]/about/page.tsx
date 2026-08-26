@@ -1,6 +1,6 @@
 import { setRequestLocale } from 'next-intl/server';
 import { About } from '@/components/public/About';
-import { CTA } from '@/components/home/CTA';
+import { CTAWithForm } from '@/components/home/CTAWithForm';
 
 export default async function AboutPage({
   params,
@@ -12,7 +12,7 @@ export default async function AboutPage({
   return (
     <>
       <About />
-      <CTA />
+      <CTAWithForm />
     </>
   );
 }

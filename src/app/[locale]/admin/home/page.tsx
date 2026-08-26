@@ -3,31 +3,23 @@ import { Link } from '@/i18n/routing';
 import {
   Settings,
   Inbox,
-  Handshake,
   Briefcase,
-  Layers,
-  BarChart3,
-  ListOrdered,
+  PlugZap,
   MessageSquareQuote,
   Sparkles,
-  PlugZap,
 } from 'lucide-react';
 
 /**
- * Home admin index — jump-board to every content table that feeds
- * the public home page.
+ * Home admin index — jump-board to every content table that
+ * feeds the public home page.
  *
- * Home page composition (top → bottom):
- *   1. Hero          — static (chat preview in code) + outcome copy
- *   2. Stats         — /admin/stats
- *   3. Services      — 3-up showcase with mini UI previews (in code)
- *   4. Case studies  — /admin/case-studies
- *   5. Process       — 3-step horizontal timeline (in code)
- *   6. Sectors       — /admin/sectors
- *   7. Integrations  — /admin/integrations
- *   8. Testimonials  — /admin/testimonials
- *   9. FAQ           — translated strings in messages/{ar,en}.json
- *  10. CTA + form    — translated strings + built-in form
+ * Home page composition (top → bottom, 6 sections):
+ *   1. Hero + chat preview — hardcoded copy in messages/ + HeroChat
+ *   2. Services            — hardcoded copy + ServicePreview art
+ *   3. Case studies        — /admin/case-studies
+ *   4. Integrations        — /admin/integrations
+ *   5. FAQ                 — translated strings in messages/
+ *   6. CTA + form          — CTA copy in messages/ + built-in form
  */
 export default function HomeAdminPage() {
   const sections = [
@@ -38,22 +30,10 @@ export default function HomeAdminPage() {
       desc: 'Site name, tagline, contact info, social links',
     },
     {
-      href: '/admin/stats',
-      icon: BarChart3,
-      title: 'Stats',
-      desc: 'The 4 big numbers in the "By the numbers" section',
-    },
-    {
       href: '/admin/case-studies',
       icon: Briefcase,
       title: 'Case studies',
       desc: 'Featured client stories with metrics (3 shown)',
-    },
-    {
-      href: '/admin/sectors',
-      icon: Layers,
-      title: 'Sectors',
-      desc: 'The 6 sector cards with hex pattern backgrounds',
     },
     {
       href: '/admin/integrations',
@@ -65,13 +45,13 @@ export default function HomeAdminPage() {
       href: '/admin/testimonials',
       icon: MessageSquareQuote,
       title: 'Testimonials',
-      desc: 'Named client quotes shown 3-up',
+      desc: 'Currently unused on home — available for /about and other pages',
     },
     {
       href: '/admin/leads',
       icon: Inbox,
       title: 'Leads',
-      desc: 'Inbound leads from the home and /contact forms',
+      desc: 'Inbound leads from the home contact form and /contact',
     },
   ];
 
@@ -79,7 +59,7 @@ export default function HomeAdminPage() {
     <div>
       <PageHeader
         title="Home content"
-        description="The public home page is composed of these pieces. Use the links below to manage each section."
+        description="The public home page is composed of 6 sections. Use the links below to manage each data-driven piece."
       />
 
       <div className="grid gap-3 sm:grid-cols-2 max-w-3xl">
@@ -110,10 +90,9 @@ export default function HomeAdminPage() {
             <p className="font-medium mb-1">Hardcoded in code or translations</p>
             <p className="text-amber-200/80 text-xs leading-relaxed">
               The Hero (with chat preview and headline), the 3-service
-              showcase, the 3-step Process timeline, and the FAQ
-              questions are in code or in&nbsp;
+              showcase, and the FAQ questions are in code or in&nbsp;
               <code className="text-xs">messages/{'{ar,en}.json'}</code>
-              &nbsp;under <code className="text-xs">home.hero</code>, <code className="text-xs">home.services</code>, <code className="text-xs">home.process</code>, and <code className="text-xs">home.faq</code>.
+              &nbsp;under <code className="text-xs">home.hero</code>, <code className="text-xs">home.services</code>, and <code className="text-xs">home.faq</code>.
             </p>
           </div>
         </div>
