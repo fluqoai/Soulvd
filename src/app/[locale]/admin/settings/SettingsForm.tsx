@@ -37,7 +37,7 @@ export function SettingsForm({ initial: row }: { initial: Initial }) {
   return (
     <form action={formAction} className="space-y-8 max-w-2xl">
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-600">Brand</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-600">الهوية</h2>
         <Field label="Site name" required error={fe.site_name}>
           <TextInput name="site_name" defaultValue={row.site_name ?? ''} required />
         </Field>
@@ -49,8 +49,8 @@ export function SettingsForm({ initial: row }: { initial: Initial }) {
       <section className="space-y-4">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-600">Contact</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Email"><TextInput name="email" type="email" defaultValue={row.email ?? ''} /></Field>
-          <Field label="Phone"><TextInput name="phone" defaultValue={row.phone ?? ''} /></Field>
+          <Field label="البريد"><TextInput name="email" type="email" defaultValue={row.email ?? ''} /></Field>
+          <Field label="الهاتف"><TextInput name="phone" defaultValue={row.phone ?? ''} /></Field>
         </div>
         <Field label="WhatsApp number" hint="Used in wa.me link, e.g. +966500000000">
           <TextInput name="whatsapp" defaultValue={row.whatsapp ?? ''} />
@@ -77,7 +77,7 @@ export function SettingsForm({ initial: row }: { initial: Initial }) {
 
       <Button type="submit" size="lg" disabled={isPending}>
         <Save className="size-4" />
-        {isPending ? 'Saving…' : 'Save settings'}
+        {isPending ? 'جاري الحفظ…' : 'Save settings'}
       </Button>
     </form>
   );

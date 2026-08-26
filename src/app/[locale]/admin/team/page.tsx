@@ -17,17 +17,17 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
 
   return (
     <div>
-      <PageHeader title="Team" description="Team members shown on the /about page." actions={
-        <ButtonLink href={`/admin/team/new`} size="sm" variant="primary"><Plus className="size-4" />New</ButtonLink>
+      <PageHeader title="الفريق" description="Team members shown on the /about page." actions={
+        <ButtonLink href={`/admin/team/new`} size="sm" variant="primary"><Plus className="size-4" />جديد</ButtonLink>
       } />
-      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/team/${r.id}`} emptyMessage="No team members yet."
+      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/team/${r.id}`} emptyMessage="لا يوجد أعضاء فريق بعد."
         columns={[
-          { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderMember} /> },
-          { key: 'name', header: 'Name', cell: (r) => <span className="font-medium">{r.full_name}</span> },
-          { key: 'role', header: 'Role', cell: (r) => <span className="text-ink-700">{r.role}</span> },
-          { key: 'published', header: 'Status', width: '100px', cell: (r) => r.published ? '🟢 Live' : '⚪ Draft' },
+          { key: 'order', header: 'الترتيب', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderMember} /> },
+          { key: 'name', header: 'الاسم', cell: (r) => <span className="font-medium">{r.full_name}</span> },
+          { key: 'role', header: 'الدور', cell: (r) => <span className="text-ink-700">{r.role}</span> },
+          { key: 'published', header: 'الحالة', width: '100px', cell: (r) => r.published ? '🟢 منشور' : '⚪ مسودة' },
         ]}
-        rowAction={(r) => <DeleteButton id={r.id} action={deleteMember} confirm={`Delete "${r.full_name}"?`} />}
+        rowAction={(r) => <DeleteButton id={r.id} action={deleteMember} confirm={`حذف "${r.full_name}"؟`} />}
       />
     </div>
   );

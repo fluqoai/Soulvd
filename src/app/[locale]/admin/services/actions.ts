@@ -13,8 +13,8 @@ const schema = z.object({
     .string()
     .min(2, 'At least 2 characters')
     .max(50)
-    .regex(/^[a-z0-9-]+$/i, 'Lowercase letters, numbers, and dashes only'),
-  icon: z.string().min(1, 'Required'),
+    .regex(/^[a-z0-9-]+$/i, 'Lowercase letters, numbers, و dashes only'),
+  icon: z.string().min(1, 'مطلوب'),
   titleAr: z.string().min(1, 'Arabic title required').max(200),
   titleEn: z.string().min(1, 'English title required').max(200),
   descAr: z.string().min(1, 'Arabic description required').max(1000),

@@ -49,7 +49,7 @@ export function ServiceForm({ initial: row }: { initial: Initial }) {
     <form action={formAction} className="space-y-6 max-w-3xl">
       {state && state.ok === false && 'error' in state && state.error === 'validation' && (
         <div className="rounded-lg border border-red-300/40 bg-red-500/10 p-3 text-sm text-red-200">
-          Please fix the errors below and try again.
+          Please fix the errors below و try again.
         </div>
       )}
 
@@ -79,7 +79,7 @@ export function ServiceForm({ initial: row }: { initial: Initial }) {
 
       <BilingualInput
         name="title"
-        label="Title"
+        label="العنوان"
         value={row.title}
         required
         error={state && !state.ok && 'fieldErrors' in state ? state.fieldErrors?.titleAr : undefined}
@@ -127,14 +127,14 @@ export function ServiceForm({ initial: row }: { initial: Initial }) {
           />
         </Field>
         <Field label="Visibility" className="self-end">
-          <Toggle name="published" defaultChecked={row.published !== false} label="Published" hint="Visible on the public site" />
+          <Toggle name="published" defaultChecked={row.published !== false} label="منشور" hint="يظهر في الموقع العام" />
         </Field>
       </div>
 
       <div className="flex items-center gap-3 pt-2">
         <Button type="submit" size="md" variant="primary" disabled={isPending}>
           <Save className="size-4" />
-          {isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Create service'}
+          {isPending ? 'جاري الحفظ…' : isEdit ? 'حفظ التغييرات' : 'إنشاء خدمة'}
         </Button>
       </div>
     </form>

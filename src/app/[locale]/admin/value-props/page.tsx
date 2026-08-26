@@ -18,16 +18,16 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   return (
     <div>
       <PageHeader title="Value props" description="The 'why Soulvd' product feature items." actions={
-        <ButtonLink href={`/admin/value-props/new`} size="sm" variant="primary"><Plus className="size-4" />New</ButtonLink>
+        <ButtonLink href={`/admin/value-props/new`} size="sm" variant="primary"><Plus className="size-4" />جديد</ButtonLink>
       } />
-      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/value-props/${r.id}`} emptyMessage="No value props yet."
+      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/value-props/${r.id}`} emptyMessage="لا توجد قيم بعد."
         columns={[
-          { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderVP} /> },
-          { key: 'title', header: 'Title', cell: (r) => <div className="min-w-0"><div className="font-medium truncate">{r.title?.en}</div>{r.title?.ar && <div className="text-xs text-ink-600 truncate" dir="rtl">{r.title.ar}</div>}</div> },
-          { key: 'icon', header: 'Icon', width: '100px', cell: (r) => <code className="text-xs text-ink-700">{r.icon}</code> },
-          { key: 'published', header: 'Status', width: '100px', cell: (r) => r.published ? '🟢 Live' : '⚪ Draft' },
+          { key: 'order', header: 'الترتيب', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderVP} /> },
+          { key: 'title', header: 'العنوان', cell: (r) => <div className="min-w-0"><div className="font-medium truncate">{r.title?.en}</div>{r.title?.ar && <div className="text-xs text-ink-600 truncate" dir="rtl">{r.title.ar}</div>}</div> },
+          { key: 'icon', header: 'الأيقونة', width: '100px', cell: (r) => <code className="text-xs text-ink-700">{r.icon}</code> },
+          { key: 'published', header: 'الحالة', width: '100px', cell: (r) => r.published ? '🟢 منشور' : '⚪ مسودة' },
         ]}
-        rowAction={(r) => <DeleteButton id={r.id} action={deleteVP} confirm={`Delete "${r.title?.en ?? r.key}"?`} />}
+        rowAction={(r) => <DeleteButton id={r.id} action={deleteVP} confirm={`حذف "${r.title?.ar ?? r.title?.en ?? r.key}"؟`} />}
       />
     </div>
   );

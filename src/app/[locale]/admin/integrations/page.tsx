@@ -18,18 +18,18 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
 
   return (
     <div>
-      <PageHeader title="Integrations" description="The integrations grid on the home page and the /services page." actions={
-        <ButtonLink href={`/admin/integrations/new`} size="sm" variant="primary"><Plus className="size-4" />New</ButtonLink>
+      <PageHeader title="Integrations" description="The integrations grid on the home page و the /services page." actions={
+        <ButtonLink href={`/admin/integrations/new`} size="sm" variant="primary"><Plus className="size-4" />جديد</ButtonLink>
       } />
-      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/integrations/${r.id}`} emptyMessage="No integrations yet."
+      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/integrations/${r.id}`} emptyMessage="لا توجد تكاملات بعد."
         columns={[
-          { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderIntegration} /> },
+          { key: 'order', header: 'الترتيب', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderIntegration} /> },
           { key: 'logo', header: 'Logo', width: '80px', cell: (r) => r.logo_url ? <div className="relative h-8 w-16"><Image src={r.logo_url} alt={r.name} fill sizes="64px" className="object-contain" /></div> : <div className="size-8 rounded bg-sage-50 grid place-items-center text-xs text-ink-600">{r.name.slice(0, 2)}</div> },
-          { key: 'name', header: 'Name', cell: (r) => <span className="font-medium">{r.name}</span> },
+          { key: 'name', header: 'الاسم', cell: (r) => <span className="font-medium">{r.name}</span> },
           { key: 'category', header: 'Category', width: '120px', cell: (r) => r.category ? <span className="px-2 py-0.5 rounded bg-sage-50 text-xs">{r.category}</span> : '—' },
-          { key: 'published', header: 'Status', width: '100px', cell: (r) => r.published ? '🟢 Live' : '⚪ Draft' },
+          { key: 'published', header: 'الحالة', width: '100px', cell: (r) => r.published ? '🟢 منشور' : '⚪ مسودة' },
         ]}
-        rowAction={(r) => <DeleteButton id={r.id} action={deleteIntegration} confirm={`Delete "${r.name}"?`} />}
+        rowAction={(r) => <DeleteButton id={r.id} action={deleteIntegration} confirm={`حذف "${r.name}"؟`} />}
       />
     </div>
   );

@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { createRowWith, updateRowWith, deleteRowWith, reorderRow } from '@/lib/admin/actions';
 
 const schema = z.object({
-  value: z.string().min(1, 'Required').max(20),
+  value: z.string().min(1, 'مطلوب').max(20),
   labelAr: z.string().min(1).max(200),
   labelEn: z.string().min(1).max(200),
   order_index: z.coerce.number().int(),

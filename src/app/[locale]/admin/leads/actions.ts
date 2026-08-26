@@ -62,7 +62,7 @@ export async function deleteLead(id: string) {
 
 /**
  * Convert a lead into a client. Creates a clients row from the lead
- * info, links it back, and marks the lead as 'closed'.
+ * info, links it back, و marks the lead as 'closed'.
  */
 export async function convertLeadToClient(leadId: string) {
   const supabase = await createClient();

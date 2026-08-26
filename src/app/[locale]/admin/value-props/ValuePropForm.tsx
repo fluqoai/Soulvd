@@ -27,13 +27,13 @@ export function ValuePropForm({ initial: row }: { initial: Initial }) {
         <Field label="Key" required><TextInput name="key" defaultValue={row.key} required /></Field>
         <Field label="Icon" required><TextInput name="icon" defaultValue={row.icon} required /></Field>
       </div>
-      <BilingualInput name="title" label="Title" value={row.title} required />
-      <BilingualInput name="description" label="Description" value={row.description} multiline rows={3} required />
+      <BilingualInput name="title" label="العنوان" value={row.title} required />
+      <BilingualInput name="description" label="الوصف" value={row.description} multiline rows={3} required />
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Order"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
-        <Field label="Visibility" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="Published" /></Field>
+        <Field label="Visibility" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="منشور" /></Field>
       </div>
-      <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Create value prop'}</Button>
+      <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'جاري الحفظ…' : isEdit ? 'حفظ التغييرات' : 'إضافة قيمة'}</Button>
     </form>
   );
 }

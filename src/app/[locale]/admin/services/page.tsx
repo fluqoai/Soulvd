@@ -41,8 +41,8 @@ export default async function ServicesAdminPage({
   return (
     <div>
       <PageHeader
-        title="Services"
-        description="The service cards shown on the home page and the /services detail page."
+        title="الخدمات"
+        description="The service cards shown on the home page و the /services detail page."
         actions={
           <ButtonLink href={`/admin/services/new`} size="sm" variant="primary">
             <Plus className="size-4" />
@@ -55,11 +55,11 @@ export default async function ServicesAdminPage({
         rows={items}
         rowKey={(r) => r.id}
         editHref={(r) => `/admin/services/${r.id}`}
-        emptyMessage="No services yet — add your first one."
+        emptyMessage="لا توجد خدمات بعد — أضف الأولى."
         columns={[
           {
             key: 'order',
-            header: 'Order',
+            header: 'الترتيب',
             width: '80px',
             cell: (r) => (
               <ReorderControls
@@ -72,7 +72,7 @@ export default async function ServicesAdminPage({
           },
           {
             key: 'title',
-            header: 'Title',
+            header: 'العنوان',
             cell: (r) => (
               <div className="min-w-0">
                 <div className="font-medium truncate">
@@ -88,30 +88,30 @@ export default async function ServicesAdminPage({
           },
           {
             key: 'key',
-            header: 'Key',
+            header: 'المعرّف',
             width: '120px',
             cell: (r) => <code className="text-xs text-ink-700">{r.key}</code>,
           },
           {
             key: 'icon',
-            header: 'Icon',
+            header: 'الأيقونة',
             width: '100px',
             cell: (r) => <code className="text-xs text-ink-700">{r.icon}</code>,
           },
           {
             key: 'published',
-            header: 'Status',
+            header: 'الحالة',
             width: '100px',
             cell: (r) =>
               r.published ? (
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-sage-500/15 text-sage-300 text-xs">
                   <span className="size-1.5 rounded-full bg-sage-400" />
-                  Live
+                  منشور
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-ink-100 text-ink-700 ring-1 ring-ink-900/10 text-xs">
                   <span className="size-1.5 rounded-full bg-linen-400" />
-                  Draft
+                  مسودة
                 </span>
               ),
           },
@@ -120,7 +120,7 @@ export default async function ServicesAdminPage({
           <DeleteButton
             id={r.id}
             action={deleteServiceAction}
-            confirm={`Delete "${r.title?.en ?? r.key}"? This cannot be undone.`}
+            confirm={`حذف "${r.title?.en ?? r.key}"? لا يمكن التراجع عن هذا الإجراء.`}
           />
         )}
       />

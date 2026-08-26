@@ -25,7 +25,7 @@ export function IntegrationForm({ initial: row }: { initial: Initial }) {
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Name" required><TextInput name="name" defaultValue={row.name ?? ''} required /></Field>
+        <Field label="الاسم" required><TextInput name="name" defaultValue={row.name ?? ''} required /></Field>
         <Field label="Category">
           <Select name="category" defaultValue={row.category ?? ''}>
             <option value="">—</option>
@@ -37,9 +37,9 @@ export function IntegrationForm({ initial: row }: { initial: Initial }) {
       <Field label="Website URL"><TextInput name="url" defaultValue={row.url ?? ''} placeholder="https://..." /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Order"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
-        <Field label="Visibility" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="Published" /></Field>
+        <Field label="Visibility" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="منشور" /></Field>
       </div>
-      <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Create integration'}</Button>
+      <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'جاري الحفظ…' : isEdit ? 'حفظ التغييرات' : 'إضافة تكامل'}</Button>
     </form>
   );
 }

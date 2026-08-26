@@ -60,7 +60,7 @@ export function SectorForm({ initial: row }: { initial: Initial }) {
         </Field>
       </div>
 
-      <BilingualInput name="title" label="Title" value={row.title} required />
+      <BilingualInput name="title" label="العنوان" value={row.title} required />
       <BilingualInput name="description" label="Short description" value={row.description} multiline rows={3} required />
 
       <fieldset className="space-y-2">
@@ -85,13 +85,13 @@ export function SectorForm({ initial: row }: { initial: Initial }) {
           <TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} />
         </Field>
         <Field label="Visibility" className="self-end">
-          <Toggle name="published" defaultChecked={row.published !== false} label="Published" />
+          <Toggle name="published" defaultChecked={row.published !== false} label="منشور" />
         </Field>
       </div>
 
       <Button type="submit" disabled={isPending}>
         <Save className="size-4" />
-        {isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Create sector'}
+        {isPending ? 'جاري الحفظ…' : isEdit ? 'حفظ التغييرات' : 'إنشاء قطاع'}
       </Button>
     </form>
   );

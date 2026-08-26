@@ -18,7 +18,7 @@ type Lead = {
   created_at: string;
 };
 
-// Light-theme status pills. Background is a soft tint of the color,
+// Light-theme status pills. رجوعground is a soft tint of the color,
 // text is the deeper shade — easy to read on the white table.
 const STATUS_STYLES: Record<string, string> = {
   new:        'bg-sage-100 text-sage-800 ring-1 ring-sage-200',

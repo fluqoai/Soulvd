@@ -32,9 +32,9 @@ export function TestimonialForm({ initial: row }: { initial: Initial }) {
       <Field label="Avatar URL"><TextInput name="avatar_url" defaultValue={row.avatar_url ?? ''} placeholder="testimonials/jane.png" /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Order"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
-        <Field label="Visibility" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="Published" /></Field>
+        <Field label="Visibility" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="منشور" /></Field>
       </div>
-      <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Create testimonial'}</Button>
+      <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'جاري الحفظ…' : isEdit ? 'حفظ التغييرات' : 'إضافة شهادة'}</Button>
     </form>
   );
 }

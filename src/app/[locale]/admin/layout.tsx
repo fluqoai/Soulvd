@@ -101,7 +101,7 @@ export default async function AdminLayout({
     build('/admin/settings', 'settings', 'settings', true),
   ].filter(Boolean) as NavItem[];
 
-  // Help is accessible to BOTH roles (editor and owner).
+  // Help is accessible to BOTH roles (editor و owner).
   const helpItems = [
     { href: '/admin/help', label: t('help'), iconName: 'help' },
   ];

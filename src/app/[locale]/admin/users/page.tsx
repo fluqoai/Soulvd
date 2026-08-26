@@ -14,7 +14,7 @@ export default async function UsersPage() {
 
   return (
     <div>
-      <PageHeader title="Users" description="All accounts that can sign in to the admin. Owners have full access; editors can only manage content." />
+      <PageHeader title="المستخدمون" description="All accounts that can sign in to the admin. Owners have full access; editors can only manage content." />
       <DataTable
         rows={items}
         rowKey={(r) => r.id}
@@ -27,7 +27,7 @@ export default async function UsersPage() {
               {r.full_name && <div className="text-xs text-ink-600 flex items-center gap-1"><Mail className="size-3" />{r.email}</div>}
             </div>
           )},
-          { key: 'role', header: 'Role', width: '180px', cell: (r) => (
+          { key: 'role', header: 'الدور', width: '180px', cell: (r) => (
             <RoleSelect userId={r.id} currentRole={r.role} isSelf={acting?.id === r.id} />
           ) },
           { key: 'created', header: 'Joined', width: '140px', cell: (r) => (

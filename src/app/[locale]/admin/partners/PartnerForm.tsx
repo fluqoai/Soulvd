@@ -22,16 +22,16 @@ export function PartnerForm({ initial: row }: { initial: Initial }) {
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">
-      <Field label="Name" required><TextInput name="name" defaultValue={row.name ?? ''} required /></Field>
+      <Field label="الاسم" required><TextInput name="name" defaultValue={row.name ?? ''} required /></Field>
       <Field label="Logo URL" hint="Path in the media bucket, or full external URL">
         <TextInput name="logo_url" defaultValue={row.logo_url ?? ''} placeholder="partners/shopify.png" />
       </Field>
       <Field label="Website URL"><TextInput name="url" defaultValue={row.url ?? ''} placeholder="https://example.com" /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Order"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
-        <Field label="Visibility" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="Published" /></Field>
+        <Field label="Visibility" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="منشور" /></Field>
       </div>
-      <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Create partner'}</Button>
+      <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'جاري الحفظ…' : isEdit ? 'حفظ التغييرات' : 'إضافة شريك'}</Button>
     </form>
   );
 }

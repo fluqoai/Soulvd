@@ -31,10 +31,10 @@ export function StatForm({ initial: row }: { initial: Initial }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Order"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
         <Field label="Visibility" className="self-end">
-          <Toggle name="published" defaultChecked={row.published !== false} label="Published" />
+          <Toggle name="published" defaultChecked={row.published !== false} label="منشور" />
         </Field>
       </div>
-      <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Create stat'}</Button>
+      <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'جاري الحفظ…' : isEdit ? 'حفظ التغييرات' : 'إضافة رقم'}</Button>
     </form>
   );
 }

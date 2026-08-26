@@ -110,7 +110,7 @@ export default async function AdminDashboard({
         <section className="rounded-2xl bg-paper border border-ink-900/5 p-6 md:p-7">
           <div className="flex items-center justify-between gap-4 mb-5">
             <h2 className="text-lg font-semibold text-ink-900">{t('recent_leads.title')}</h2>
-            <Link href="/admin/leads" className="text-sm font-medium text-ink-700 hover:text-ink-900 underline-offset-4 hover:underline">
+            <Link href="/admin/leads" className="text-sm font-medium text-ink-700 hover:text-ink-900 تحتline-offset-4 hover:تحتline">
               {t('recent_leads.view_all')}
             </Link>
           </div>

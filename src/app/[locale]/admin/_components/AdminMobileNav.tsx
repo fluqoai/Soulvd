@@ -89,7 +89,7 @@ export function AdminMobileNav({ role, userEmail, userName, groups }: Props) {
         aria-label="Admin navigation"
       >
         <div className="h-16 flex items-center justify-between px-5 border-b border-linen-400/10">
-          <Link href="/admin" aria-label="Dashboard" className="flex items-center gap-2">
+          <Link href="/admin" aria-label="لوحة التحكم" className="flex items-center gap-2">
             <span className="text-base font-semibold tracking-tight">Soulvd</span>
             <span className="text-[10px] uppercase tracking-widest text-sage-300">Admin</span>
           </Link>

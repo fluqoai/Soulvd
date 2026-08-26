@@ -38,8 +38,8 @@ export default async function SectorsAdminPage({
   return (
     <div>
       <PageHeader
-        title="Sectors"
-        description="Sector cards on the home page and the /sectors list."
+        title="القطاعات"
+        description="Sector cards on the home page و the /sectors list."
         actions={
           <ButtonLink href={`/admin/sectors/new`} size="sm" variant="primary">
             <Plus className="size-4" />
@@ -51,22 +51,22 @@ export default async function SectorsAdminPage({
         rows={items}
         rowKey={(r) => r.id}
         editHref={(r) => `/admin/sectors/${r.id}`}
-        emptyMessage="No sectors yet."
+        emptyMessage="لا توجد قطاعات بعد."
         columns={[
-          { key: 'order', header: 'Order', width: '80px', cell: (r) => (
+          { key: 'order', header: 'الترتيب', width: '80px', cell: (r) => (
             <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderSectorAction} />
           )},
-          { key: 'title', header: 'Title', cell: (r) => (
+          { key: 'title', header: 'العنوان', cell: (r) => (
             <div className="min-w-0">
               <div className="font-medium truncate">{r.title?.en || r.title?.ar || '—'}</div>
               {r.title?.ar && r.title?.en && <div className="text-xs text-ink-600 truncate" dir="rtl">{r.title.ar}</div>}
             </div>
           )},
-          { key: 'key', header: 'Key', width: '120px', cell: (r) => <code className="text-xs text-ink-700">{r.key}</code> },
-          { key: 'published', header: 'Status', width: '100px', cell: (r) => r.published ? '🟢 Live' : '⚪ Draft' },
+          { key: 'key', header: 'المعرّف', width: '120px', cell: (r) => <code className="text-xs text-ink-700">{r.key}</code> },
+          { key: 'published', header: 'الحالة', width: '100px', cell: (r) => r.published ? '🟢 منشور' : '⚪ مسودة' },
         ]}
         rowAction={(r) => (
-          <DeleteButton id={r.id} action={deleteSectorAction} confirm={`Delete "${r.title?.en ?? r.key}"?`} />
+          <DeleteButton id={r.id} action={deleteSectorAction} confirm={`حذف "${r.title?.ar ?? r.title?.en ?? r.key}"؟`} />
         )}
       />
     </div>

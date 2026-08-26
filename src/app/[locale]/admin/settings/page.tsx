@@ -8,7 +8,7 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <PageHeader title="Settings" description="Site name, contact info, social links, and SEO defaults. Saved here propagate to the public site." />
+      <PageHeader title="الإعدادات" description="Site name, contact info, social links, و SEO defaults. Saved here propagate to the public site." />
       <SettingsForm initial={data ?? {}} />
     </div>
   );
