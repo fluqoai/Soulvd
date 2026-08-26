@@ -26,7 +26,7 @@ export default async function EditServicePage({ params }: { params: Params }) {
   return (
     <div>
       <PageHeader
-        title="Edit service"
+        title="تعديل الخدمة"
         backHref="/admin/services"
         description={`Editing "${data.title?.en ?? data.key}"`}
       />

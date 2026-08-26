@@ -17,7 +17,7 @@ export default async function EditSectorPage({ params }: { params: Params }) {
   if (!data) notFound();
   return (
     <div>
-      <PageHeader title="Edit sector" backHref="/admin/sectors" description={`Editing "${data.title?.en ?? data.key}"`} />
+      <PageHeader title="تعديل القطاع" backHref="/admin/sectors" description={`Editing "${data.title?.en ?? data.key}"`} />
       <SectorForm initial={data} />
     </div>
   );

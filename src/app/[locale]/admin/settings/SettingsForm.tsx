@@ -77,7 +77,7 @@ export function SettingsForm({ initial: row }: { initial: Initial }) {
 
       <Button type="submit" size="lg" disabled={isPending}>
         <Save className="size-4" />
-        {isPending ? 'جاري الحفظ…' : 'Save settings'}
+        {isPending ? 'جاري الحفظ…' : 'حفظ الإعدادات'}
       </Button>
     </form>
   );

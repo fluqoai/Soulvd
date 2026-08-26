@@ -7,5 +7,5 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const supabase = await createClient();
   const { data } = await supabase.from('integrations').select('*').eq('id', id).maybeSingle();
   if (!data) notFound();
-  return <div><PageHeader title="Edit integration" backHref="/admin/integrations" description={`Editing "${data.name}"`} /><IntegrationForm initial={data} /></div>;
+  return <div><PageHeader title="تعديل التكامل" backHref="/admin/integrations" description={`Editing "${data.name}"`} /><IntegrationForm initial={data} /></div>;
 }

@@ -7,5 +7,5 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const supabase = await createClient();
   const { data } = await supabase.from('value_props').select('*').eq('id', id).maybeSingle();
   if (!data) notFound();
-  return <div><PageHeader title="Edit value prop" backHref="/admin/value-props" /><ValuePropForm initial={data} /></div>;
+  return <div><PageHeader title="تعديل القيمة" backHref="/admin/value-props" /><ValuePropForm initial={data} /></div>;
 }

@@ -79,7 +79,7 @@ export function AdminMobileNav({ role, userEmail, userName, groups }: Props) {
       <button
         type="button"
         onClick={close}
-        aria-label="Close admin menu"
+        aria-label="إغلاق القائمة"
         className="fixed inset-0 z-40 bg-ink-900/60 backdrop-blur-sm md:hidden"
       />
 
@@ -97,7 +97,7 @@ export function AdminMobileNav({ role, userEmail, userName, groups }: Props) {
             type="button"
             onClick={close}
             className="size-11 -ms-2 grid place-items-center rounded-md text-linen-200 hover:bg-linen-400/10"
-            aria-label="Close menu"
+            aria-label="إغلاق القائمة"
           >
             <X className="size-5" />
           </button>

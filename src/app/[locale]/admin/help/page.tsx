@@ -503,8 +503,8 @@ const SECTIONS: Section[] = [
     ],
     editSteps: [
       'Storage → اختر الـ bucket (media أو templates)',
-      'اضغط "Upload file"',
-      'بعد الرفع، اضغط على الملف → Copy URL (اجعله Public)',
+      'اضغط "Upload file" (رفع ملف)',
+      'بعد الرفع، اضغط على الملف → Copy URL (انسخ الرابط، اجعله Public)',
       'الصق الرابط في الحقل المناسب (مثل logo_url)',
     ],
     publicShows: 'تظهر في كل مكان في الموقع.',

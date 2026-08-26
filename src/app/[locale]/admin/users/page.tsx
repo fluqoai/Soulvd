@@ -14,7 +14,7 @@ export default async function UsersPage() {
 
   return (
     <div>
-      <PageHeader title="المستخدمون" description="All accounts that can sign in to the admin. Owners have full access; editors can only manage content." />
+      <PageHeader title="المستخدمون" description="كل الحسابات التي تستطيع الدخول إلى /admin. المالك (owner) يرى كل شيء؛ المحرر (editor) محدود بالمحتوى." />
       <DataTable
         rows={items}
         rowKey={(r) => r.id}

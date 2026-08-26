@@ -10,7 +10,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   if (!data) notFound();
   return (
     <div>
-      <PageHeader title="Edit client" backHref="/admin/clients" description={`Editing "${data.name}"`} />
+      <PageHeader title="تعديل العميل" backHref="/admin/clients" description={`Editing "${data.name}"`} />
       <ClientForm initial={data} />
     </div>
   );

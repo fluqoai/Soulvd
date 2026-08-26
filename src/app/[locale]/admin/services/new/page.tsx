@@ -7,7 +7,7 @@ export default function NewServicePage() {
       <PageHeader
         title="New service"
         backHref="/admin/services"
-        description="Add a new service card. It will be available on the home page و the /services detail page once published."
+        description="أضف بطاقة خدمة جديدة. ستظهر في الصفحة الرئيسية وصفحة /services عند نشرها."
       />
       <ServiceForm initial={{}} />
     </div>
