@@ -62,7 +62,8 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-touch-icon.png',
   },
-  manifest: '/site.webmanifest',
+  // Web app manifest is provided by the favicon icons above;
+  // declare a real one when PWA install is on the roadmap.
   alternates: {
     canonical: '/',
     languages: {

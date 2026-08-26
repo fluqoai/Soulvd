@@ -2,15 +2,63 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { X, type LucideIcon } from 'lucide-react';
+import {
+  X,
+  LayoutDashboard,
+  Home,
+  Sparkles,
+  Building2,
+  BarChart3,
+  Wand2,
+  PlugZap,
+  Quote,
+  Star,
+  Users,
+  Handshake,
+  Inbox,
+  UserSquare2,
+  FileText,
+  Receipt,
+  ScrollText,
+  Activity,
+  Settings,
+  HelpCircle,
+  type LucideIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { LogoutButton } from './LogoutButton';
 
+/**
+ * Server → client components cannot serialize functions. So the
+ * layout passes icon NAMES (strings) and we resolve them here.
+ */
+export const ADMIN_ICON_MAP: Record<string, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  home: Home,
+  services: Sparkles,
+  sectors: Building2,
+  stats: BarChart3,
+  value_props: Wand2,
+  integrations: PlugZap,
+  case_studies: Quote,
+  testimonials: Star,
+  team: Users,
+  partners: Handshake,
+  leads: Inbox,
+  clients: UserSquare2,
+  templates: FileText,
+  invoices: Receipt,
+  quotes: ScrollText,
+  users: Users,
+  activity_log: Activity,
+  settings: Settings,
+};
+
 export type NavItem = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  iconName: string;
 };
 
 type Props = {
@@ -122,7 +170,7 @@ export function AdminMobileNav({ locale, role, userEmail, userName, groups }: Pr
                 </p>
                 <ul className="space-y-0.5">
                   {group.items.map((item) => {
-                    const Icon = item.icon;
+                    const Icon = ADMIN_ICON_MAP[item.iconName] ?? HelpCircle;
                     const isActive = pathname === item.href;
                     return (
                       <li key={item.href}>

@@ -41,6 +41,12 @@ export default async function LoginPage({
             src="/brand/soulvd-mark-white.png"
             alt=""
             fill
+            // The brand mark on the login screen is the Largest
+            // Contentful Paint on desktop, so load it eagerly.
+            // On screens >= 768px the right panel is exactly half
+            // the viewport width.
+            sizes="(min-width: 768px) 50vw, 100vw"
+            priority
             className="object-contain p-32"
           />
         </div>

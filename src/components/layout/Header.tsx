@@ -26,12 +26,15 @@ export async function Header() {
           aria-label={tSite('name')}
         >
           <Image
-            src="/brand/soulvd-logo.png"
+            src="/brand/soulvd-mark.png"
             alt={tSite('name')}
-            width={240}
+            width={64}
             height={64}
-            className="h-12 md:h-14 w-auto"
             priority
+            // Tell next/image to keep the intrinsic aspect ratio
+            // when CSS sets only one dimension (here: height).
+            style={{ width: 'auto', height: 'auto' }}
+            className="h-12 md:h-14"
           />
         </Link>
 

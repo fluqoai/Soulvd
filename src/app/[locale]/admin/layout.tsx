@@ -11,48 +11,6 @@ import {
   AdminMobileNav,
   type NavItem,
 } from './_components/AdminMobileNav';
-import {
-  LayoutDashboard,
-  Home,
-  Sparkles,
-  Building2,
-  BarChart3,
-  Wand2,
-  PlugZap,
-  Quote,
-  Star,
-  Handshake,
-  Inbox,
-  UserSquare2,
-  FileText,
-  Receipt,
-  ScrollText,
-  Users,
-  Activity,
-  Settings,
-} from 'lucide-react';
-
-const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  dashboard: LayoutDashboard as never,
-  home: Home as never,
-  services: Sparkles as never,
-  sectors: Building2 as never,
-  stats: BarChart3 as never,
-  value_props: Wand2 as never,
-  integrations: PlugZap as never,
-  case_studies: Quote as never,
-  testimonials: Star as never,
-  team: Users as never,
-  partners: Handshake as never,
-  leads: Inbox as never,
-  clients: UserSquare2 as never,
-  templates: FileText as never,
-  invoices: Receipt as never,
-  quotes: ScrollText as never,
-  users: Users as never,
-  activity_log: Activity as never,
-  settings: Settings as never,
-};
 
 export default async function AdminLayout({
   children,
@@ -102,7 +60,10 @@ export default async function AdminLayout({
     return {
       href: `/${locale}${href}`,
       label: t(labelKey as never),
-      icon: ICONS[iconKey] as never,
+      // Pass the icon NAME, not the component — server → client
+      // serialization can't carry functions. The client component
+      // resolves it via its own icon map.
+      iconName: iconKey,
     };
   };
 
