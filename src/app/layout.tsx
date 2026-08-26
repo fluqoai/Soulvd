@@ -1,7 +1,8 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { getLocale } from 'next-intl/server';
 import { Inter, IBM_Plex_Sans_Arabic, Fraunces } from 'next/font/google';
 import { routing, type Locale } from '@/i18n/routing';
+import { JsonLd } from '@/components/seo/JsonLd';
 import './globals.css';
 
 const inter = Inter({
@@ -24,24 +25,88 @@ const fraunces = Fraunces({
   display: 'swap',
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://soulvd.net';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#F5F0E4',
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Soulvd — سولڤد',
+    default: 'Soulvd · سولڤد — WhatsApp AI for Saudi businesses',
     template: '%s · Soulvd',
   },
   description:
-    'سولڤد — منصة ذكاء اصطناعي متكاملة للشركات السعودية، شريك ميتا الرسمي لأتمتة واتساب.',
+    'Soulvd is the official Meta WhatsApp Business Partner for Saudi Arabia. Turn WhatsApp conversations into revenue with an AI bot that speaks Saudi Arabic, qualifies leads, and closes deals — live in 2 weeks.',
+  applicationName: 'Soulvd',
+  authors: [{ name: 'Soulvd', url: SITE_URL }],
+  generator: 'Next.js',
+  keywords: [
+    'WhatsApp Business Saudi Arabia',
+    'واتساب بزنس السعودية',
+    'AI chatbot Saudi',
+    'Meta Business Partner',
+    'WhatsApp automation',
+    'بوت واتساب',
+    'ذكاء اصطناعي',
+  ],
+  referrer: 'origin-when-cross-origin',
+  formatDetection: { email: false, address: false, telephone: false },
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16.png', sizes: '16x16', type: 'image/png' },
+    ],
     apple: '/apple-touch-icon.png',
   },
-  openGraph: {
-    title: 'Soulvd — سولڤد',
-    description:
-      'نحوّل محادثات واتساب إلى مبيعات — منصة ذكاء اصطناعي للسوق السعودي.',
-    locale: 'ar_SA',
-    type: 'website',
+  manifest: '/site.webmanifest',
+  alternates: {
+    canonical: '/',
+    languages: {
+      ar: '/',
+      en: '/en',
+      'x-default': '/',
+    },
   },
+  openGraph: {
+    type: 'website',
+    siteName: 'Soulvd · سولڤد',
+    title: 'Soulvd — Turn WhatsApp conversations into revenue',
+    description:
+      'The official Meta WhatsApp Business Partner for Saudi Arabia. AI bot that speaks Saudi Arabic, 24/7, live in 2 weeks.',
+    url: SITE_URL,
+    locale: 'ar_SA',
+    alternateLocale: ['en_US'],
+    images: [
+      {
+        url: '/og',
+        width: 1200,
+        height: 630,
+        alt: 'Soulvd — WhatsApp AI for Saudi businesses',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Soulvd — Turn WhatsApp conversations into revenue',
+    description:
+      'The official Meta WhatsApp Business Partner for Saudi Arabia.',
+    images: ['/og'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  category: 'technology',
 };
 
 export async function generateStaticParams() {
@@ -61,7 +126,30 @@ export default async function RootLayout({
       dir={dir}
       className={`${inter.variable} ${plexArabic.variable} ${fraunces.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Soulvd',
+            alternateName: 'سولڤد',
+            url: SITE_URL,
+            logo: `${SITE_URL}/brand/soulvd-logo.png`,
+            description:
+              'Official Meta WhatsApp Business Partner for Saudi Arabia. AI WhatsApp automation for businesses.',
+            sameAs: [
+              // User to fill in once real socials exist
+            ],
+            contactPoint: {
+              '@type': 'ContactPoint',
+              contactType: 'sales',
+              areaServed: ['SA', 'AE', 'KW', 'BH', 'QA', 'OM'],
+              availableLanguage: ['Arabic', 'English'],
+            },
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

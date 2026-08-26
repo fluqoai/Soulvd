@@ -3,6 +3,22 @@ import { Section } from '@/components/ui/Section';
 import { ContactForm } from '@/components/public/ContactForm';
 import { ContactInfo } from '@/components/public/ContactInfo';
 
+// See [locale]/page.tsx for the `force-static` warning.
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'contact' });
+  return {
+    title: t('title'),
+    description: t('subtitle'),
+    alternates: { canonical: locale === 'ar' ? '/contact' : '/en/contact' },
+  };
+}
+
 export default async function ContactPage({
   params,
 }: {

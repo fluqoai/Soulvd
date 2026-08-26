@@ -1,0 +1,10 @@
+# robots.txt — Soulvd
+# https://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /api
+
+Sitemap: https://soulvd.net/sitemap.xml

@@ -1,6 +1,6 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { ArrowRight, ArrowLeft, MessageCircle, Play, ShieldCheck, Cpu, Globe, Clock } from 'lucide-react';
-import { ButtonLink } from '@/components/ui/Button';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { FadeIn } from '@/components/motion/Motion';
 import { HeroChat } from './HeroChat';
 
@@ -61,7 +61,13 @@ export async function Hero() {
             </p>
 
             <div className="mt-8 md:mt-9 flex flex-wrap items-center gap-3">
-              <ButtonLink href="/contact" size="lg" variant="primary">
+              <TrackedLink
+                href="/contact"
+                event="hero_cta_clicked"
+                eventProps={{ location: 'hero_primary' }}
+                size="lg"
+                variant="primary"
+              >
                 <MessageCircle className="size-4" />
                 {t('cta_primary')}
                 {isRtl ? (
@@ -69,11 +75,17 @@ export async function Hero() {
                 ) : (
                   <ArrowRight className="size-4" aria-hidden />
                 )}
-              </ButtonLink>
-              <ButtonLink href="#case-studies" size="lg" variant="secondary">
+              </TrackedLink>
+              <TrackedLink
+                href="#case-studies"
+                event="hero_secondary_cta_clicked"
+                eventProps={{ location: 'hero_secondary' }}
+                size="lg"
+                variant="secondary"
+              >
                 <Play className="size-3.5" aria-hidden />
                 {t('cta_secondary')}
-              </ButtonLink>
+              </TrackedLink>
             </div>
 
             {/* Inline trust line under the buttons */}

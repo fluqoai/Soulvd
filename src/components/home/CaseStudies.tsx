@@ -6,6 +6,7 @@ import { Section } from '@/components/ui/Section';
 import { ScrollReveal } from '@/components/motion/Motion';
 import { SectionLabel } from './SectionLabel';
 import { Link } from '@/i18n/routing';
+import { ViewTracker } from '@/components/analytics/ViewTracker';
 import { cn } from '@/lib/utils';
 
 type Result = { label: string; value: string };
@@ -97,6 +98,7 @@ export async function CaseStudies() {
             ))}
           </div>
         </div>
+        <ViewTracker event="case_studies_viewed" />
       </div>
     </Section>
   );

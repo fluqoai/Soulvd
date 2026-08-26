@@ -118,7 +118,13 @@ for (const cs of caseStudies) {
   await client.query(
     `insert into public.case_studies
        (client_name, title, summary, results, order_index, published, cover_image)
-     values ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5, true, null)`,
+     values ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5, true, null)
+     on conflict (client_name) do update
+       set title = excluded.title,
+           summary = excluded.summary,
+           results = excluded.results,
+           order_index = excluded.order_index,
+           published = true`,
     [cs.client_name, JSON.stringify(cs.title), JSON.stringify(cs.summary), JSON.stringify(cs.results), cs.order_index]
   );
   console.log(`  ✓ case_studies: ${cs.client_name}`);
@@ -163,7 +169,12 @@ for (const tm of testimonials) {
     `insert into public.testimonials
        (client_name, client_role, client_company, quote, order_index, published, avatar_url)
      values ($1, $2, $3, $4::jsonb, $5, true, null)
-     on conflict do nothing`,
+     on conflict (client_name) do update
+       set client_role = excluded.client_role,
+           client_company = excluded.client_company,
+           quote = excluded.quote,
+           order_index = excluded.order_index,
+           published = true`,
     [tm.client_name, tm.client_role, tm.client_company, JSON.stringify(tm.quote), tm.order_index]
   );
   console.log(`  ✓ testimonials: ${tm.client_name}`);

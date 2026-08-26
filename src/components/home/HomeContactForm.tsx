@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import {
@@ -20,6 +20,13 @@ export function HomeContactForm() {
     initialState
   );
 
+  // Stamp the form mount time so the server can reject bot-speed
+  // submissions (< 2.5s between render and submit is almost always a bot).
+  const mountedAt = useRef<number>(0);
+  useEffect(() => {
+    mountedAt.current = Date.now();
+  }, []);
+
   if (state.status === 'success') {
     return (
       <div className="rounded-3xl bg-sage-50 border border-sage-200 p-8 md:p-12 text-center">
@@ -37,6 +44,7 @@ export function HomeContactForm() {
   }
 
   const err = (k: string) => state.errors?.[k];
+  const rateLimited = state.status === 'error' && state.message === 'rate_limited';
 
   return (
     <form
@@ -45,6 +53,20 @@ export function HomeContactForm() {
       noValidate
     >
       <input type="hidden" name="locale" value={locale} />
+      {/* Honeypot — visually hidden, screen-reader & tab skip.
+          Real users never fill it; bots usually do. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden">
+        <label htmlFor="hp_company">Company</label>
+        <input
+          id="hp_company"
+          name="hp_company"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+      {/* Mount-time stamp for server-side bot-speed check */}
+      <MountStamp onReady={(t) => (mountedAt.current = t)} />
 
       <Field
         name="name"
@@ -77,6 +99,17 @@ export function HomeContactForm() {
         <div className="md:col-span-2 flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-800">
           <AlertCircle className="size-4 shrink-0 mt-0.5" aria-hidden />
           <p>{t('error_description')}</p>
+        </div>
+      )}
+
+      {rateLimited && (
+        <div className="md:col-span-2 flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
+          <AlertCircle className="size-4 shrink-0 mt-0.5" aria-hidden />
+          <p>
+            {locale === 'ar'
+              ? 'تم إرسال عدد كبير من الرسائل. حاول مرة أخرى بعد قليل.'
+              : 'Too many submissions. Please try again in a few minutes.'}
+          </p>
         </div>
       )}
 
@@ -149,4 +182,21 @@ function Field({
       {error && <span className="block text-xs text-red-600 mt-1">{error}</span>}
     </label>
   );
+}
+
+/**
+ * Hidden timestamp stamp for bot-speed rejection. Renders an
+ * `<input type="hidden" name="_t">` whose `defaultValue` is set
+ * at mount time (post-hydration, so it can't be pre-baked by
+ * a static-form scraper).
+ */
+function MountStamp({ onReady }: { onReady: (t: number) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.value = String(Date.now());
+      onReady(Date.now());
+    }
+  }, [onReady]);
+  return <input ref={ref} type="hidden" name="_t" defaultValue="" />;
 }

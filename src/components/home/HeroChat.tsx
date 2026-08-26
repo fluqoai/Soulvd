@@ -21,7 +21,7 @@ function getConversation(locale: 'ar' | 'en'): Bubble[] {
   if (locale === 'ar') {
     return [
       { side: 'in', text: 'السلام عليكم، أبغى أعرف عن خدماتكم في واتساب', time: '10:23 ص' },
-      { side: 'out', text: 'وعليكم السلام، سولڤد معك. تقدر تطلب عرض خلال دقيقتين فقط. إيش مجال عملك؟', time: '10:23 ص', read: true },
+      { side: 'out', text: 'وعليكم السلام، سولڤد معك. البوت يرد على عملائك بالعربي خلال ثوانٍ. إيش مجال عملك؟', time: '10:23 ص', read: true },
       { side: 'in', text: 'عندي مطعم في الرياض، عايز أزيد الطلبات خاصة في الويكند', time: '10:24 ص' },
       { side: 'out', text: 'ممتاز. عندنا بوت يرد على العملاء بالعربي ٢٤/٧ وياخذ الطلبات تلقائياً. أحجز لك ديمو مجاني؟', time: '10:24 ص', read: true },
     ];
@@ -108,18 +108,15 @@ export function HeroChat({ locale }: Props) {
         </div>
 
         {bubbles.map((b, i) => (
-          <ChatBubble key={i} bubble={b} locale={locale} delay={i * 0.6} />
+          <ChatBubble key={i} bubble={b} locale={locale} />
         ))}
 
-        {/* Typing indicator (only on AR/EN first 3) */}
-        <div
-          className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both"
-          style={{ animationDelay: '2.5s' }}
-        >
+        {/* Typing indicator — purely decorative, no animation timing */}
+        <div className="flex justify-start">
           <div className="bg-paper rounded-2xl rounded-bl-md px-3 py-2 shadow-sm flex items-center gap-1">
-            <span className="size-1.5 rounded-full bg-ink-500/60 animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="size-1.5 rounded-full bg-ink-500/60 animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="size-1.5 rounded-full bg-ink-500/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+            <span className="size-1.5 rounded-full bg-ink-500/60" />
+            <span className="size-1.5 rounded-full bg-ink-500/60" />
+            <span className="size-1.5 rounded-full bg-ink-500/60" />
           </div>
         </div>
       </div>
@@ -130,20 +127,17 @@ export function HeroChat({ locale }: Props) {
 function ChatBubble({
   bubble,
   locale,
-  delay,
 }: {
   bubble: Bubble;
   locale: 'ar' | 'en';
-  delay: number;
 }) {
   const isIn = bubble.side === 'in';
   return (
     <div
       className={cn(
-        'flex animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both',
+        'flex',
         isIn ? 'justify-start' : 'justify-end'
       )}
-      style={{ animationDelay: `${delay}s` }}
     >
       <div
         className={cn(
