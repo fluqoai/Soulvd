@@ -22,19 +22,20 @@ export async function Header() {
       <div className="container-page h-20 md:h-24 flex items-center justify-between gap-4">
         <Link
           href="/"
-          className="flex items-center gap-2 shrink-0"
+          className="flex items-center gap-2 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage-500 rounded-md"
           aria-label={tSite('name')}
         >
           <Image
-            src="/brand/soulvd-mark.png"
+            src="/brand/soulvd-logo.png"
             alt={tSite('name')}
-            width={64}
-            height={64}
+            width={180}
+            height={48}
             priority
-            // Tell next/image to keep the intrinsic aspect ratio
-            // when CSS sets only one dimension (here: height).
+            // intrinsic aspect ratio 180/48 ≈ 3.75:1 — the visible mark+wordmark
+            // fits inside the image with some breathing room. Setting height
+            // only (via className) and width:auto keeps the original aspect.
             style={{ width: 'auto', height: 'auto' }}
-            className="h-12 md:h-14"
+            className="h-10 md:h-12"
           />
         </Link>
 
