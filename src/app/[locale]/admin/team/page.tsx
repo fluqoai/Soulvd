@@ -18,9 +18,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   return (
     <div>
       <PageHeader title="Team" description="Team members shown on the /about page." actions={
-        <ButtonLink href={`/${locale}/admin/team/new`} size="sm" variant="primary"><Plus className="size-4" />New</ButtonLink>
+        <ButtonLink href={`/admin/team/new`} size="sm" variant="primary"><Plus className="size-4" />New</ButtonLink>
       } />
-      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/${locale}/admin/team/${r.id}`} emptyMessage="No team members yet."
+      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/team/${r.id}`} emptyMessage="No team members yet."
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderMember} /> },
           { key: 'name', header: 'Name', cell: (r) => <span className="font-medium">{r.full_name}</span> },

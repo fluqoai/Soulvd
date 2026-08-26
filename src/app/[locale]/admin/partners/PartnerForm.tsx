@@ -13,12 +13,12 @@ type Initial = { id?: string; name?: string; logo_url?: string | null; url?: str
 const init: CrudResult = { ok: false, error: '' };
 
 export function PartnerForm({ initial: row }: { initial: Initial }) {
-  const locale = useLocale() as 'ar' | 'en';
+  const locale = 'ar' as 'ar' | 'en';
   const router = useRouter();
   const isEdit = !!row.id;
   const action = isEdit ? updatePartner.bind(null, row.id!) : createPartner;
   const [state, formAction, isPending] = useActionState<CrudResult, FormData>(action, init);
-  if (state?.ok && typeof window !== 'undefined') router.push(`/${locale}/admin/partners`);
+  if (state?.ok && typeof window !== 'undefined') router.push(`/admin/partners`);
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">

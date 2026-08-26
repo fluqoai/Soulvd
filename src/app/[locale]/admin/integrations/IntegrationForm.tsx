@@ -15,12 +15,12 @@ const init: CrudResult = { ok: false, error: '' };
 const CATEGORIES = ['crm', 'ecommerce', 'payment', 'productivity', 'social', 'automation', 'other'];
 
 export function IntegrationForm({ initial: row }: { initial: Initial }) {
-  const locale = useLocale() as 'ar' | 'en';
+  const locale = 'ar' as 'ar' | 'en';
   const router = useRouter();
   const isEdit = !!row.id;
   const action = isEdit ? updateIntegration.bind(null, row.id!) : createIntegration;
   const [state, formAction, isPending] = useActionState<CrudResult, FormData>(action, init);
-  if (state?.ok && typeof window !== 'undefined') router.push(`/${locale}/admin/integrations`);
+  if (state?.ok && typeof window !== 'undefined') router.push(`/admin/integrations`);
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">

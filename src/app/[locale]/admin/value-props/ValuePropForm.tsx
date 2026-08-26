@@ -14,12 +14,12 @@ type Initial = { id?: string; key?: string; icon?: string; title?: { ar?: string
 const init: CrudResult = { ok: false, error: '' };
 
 export function ValuePropForm({ initial: row }: { initial: Initial }) {
-  const locale = useLocale() as 'ar' | 'en';
+  const locale = 'ar' as 'ar' | 'en';
   const router = useRouter();
   const isEdit = !!row.id;
   const action = isEdit ? updateVP.bind(null, row.id!) : createVP;
   const [state, formAction, isPending] = useActionState<CrudResult, FormData>(action, init);
-  if (state?.ok && typeof window !== 'undefined') router.push(`/${locale}/admin/value-props`);
+  if (state?.ok && typeof window !== 'undefined') router.push(`/admin/value-props`);
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">

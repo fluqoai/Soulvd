@@ -2,17 +2,19 @@
 // Dashboard overview.
 
 import { getTranslations } from 'next-intl/server';
-import { Inbox, Receipt, FileText, Users, ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function AdminDashboard({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  // Admin is always Arabic; locale param is kept for Next's typed
+  // segment API but not used.
   const t = await getTranslations('admin.dashboard');
   const tNav = await getTranslations('admin.nav');
 
@@ -44,10 +46,10 @@ export default async function AdminDashboard({
       admin.from('templates').select('*', { count: 'exact', head: true }),
     ]);
     stats = [
-      { label: t('stats.new_leads'), value: newLeads.count ?? 0, href: `/${locale}/admin/leads`, icon: 'inbox' },
-      { label: t('stats.total_leads'), value: totalLeads.count ?? 0, href: `/${locale}/admin/leads`, icon: 'inbox' },
-      { label: t('stats.open_invoices'), value: openInvoices.count ?? 0, href: `/${locale}/admin/invoices`, icon: 'receipt' },
-      { label: t('stats.templates_count'), value: templatesCount.count ?? 0, href: `/${locale}/admin/templates`, icon: 'file' },
+      { label: t('stats.new_leads'), value: newLeads.count ?? 0, href: '/admin/leads', icon: 'inbox' },
+      { label: t('stats.total_leads'), value: totalLeads.count ?? 0, href: '/admin/leads', icon: 'inbox' },
+      { label: t('stats.open_invoices'), value: openInvoices.count ?? 0, href: '/admin/invoices', icon: 'receipt' },
+      { label: t('stats.templates_count'), value: templatesCount.count ?? 0, href: '/admin/templates', icon: 'file' },
     ];
   } else {
     const [servicesCount, sectorsCount, statsCount, vpCount] = await Promise.all([
@@ -57,17 +59,17 @@ export default async function AdminDashboard({
       admin.from('value_props').select('*', { count: 'exact', head: true }),
     ]);
     stats = [
-      { label: tNav('services'), value: servicesCount.count ?? 0, href: `/${locale}/admin/services`, icon: 'file' },
-      { label: tNav('sectors'), value: sectorsCount.count ?? 0, href: `/${locale}/admin/sectors`, icon: 'file' },
-      { label: tNav('stats'), value: statsCount.count ?? 0, href: `/${locale}/admin/stats`, icon: 'file' },
-      { label: tNav('value_props'), value: vpCount.count ?? 0, href: `/${locale}/admin/value-props`, icon: 'file' },
+      { label: tNav('services'), value: servicesCount.count ?? 0, href: '/admin/services', icon: 'file' },
+      { label: tNav('sectors'), value: sectorsCount.count ?? 0, href: '/admin/sectors', icon: 'file' },
+      { label: tNav('stats'), value: statsCount.count ?? 0, href: '/admin/stats', icon: 'file' },
+      { label: tNav('value_props'), value: vpCount.count ?? 0, href: '/admin/value-props', icon: 'file' },
     ];
   }
 
   // Recent leads (owner only)
   const recentLeadsRes = isOwner
     ? await admin.from('leads').select('id, name, email, status, created_at').order('created_at', { ascending: false }).limit(5)
-    : { data: [] as any[] };
+    : { data: [] as { id: string; name: string; email: string | null; status: string; created_at: string }[] };
   const recentLeads = recentLeadsRes.data as Array<{ id: string; name: string; email: string | null; status: string; created_at: string }> | null;
 
   const displayName = profile.full_name || profile.email?.split('@')[0] || 'there';
@@ -108,7 +110,7 @@ export default async function AdminDashboard({
         <section className="rounded-2xl bg-paper border border-ink-900/5 p-6 md:p-7">
           <div className="flex items-center justify-between gap-4 mb-5">
             <h2 className="text-lg font-semibold text-ink-900">{t('recent_leads.title')}</h2>
-            <Link href={`/${locale}/admin/leads`} className="text-sm font-medium text-ink-700 hover:text-ink-900 underline-offset-4 hover:underline">
+            <Link href="/admin/leads" className="text-sm font-medium text-ink-700 hover:text-ink-900 underline-offset-4 hover:underline">
               {t('recent_leads.view_all')}
             </Link>
           </div>
@@ -123,7 +125,7 @@ export default async function AdminDashboard({
                   <div className="shrink-0 flex items-center gap-3">
                     <span className={statusPill(lead.status)}>{lead.status}</span>
                     <span className="text-xs text-ink-500">
-                      {new Date(lead.created_at).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-GB')}
+                      {new Date(lead.created_at).toLocaleDateString('ar-SA')}
                     </span>
                   </div>
                 </li>

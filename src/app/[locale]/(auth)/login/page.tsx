@@ -4,20 +4,22 @@ import { LoginForm } from '@/components/auth/LoginForm';
 import { Link } from '@/i18n/routing';
 
 export default async function LoginPage({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
+  // Force Arabic — the admin section is always Arabic, and the
+  // login is the gateway to admin.
+  setRequestLocale('ar');
   const t = await getTranslations('auth.login');
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex">
-      {/* Left: form */}
+    <div className="min-h-screen flex" dir="rtl" lang="ar">
+      {/* Left: form (RTL) */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
-          <Link href={`/${locale}`} className="inline-flex items-center mb-10 p-1 -m-1">
+          <Link href="/" className="inline-flex items-center mb-10 p-1 -m-1">
             <Image
               src="/brand/soulvd-logo.png"
               alt="Soulvd"
@@ -45,10 +47,6 @@ export default async function LoginPage({
             src="/brand/soulvd-mark-white.png"
             alt=""
             fill
-            // The brand mark on the login screen is the Largest
-            // Contentful Paint on desktop, so load it eagerly.
-            // On screens >= 768px the right panel is exactly half
-            // the viewport width.
             sizes="(min-width: 768px) 50vw, 100vw"
             priority
             className="object-contain p-32"

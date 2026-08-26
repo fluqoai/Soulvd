@@ -14,12 +14,12 @@ type Initial = { id?: string; full_name?: string; role?: string; bio?: { ar?: st
 const init: CrudResult = { ok: false, error: '' };
 
 export function MemberForm({ initial: row }: { initial: Initial }) {
-  const locale = useLocale() as 'ar' | 'en';
+  const locale = 'ar' as 'ar' | 'en';
   const router = useRouter();
   const isEdit = !!row.id;
   const action = isEdit ? updateMember.bind(null, row.id!) : createMember;
   const [state, formAction, isPending] = useActionState<CrudResult, FormData>(action, init);
-  if (state?.ok && typeof window !== 'undefined') router.push(`/${locale}/admin/team`);
+  if (state?.ok && typeof window !== 'undefined') router.push(`/admin/team`);
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">

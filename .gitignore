@@ -58,6 +58,9 @@ public/brand/extracted/
 public/brand/pages/
 public/brand/concepts/
 
+# tmp scratch (verification scripts, scraped HTML, etc.)
+/tmp/
+
 # secrets (extra safety)
 *.pem
 *.key

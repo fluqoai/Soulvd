@@ -119,7 +119,7 @@ export function ConvertButton({ id, locale }: { id: string; locale: 'ar' | 'en' 
             if (!r.ok) {
               setError(r.error);
             } else {
-              router.push(`/${locale}/admin/clients/${r.clientId}`);
+              router.push(`/admin/clients/${r.clientId}`);
             }
           });
         }}

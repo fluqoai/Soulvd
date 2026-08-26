@@ -19,7 +19,6 @@ export type NavItem = {
 };
 
 type Props = {
-  locale: string;
   role: 'owner' | 'editor';
   userEmail: string;
   userName: string;
@@ -30,18 +29,15 @@ const QUERY = 'm';
 
 /**
  * Mobile-only admin drawer. State is held in the URL search
- * param `?m=1` so the trigger button (in the TopBar) and the
- * drawer (in the layout) can stay in sync without a context.
- *
- * On desktop the regular `Sidebar` is visible; this drawer is
- * `md:hidden`.
+ * param `?m=1` so the trigger button (rendered separately as
+ * `<AdminMobileMenuFab />`) and the drawer can stay in sync
+ * without a context.
  */
-export function AdminMobileNav({ locale, role, userEmail, userName, groups }: Props) {
+export function AdminMobileNav({ role, userEmail, userName, groups }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const open = searchParams.get(QUERY) === '1';
-  const [, force] = useState(0);
 
   const close = useCallback(() => {
     const sp = new URLSearchParams(searchParams.toString());
@@ -63,7 +59,6 @@ export function AdminMobileNav({ locale, role, userEmail, userName, groups }: Pr
   // Close on navigation
   useEffect(() => {
     if (open) close();
-    // We only want to react to pathname changes, not open/close
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
@@ -77,18 +72,10 @@ export function AdminMobileNav({ locale, role, userEmail, userName, groups }: Pr
     };
   }, [open]);
 
-  // Keep state in sync after popstate (back/forward)
-  useEffect(() => {
-    const onPop = () => force((n) => n + 1);
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, []);
-
   if (!open) return null;
 
   return (
     <>
-      {/* Backdrop */}
       <button
         type="button"
         onClick={close}
@@ -96,21 +83,20 @@ export function AdminMobileNav({ locale, role, userEmail, userName, groups }: Pr
         className="fixed inset-0 z-40 bg-ink-900/60 backdrop-blur-sm md:hidden"
       />
 
-      {/* Drawer */}
       <aside
-        className="fixed inset-y-0 start-0 z-50 w-72 max-w-[85vw] flex flex-col bg-ink-900 text-paper md:hidden"
+        className="fixed inset-y-0 end-0 z-50 w-72 max-w-[85vw] flex flex-col bg-ink-900 text-paper md:hidden"
         role="dialog"
         aria-label="Admin navigation"
       >
         <div className="h-16 flex items-center justify-between px-5 border-b border-linen-400/10">
-          <Link href={`/${locale}`} aria-label="View site">
+          <Link href="/admin" aria-label="Dashboard" className="flex items-center gap-2">
             <span className="text-base font-semibold tracking-tight">Soulvd</span>
-            <span className="ms-2 text-[10px] uppercase tracking-widest text-sage-300">Admin</span>
+            <span className="text-[10px] uppercase tracking-widest text-sage-300">Admin</span>
           </Link>
           <button
             type="button"
             onClick={close}
-            className="size-11 -me-2 grid place-items-center rounded-md text-linen-200 hover:bg-linen-400/10"
+            className="size-11 -ms-2 grid place-items-center rounded-md text-linen-200 hover:bg-linen-400/10"
             aria-label="Close menu"
           >
             <X className="size-5" />
@@ -154,7 +140,7 @@ export function AdminMobileNav({ locale, role, userEmail, userName, groups }: Pr
 
         <div className="border-t border-linen-400/10 p-3 space-y-2">
           <Link
-            href={`/${locale}/admin/users`}
+            href="/admin/users"
             className="flex items-center gap-3 px-2 py-2.5 rounded-md hover:bg-linen-400/5"
           >
             <div className="size-8 rounded-full bg-sage-600 grid place-items-center text-sm font-semibold text-paper">
@@ -167,7 +153,30 @@ export function AdminMobileNav({ locale, role, userEmail, userName, groups }: Pr
               <p className="text-xs text-linen-400 capitalize">{role}</p>
             </div>
           </Link>
-          <LogoutButton locale={locale} />
+          <Link
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-linen-300 hover:text-paper hover:bg-linen-400/10 transition-colors"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            <span>عرض الموقع</span>
+          </Link>
+          <LogoutButton />
         </div>
       </aside>
     </>
@@ -175,10 +184,11 @@ export function AdminMobileNav({ locale, role, userEmail, userName, groups }: Pr
 }
 
 /**
- * The trigger button. Lives in the TopBar. Toggles the `?m=1`
- * search param to open or close the drawer.
+ * Floating action button (FAB) that opens the mobile admin drawer.
+ * Only visible on mobile (`md:hidden`). Lives in the bottom-start
+ * corner so it doesn't conflict with anything on the right side.
  */
-export function AdminMobileNavTrigger() {
+export function AdminMobileMenuFab() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -199,35 +209,44 @@ export function AdminMobileNavTrigger() {
     <button
       type="button"
       onClick={toggle}
-      className="md:hidden inline-flex items-center justify-center size-11 -ms-2 rounded-md text-ink-700 hover:bg-sage-50 active:bg-sage-100 transition-colors"
-      aria-label={open ? 'Close admin menu' : 'Open admin menu'}
+      className="md:hidden fixed bottom-5 start-5 z-30 inline-flex items-center justify-center size-12 rounded-full bg-ink-900 text-paper shadow-lg shadow-ink-900/20 hover:bg-ink-800 active:scale-95 transition-all"
+      aria-label={open ? 'إغلاق القائمة' : 'فتح القائمة'}
       aria-expanded={open}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        {open ? (
-          <>
-            <path d="M18 6L6 18" />
-            <path d="M6 6l12 12" />
-          </>
-        ) : (
-          <>
-            <path d="M4 6h16" />
-            <path d="M4 12h16" />
-            <path d="M4 18h16" />
-          </>
-        )}
-      </svg>
+      {open ? (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M18 6L6 18" />
+          <path d="M6 6l12 12" />
+        </svg>
+      ) : (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M4 6h16" />
+          <path d="M4 12h16" />
+          <path d="M4 18h16" />
+        </svg>
+      )}
     </button>
   );
 }

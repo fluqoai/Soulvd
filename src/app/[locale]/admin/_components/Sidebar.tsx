@@ -7,7 +7,7 @@
 
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/routing';
+import Link from 'next/link';
 import { LogoutButton } from './LogoutButton';
 import { SidebarNavLink } from './SidebarNavLink';
 
@@ -41,12 +41,10 @@ const ICON: Record<string, string> = {
 };
 
 export async function Sidebar({
-  locale,
   role,
   userEmail,
   userName,
 }: {
-  locale: string;
   role: 'owner' | 'editor';
   userEmail: string;
   userName: string;
@@ -56,31 +54,31 @@ export async function Sidebar({
   const tRole = await getTranslations('admin.role');
 
   const contentItems: NavItem[] = [
-    { href: `/${locale}/admin`, labelKey: 'dashboard', iconName: ICON.dashboard },
-    { href: `/${locale}/admin/home`, labelKey: 'home', iconName: ICON.home },
-    { href: `/${locale}/admin/services`, labelKey: 'services', iconName: ICON.services },
-    { href: `/${locale}/admin/sectors`, labelKey: 'sectors', iconName: ICON.sectors },
-    { href: `/${locale}/admin/stats`, labelKey: 'stats', iconName: ICON.stats },
-    { href: `/${locale}/admin/value-props`, labelKey: 'value_props', iconName: ICON.value_props },
-    { href: `/${locale}/admin/integrations`, labelKey: 'integrations', iconName: ICON.integrations },
-    { href: `/${locale}/admin/case-studies`, labelKey: 'case_studies', iconName: ICON.case_studies },
-    { href: `/${locale}/admin/testimonials`, labelKey: 'testimonials', iconName: ICON.testimonials },
-    { href: `/${locale}/admin/team`, labelKey: 'team', iconName: ICON.team },
-    { href: `/${locale}/admin/partners`, labelKey: 'partners', iconName: ICON.partners },
+    { href: '/admin', labelKey: 'dashboard', iconName: ICON.dashboard },
+    { href: '/admin/home', labelKey: 'home', iconName: ICON.home },
+    { href: '/admin/services', labelKey: 'services', iconName: ICON.services },
+    { href: '/admin/sectors', labelKey: 'sectors', iconName: ICON.sectors },
+    { href: '/admin/stats', labelKey: 'stats', iconName: ICON.stats },
+    { href: '/admin/value-props', labelKey: 'value_props', iconName: ICON.value_props },
+    { href: '/admin/integrations', labelKey: 'integrations', iconName: ICON.integrations },
+    { href: '/admin/case-studies', labelKey: 'case_studies', iconName: ICON.case_studies },
+    { href: '/admin/testimonials', labelKey: 'testimonials', iconName: ICON.testimonials },
+    { href: '/admin/team', labelKey: 'team', iconName: ICON.team },
+    { href: '/admin/partners', labelKey: 'partners', iconName: ICON.partners },
   ];
 
   const adminItems: NavItem[] = [
-    { href: `/${locale}/admin/leads`, labelKey: 'leads', iconName: ICON.leads, ownerOnly: true },
-    { href: `/${locale}/admin/clients`, labelKey: 'clients', iconName: ICON.clients, ownerOnly: true },
-    { href: `/${locale}/admin/templates`, labelKey: 'templates', iconName: ICON.templates, ownerOnly: true },
-    { href: `/${locale}/admin/invoices`, labelKey: 'invoices', iconName: ICON.invoices, ownerOnly: true },
-    { href: `/${locale}/admin/quotes`, labelKey: 'quotes', iconName: ICON.quotes, ownerOnly: true },
+    { href: '/admin/leads', labelKey: 'leads', iconName: ICON.leads, ownerOnly: true },
+    { href: '/admin/clients', labelKey: 'clients', iconName: ICON.clients, ownerOnly: true },
+    { href: '/admin/templates', labelKey: 'templates', iconName: ICON.templates, ownerOnly: true },
+    { href: '/admin/invoices', labelKey: 'invoices', iconName: ICON.invoices, ownerOnly: true },
+    { href: '/admin/quotes', labelKey: 'quotes', iconName: ICON.quotes, ownerOnly: true },
   ];
 
   const systemItems: NavItem[] = [
-    { href: `/${locale}/admin/users`, labelKey: 'users', iconName: ICON.users, ownerOnly: true },
-    { href: `/${locale}/admin/activity-log`, labelKey: 'activity_log', iconName: ICON.activity_log, ownerOnly: true },
-    { href: `/${locale}/admin/settings`, labelKey: 'settings', iconName: ICON.settings, ownerOnly: true },
+    { href: '/admin/users', labelKey: 'users', iconName: ICON.users, ownerOnly: true },
+    { href: '/admin/activity-log', labelKey: 'activity_log', iconName: ICON.activity_log, ownerOnly: true },
+    { href: '/admin/settings', labelKey: 'settings', iconName: ICON.settings, ownerOnly: true },
   ];
 
   const visible = (items: NavItem[]) => items.filter((i) => role === 'owner' || !i.ownerOnly);
@@ -89,15 +87,12 @@ export async function Sidebar({
     <aside className="fixed inset-y-0 start-0 z-40 hidden md:flex md:w-64 flex-col bg-ink-900 text-paper">
       {/* Logo */}
       <div className="h-16 flex items-center px-5 border-b border-linen-400/10">
-        <Link href={`/${locale}`} aria-label={tCommon('view_site')}>
+        <Link href="/admin" aria-label={tCommon('view_site')}>
           <Image
             src="/brand/soulvd-logo-white.png"
             alt="Soulvd"
             width={240}
             height={64}
-            // The CSS `h-7 w-auto` overrides the intrinsic dimensions;
-            // tell next/image to keep the aspect ratio by setting the
-            // missing dim to "auto" via inline style.
             style={{ width: 'auto', height: 'auto' }}
             className="h-7"
           />
@@ -112,9 +107,9 @@ export async function Sidebar({
       </nav>
 
       {/* User footer */}
-      <div className="border-t border-linen-400/10 p-3">
+      <div className="border-t border-linen-400/10 p-3 space-y-2">
         <Link
-          href={`/${locale}/admin/users`}
+          href="/admin/users"
           className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-linen-400/5"
         >
           <div className="size-8 rounded-full bg-sage-600 grid place-items-center text-sm font-semibold text-paper">
@@ -125,7 +120,30 @@ export async function Sidebar({
             <p className="text-xs text-linen-400">{tRole(role)}</p>
           </div>
         </Link>
-        <LogoutButton locale={locale} />
+        <Link
+          href="/"
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-linen-300 hover:text-paper hover:bg-linen-400/10 transition-colors"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+          <span>{tCommon('view_site')}</span>
+        </Link>
+        <LogoutButton />
       </div>
     </aside>
   );

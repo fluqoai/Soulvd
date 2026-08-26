@@ -1,9 +1,9 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { LogIn, AlertCircle, Loader2 } from 'lucide-react';
-import { login, type LoginState } from '@/app/[locale]/login/actions';
+import { login, type LoginState } from '@/app/[locale]/(auth)/login/actions';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +12,6 @@ const initial: LoginState = { status: 'idle' };
 export function LoginForm() {
   const t = useTranslations('auth.login');
   const tErr = useTranslations('auth.errors');
-  const locale = useLocale();
   const [state, formAction, isPending] = useActionState<LoginState, FormData>(
     login,
     initial
@@ -22,8 +21,6 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="space-y-5" noValidate>
-      <input type="hidden" name="locale" value={locale} />
-
       <Field
         name="email"
         type="email"

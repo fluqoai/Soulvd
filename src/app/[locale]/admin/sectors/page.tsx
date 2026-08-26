@@ -41,7 +41,7 @@ export default async function SectorsAdminPage({
         title="Sectors"
         description="Sector cards on the home page and the /sectors list."
         actions={
-          <ButtonLink href={`/${locale}/admin/sectors/new`} size="sm" variant="primary">
+          <ButtonLink href={`/admin/sectors/new`} size="sm" variant="primary">
             <Plus className="size-4" />
             New sector
           </ButtonLink>
@@ -50,7 +50,7 @@ export default async function SectorsAdminPage({
       <DataTable
         rows={items}
         rowKey={(r) => r.id}
-        editHref={(r) => `/${locale}/admin/sectors/${r.id}`}
+        editHref={(r) => `/admin/sectors/${r.id}`}
         emptyMessage="No sectors yet."
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => (

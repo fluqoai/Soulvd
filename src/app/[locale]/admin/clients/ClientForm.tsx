@@ -12,12 +12,12 @@ type Initial = { id?: string; name?: string; email?: string | null; phone?: stri
 const init: CrudResult = { ok: false, error: '' };
 
 export function ClientForm({ initial: row }: { initial: Initial }) {
-  const locale = useLocale() as 'ar' | 'en';
+  const locale = 'ar' as 'ar' | 'en';
   const router = useRouter();
   const isEdit = !!row.id;
   const action = isEdit ? updateClientAction.bind(null, row.id!) : createClientAction;
   const [state, formAction, isPending] = useActionState<CrudResult, FormData>(action, init);
-  if (state?.ok && typeof window !== 'undefined') router.push(`/${locale}/admin/clients`);
+  if (state?.ok && typeof window !== 'undefined') router.push(`/admin/clients`);
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">

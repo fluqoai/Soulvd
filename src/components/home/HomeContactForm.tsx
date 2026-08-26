@@ -6,7 +6,7 @@ import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import {
   submitHomeLead,
   type SubmitHomeLeadState,
-} from '@/app/[locale]/home-contact/actions';
+} from '@/app/[locale]/(public)/home-contact/actions';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 

@@ -29,7 +29,7 @@ type Initial = {
 const initial: CrudResult = { ok: false, error: '' };
 
 export function SectorForm({ initial: row }: { initial: Initial }) {
-  const locale = useLocale() as 'ar' | 'en';
+  const locale = 'ar' as 'ar' | 'en';
   const router = useRouter();
   const isEdit = !!row.id;
 
@@ -37,7 +37,7 @@ export function SectorForm({ initial: row }: { initial: Initial }) {
   const [state, formAction, isPending] = useActionState<CrudResult, FormData>(action, initial);
 
   if (state?.ok && typeof window !== 'undefined') {
-    router.push(`/${locale}/admin/sectors`);
+    router.push(`/admin/sectors`);
   }
 
   const useCasesAr = (row.use_cases ?? [])

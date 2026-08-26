@@ -18,9 +18,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   return (
     <div>
       <PageHeader title="Value props" description="The 'why Soulvd' product feature items." actions={
-        <ButtonLink href={`/${locale}/admin/value-props/new`} size="sm" variant="primary"><Plus className="size-4" />New</ButtonLink>
+        <ButtonLink href={`/admin/value-props/new`} size="sm" variant="primary"><Plus className="size-4" />New</ButtonLink>
       } />
-      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/${locale}/admin/value-props/${r.id}`} emptyMessage="No value props yet."
+      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/value-props/${r.id}`} emptyMessage="No value props yet."
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderVP} /> },
           { key: 'title', header: 'Title', cell: (r) => <div className="min-w-0"><div className="font-medium truncate">{r.title?.en}</div>{r.title?.ar && <div className="text-xs text-linen-400 truncate" dir="rtl">{r.title.ar}</div>}</div> },

@@ -1,31 +1,39 @@
 // src/app/[locale]/admin/layout.tsx
 // Server component. Auth gate + admin shell.
+//
+// The admin section is always Arabic — no language toggle, no public
+// site header. We force `setRequestLocale('ar')` so any getTranslations
+// call returns Arabic regardless of which locale segment the user
+// landed on. Internal links use plain `/admin/...` paths so the proxy
+// routes them back to the same Arabic page.
 
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { Sidebar } from './_components/Sidebar';
-import { TopBar } from './_components/TopBar';
 import {
   AdminMobileNav,
+  AdminMobileMenuFab,
   type NavItem,
 } from './_components/AdminMobileNav';
 
 export default async function AdminLayout({
   children,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   params,
 }: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  // Force Arabic for the entire admin section
+  setRequestLocale('ar');
 
   // 1. Auth check
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    redirect(`/${locale}/login`);
+    redirect('/login');
   }
 
   // 2. Role check
@@ -39,14 +47,15 @@ export default async function AdminLayout({
   const profile = profileData as { role: 'owner' | 'editor'; full_name: string | null; email: string | null } | null;
 
   if (!profile || !['owner', 'editor'].includes(profile.role)) {
-    redirect(`/${locale}/login`);
+    redirect('/login');
   }
 
   const role = profile.role as 'owner' | 'editor';
   const userEmail = profile.email ?? user.email ?? '';
   const userName = profile.full_name ?? '';
 
-  // 3. Build the nav groups (also used by the mobile drawer)
+  // 3. Build the nav groups. Plain /admin/... paths — the proxy
+  //    middleware will route them to the Arabic admin.
   const t = await getTranslations('admin.nav');
   const tGroups = await getTranslations('admin.nav.groups');
 
@@ -58,11 +67,8 @@ export default async function AdminLayout({
   ): NavItem | null => {
     if (ownerOnly && role !== 'owner') return null;
     return {
-      href: `/${locale}${href}`,
+      href,
       label: t(labelKey as never),
-      // Pass the icon NAME, not the component — server → client
-      // serialization can't carry functions. The client component
-      // resolves it via its own icon map.
       iconName: iconKey,
     };
   };
@@ -106,26 +112,22 @@ export default async function AdminLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-linen-50">
+    <div className="min-h-screen bg-linen-50" dir="rtl" lang="ar">
       {/* Desktop sidebar (md+) */}
-      <Sidebar
-        locale={locale}
-        role={role}
-        userEmail={userEmail}
-        userName={userName}
-      />
-      {/* Mobile drawer (md-). The trigger is inside TopBar. */}
+      <Sidebar role={role} userEmail={userEmail} userName={userName} />
+      {/* Mobile drawer (md-). Trigger is a floating FAB below. */}
       <AdminMobileNav
-        locale={locale}
         role={role}
         userEmail={userEmail}
         userName={userName}
         groups={groups}
       />
       <div className="md:ms-64 flex flex-col min-h-screen">
-        <TopBar locale={locale} />
-        <main className="flex-1 p-4 sm:p-6 md:p-10">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 md:p-10 pb-24 md:pb-10">{children}</main>
       </div>
+      {/* Floating mobile menu FAB (md-). Replaces the old TopBar
+          hamburger — sits in the bottom-start corner on mobile. */}
+      <AdminMobileMenuFab />
     </div>
   );
 }

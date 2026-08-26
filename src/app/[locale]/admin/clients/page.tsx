@@ -17,9 +17,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   return (
     <div>
       <PageHeader title="Clients" description="Saved client info — used to generate invoices and quotes." actions={
-        <ButtonLink href={`/${locale}/admin/clients/new`} size="sm" variant="primary"><Plus className="size-4" />New client</ButtonLink>
+        <ButtonLink href={`/admin/clients/new`} size="sm" variant="primary"><Plus className="size-4" />New client</ButtonLink>
       } />
-      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/${locale}/admin/clients/${r.id}`} emptyMessage="No clients yet — create one or convert a lead."
+      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/clients/${r.id}`} emptyMessage="No clients yet — create one or convert a lead."
         columns={[
           { key: 'name', header: 'Name', cell: (r) => <div><div className="font-medium">{r.name}</div>{r.company && <div className="text-xs text-linen-400 flex items-center gap-1"><Building2 className="size-3" />{r.company}</div>}</div> },
           { key: 'contact', header: 'Contact', cell: (r) => <div className="space-y-0.5 text-xs">{r.email && <div className="flex items-center gap-1 text-linen-300"><Mail className="size-3" />{r.email}</div>}{r.phone && <div className="flex items-center gap-1 text-linen-300"><Phone className="size-3" />{r.phone}</div>}</div> },

@@ -18,9 +18,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   return (
     <div>
       <PageHeader title="Testimonials" description="Client quotes shown on the site." actions={
-        <ButtonLink href={`/${locale}/admin/testimonials/new`} size="sm" variant="primary"><Plus className="size-4" />New</ButtonLink>
+        <ButtonLink href={`/admin/testimonials/new`} size="sm" variant="primary"><Plus className="size-4" />New</ButtonLink>
       } />
-      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/${locale}/admin/testimonials/${r.id}`} emptyMessage="No testimonials yet."
+      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/testimonials/${r.id}`} emptyMessage="No testimonials yet."
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderTestimonial} /> },
           { key: 'name', header: 'Client', cell: (r) => <div><div className="font-medium">{r.client_name}</div>{r.client_company && <div className="text-xs text-linen-400">{r.client_company}</div>}</div> },

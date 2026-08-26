@@ -4,12 +4,10 @@ import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import type { Locale } from '@/i18n/routing';
 
 const schema = z.object({
   email: z.string().email('email_invalid'),
   password: z.string().min(6, 'password_too_short'),
-  locale: z.string().optional(),
 });
 
 export type LoginState = {
@@ -25,7 +23,6 @@ export async function login(
   const raw = {
     email: String(formData.get('email') ?? '').trim().toLowerCase(),
     password: String(formData.get('password') ?? ''),
-    locale: String(formData.get('locale') ?? 'en'),
   };
 
   const parsed = schema.safeParse(raw);
@@ -64,15 +61,15 @@ export async function login(
     return { status: 'error', error: 'no_role' };
   }
 
-  // Success — redirect to /admin (or localized /admin)
-  const locale = (parsed.data.locale as Locale) ?? 'ar';
-  redirect(`/${locale}/admin`);
+  // Success — admin is always Arabic, no locale prefix
+  redirect('/admin');
   // Unreachable — TypeScript needs an explicit return after redirect
   return { status: 'success' as never };
 }
 
-export async function logout(locale: string = 'ar') {
+export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect(`/${locale}`);
+  // Log out and send the user to the public site home (Arabic default)
+  redirect('/');
 }

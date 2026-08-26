@@ -44,7 +44,7 @@ export default async function ServicesAdminPage({
         title="Services"
         description="The service cards shown on the home page and the /services detail page."
         actions={
-          <ButtonLink href={`/${locale}/admin/services/new`} size="sm" variant="primary">
+          <ButtonLink href={`/admin/services/new`} size="sm" variant="primary">
             <Plus className="size-4" />
             New service
           </ButtonLink>
@@ -54,7 +54,7 @@ export default async function ServicesAdminPage({
       <DataTable
         rows={items}
         rowKey={(r) => r.id}
-        editHref={(r) => `/${locale}/admin/services/${r.id}`}
+        editHref={(r) => `/admin/services/${r.id}`}
         emptyMessage="No services yet — add your first one."
         columns={[
           {

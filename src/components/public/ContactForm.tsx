@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
-import { submitLead, type SubmitLeadState } from '@/app/[locale]/contact/actions';
+import { submitLead, type SubmitLeadState } from '@/app/[locale]/(public)/contact/actions';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 

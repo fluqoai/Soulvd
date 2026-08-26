@@ -15,12 +15,12 @@ type Initial = { id?: string; value?: string; label?: { ar?: string; en?: string
 const init: CrudResult = { ok: false, error: '' };
 
 export function StatForm({ initial: row }: { initial: Initial }) {
-  const locale = useLocale() as 'ar' | 'en';
+  const locale = 'ar' as 'ar' | 'en';
   const router = useRouter();
   const isEdit = !!row.id;
   const action = isEdit ? updateStatAction.bind(null, row.id!) : createStatAction;
   const [state, formAction, isPending] = useActionState<CrudResult, FormData>(action, init);
-  if (state?.ok && typeof window !== 'undefined') router.push(`/${locale}/admin/stats`);
+  if (state?.ok && typeof window !== 'undefined') router.push(`/admin/stats`);
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">

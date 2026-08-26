@@ -18,10 +18,10 @@ export default async function StatsAdminPage({ params }: { params: Promise<{ loc
   return (
     <div>
       <PageHeader title="Stats" description="Big numbers shown on the home page." actions={
-        <ButtonLink href={`/${locale}/admin/stats/new`} size="sm" variant="primary"><Plus className="size-4" />New stat</ButtonLink>
+        <ButtonLink href={`/admin/stats/new`} size="sm" variant="primary"><Plus className="size-4" />New stat</ButtonLink>
       } />
       <DataTable
-        rows={items} rowKey={(r) => r.id} editHref={(r) => `/${locale}/admin/stats/${r.id}`} emptyMessage="No stats yet."
+        rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/stats/${r.id}`} emptyMessage="No stats yet."
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderStatAction} /> },
           { key: 'value', header: 'Value', width: '100px', cell: (r) => <span className="text-xl font-semibold tabular-nums">{r.value}</span> },

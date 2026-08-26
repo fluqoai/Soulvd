@@ -14,12 +14,12 @@ type Initial = { id?: string; client_name?: string; client_role?: string | null;
 const init: CrudResult = { ok: false, error: '' };
 
 export function TestimonialForm({ initial: row }: { initial: Initial }) {
-  const locale = useLocale() as 'ar' | 'en';
+  const locale = 'ar' as 'ar' | 'en';
   const router = useRouter();
   const isEdit = !!row.id;
   const action = isEdit ? updateTestimonial.bind(null, row.id!) : createTestimonial;
   const [state, formAction, isPending] = useActionState<CrudResult, FormData>(action, init);
-  if (state?.ok && typeof window !== 'undefined') router.push(`/${locale}/admin/testimonials`);
+  if (state?.ok && typeof window !== 'undefined') router.push(`/admin/testimonials`);
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">

@@ -19,9 +19,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   return (
     <div>
       <PageHeader title="Partners" description="The home page scrolling logo strip." actions={
-        <ButtonLink href={`/${locale}/admin/partners/new`} size="sm" variant="primary"><Plus className="size-4" />New partner</ButtonLink>
+        <ButtonLink href={`/admin/partners/new`} size="sm" variant="primary"><Plus className="size-4" />New partner</ButtonLink>
       } />
-      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/${locale}/admin/partners/${r.id}`} emptyMessage="No partners yet."
+      <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/partners/${r.id}`} emptyMessage="No partners yet."
         columns={[
           { key: 'order', header: 'Order', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderPartner} /> },
           { key: 'logo', header: 'Logo', width: '80px', cell: (r) => r.logo_url ? <div className="relative h-8 w-16"><Image src={r.logo_url} alt={r.name} fill sizes="64px" className="object-contain" /></div> : <div className="size-8 rounded bg-ink-700/50 grid place-items-center text-xs text-linen-400">{r.name.slice(0, 2)}</div> },

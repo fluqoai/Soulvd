@@ -28,7 +28,7 @@ type Initial = {
 const initial: CrudResult = { ok: false, error: '' };
 
 export function ServiceForm({ initial: row }: { initial: Initial }) {
-  const locale = useLocale() as 'ar' | 'en';
+  const locale = 'ar' as 'ar' | 'en';
   const router = useRouter();
   const isEdit = !!row.id;
 
@@ -41,7 +41,7 @@ export function ServiceForm({ initial: row }: { initial: Initial }) {
   if (state?.ok) {
     // Success — push to list view.
     if (typeof window !== 'undefined') {
-      router.push(`/${locale}/admin/services`);
+      router.push(`/admin/services`);
     }
   }
 

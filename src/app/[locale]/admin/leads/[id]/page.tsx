@@ -37,7 +37,7 @@ export default async function LeadDetailPage({ params }: { params: Params }) {
         actions={
           !isConverted ? <ConvertButton id={id} locale={locale as 'ar' | 'en'} /> : (
             <Link
-              href={`/${locale}/admin/clients/${isConverted}`}
+              href={`/admin/clients/${isConverted}`}
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-sage-500/15 text-sage-200 text-sm hover:bg-sage-500/25"
             >
               View client →

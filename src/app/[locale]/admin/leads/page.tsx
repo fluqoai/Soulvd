@@ -74,7 +74,7 @@ export default async function LeadsAdminPage({
           return (
             <Link
               key={tab.value}
-              href={`/${locale}/admin/leads?status=${tab.value}`}
+              href={`/admin/leads?status=${tab.value}`}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 active
                   ? 'bg-paper text-ink-900'
@@ -90,7 +90,7 @@ export default async function LeadsAdminPage({
       <DataTable
         rows={items}
         rowKey={(r) => r.id}
-        editHref={(r) => `/${locale}/admin/leads/${r.id}`}
+        editHref={(r) => `/admin/leads/${r.id}`}
         emptyMessage="No leads yet."
         columns={[
           {
