@@ -26,18 +26,18 @@ export function IntegrationForm({ initial: row }: { initial: Initial }) {
     <form action={formAction} className="space-y-6 max-w-2xl">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="الاسم" required><TextInput name="name" defaultValue={row.name ?? ''} required /></Field>
-        <Field label="Category">
+        <Field label="الفئة">
           <Select name="category" defaultValue={row.category ?? ''}>
             <option value="">—</option>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </Select>
         </Field>
       </div>
-      <Field label="Logo URL" hint="Path in media bucket or external URL"><TextInput name="logo_url" defaultValue={row.logo_url ?? ''} /></Field>
-      <Field label="Website URL"><TextInput name="url" defaultValue={row.url ?? ''} placeholder="https://..." /></Field>
+      <Field label="رابط الشعار" hint="المسار في bucket media أو رابط خارجي"><TextInput name="logo_url" defaultValue={row.logo_url ?? ''} /></Field>
+      <Field label="رابط الموقع"><TextInput name="url" defaultValue={row.url ?? ''} placeholder="https://..." /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Order"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
-        <Field label="Visibility" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="منشور" /></Field>
+        <Field label="الترتيب"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
+        <Field label="الظهور" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="منشور" /></Field>
       </div>
       <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'جاري الحفظ…' : isEdit ? 'حفظ التغييرات' : 'إضافة تكامل'}</Button>
     </form>

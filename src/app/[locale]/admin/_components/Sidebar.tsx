@@ -84,9 +84,9 @@ export async function Sidebar({
   const visible = (items: NavItem[]) => items.filter((i) => role === 'owner' || !i.ownerOnly);
 
   return (
-    <aside className="fixed inset-y-0 start-0 z-40 hidden md:flex md:w-64 flex-col bg-ink-900 text-paper">
+    <aside className="fixed inset-y-0 start-0 z-40 hidden md:flex md:w-64 flex-col bg-ink-900 text-paper shadow-[1px_0_0_rgba(0,0,0,0.04)]">
       {/* Logo */}
-      <div className="h-16 flex items-center px-5 border-b border-linen-400/10">
+      <div className="h-16 flex items-center px-5 border-b border-linen-400/10 shrink-0">
         <Link href="/admin" aria-label={tCommon('view_site')}>
           <Image
             src="/brand/soulvd-logo-white.png"

@@ -5,7 +5,7 @@ export default function NewServicePage() {
   return (
     <div>
       <PageHeader
-        title="New service"
+        title="خدمة جديدة"
         backHref="/admin/services"
         description="أضف بطاقة خدمة جديدة. ستظهر في الصفحة الرئيسية وصفحة /services عند نشرها."
       />

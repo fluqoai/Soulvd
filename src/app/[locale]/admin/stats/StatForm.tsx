@@ -24,13 +24,13 @@ export function StatForm({ initial: row }: { initial: Initial }) {
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">
-      <Field label="Value" hint="The number, e.g. +8, 98%, 2" required>
+      <Field label="القيمة" hint="The number, e.g. +8, 98%, 2" required>
         <TextInput name="value" defaultValue={row.value} placeholder="+8" required />
       </Field>
-      <BilingualInput name="label" label="Label" value={row.label} required />
+      <BilingualInput name="label" label="التسمية" value={row.label} required />
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Order"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
-        <Field label="Visibility" className="self-end">
+        <Field label="الترتيب"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
+        <Field label="الظهور" className="self-end">
           <Toggle name="published" defaultChecked={row.published !== false} label="منشور" />
         </Field>
       </div>

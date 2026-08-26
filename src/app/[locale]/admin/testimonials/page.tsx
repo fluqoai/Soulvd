@@ -17,13 +17,13 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
 
   return (
     <div>
-      <PageHeader title="Testimonials" description="Client quotes shown on the site." actions={
+      <PageHeader title="آراء العملاء" description="Client quotes shown on the site." actions={
         <ButtonLink href={`/admin/testimonials/new`} size="sm" variant="primary"><Plus className="size-4" />جديد</ButtonLink>
       } />
       <DataTable rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/testimonials/${r.id}`} emptyMessage="لا توجد شهادات بعد."
         columns={[
           { key: 'order', header: 'الترتيب', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderTestimonial} /> },
-          { key: 'name', header: 'Client', cell: (r) => <div><div className="font-medium">{r.client_name}</div>{r.client_company && <div className="text-xs text-ink-600">{r.client_company}</div>}</div> },
+          { key: 'name', header: 'العميل', cell: (r) => <div><div className="font-medium">{r.client_name}</div>{r.client_company && <div className="text-xs text-ink-600">{r.client_company}</div>}</div> },
           { key: 'quote', header: 'Quote', cell: (r) => <div className="max-w-md text-ink-700 line-clamp-2">{r.quote?.en || r.quote?.ar}</div> },
           { key: 'published', header: 'الحالة', width: '100px', cell: (r) => r.published ? '🟢 منشور' : '⚪ مسودة' },
         ]}

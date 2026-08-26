@@ -30,7 +30,7 @@ export default async function UsersPage() {
           { key: 'role', header: 'الدور', width: '180px', cell: (r) => (
             <RoleSelect userId={r.id} currentRole={r.role} isSelf={acting?.id === r.id} />
           ) },
-          { key: 'created', header: 'Joined', width: '140px', cell: (r) => (
+          { key: 'created', header: 'تاريخ الانضمام', width: '140px', cell: (r) => (
             <span className="text-xs text-ink-600">{new Date(r.created_at).toLocaleDateString()}</span>
           ) },
         ]}

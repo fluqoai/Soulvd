@@ -24,8 +24,8 @@ export default async function StatsAdminPage({ params }: { params: Promise<{ loc
         rows={items} rowKey={(r) => r.id} editHref={(r) => `/admin/stats/${r.id}`} emptyMessage="لا توجد أرقام بعد."
         columns={[
           { key: 'order', header: 'الترتيب', width: '80px', cell: (r) => <ReorderControls id={r.id} isFirst={items[0]?.id === r.id} isLast={items[items.length - 1]?.id === r.id} action={reorderStatAction} /> },
-          { key: 'value', header: 'Value', width: '100px', cell: (r) => <span className="text-xl font-semibold tabular-nums">{r.value}</span> },
-          { key: 'label', header: 'Label', cell: (r) => <div className="min-w-0"><div className="truncate">{r.label?.en}</div>{r.label?.ar && <div className="text-xs text-ink-600 truncate" dir="rtl">{r.label.ar}</div>}</div> },
+          { key: 'value', header: 'القيمة', width: '100px', cell: (r) => <span className="text-xl font-semibold tabular-nums">{r.value}</span> },
+          { key: 'label', header: 'التسمية', cell: (r) => <div className="min-w-0"><div className="truncate">{r.label?.en}</div>{r.label?.ar && <div className="text-xs text-ink-600 truncate" dir="rtl">{r.label.ar}</div>}</div> },
           { key: 'published', header: 'الحالة', width: '100px', cell: (r) => r.published ? '🟢 منشور' : '⚪ مسودة' },
         ]}
         rowAction={(r) => <DeleteButton id={r.id} action={deleteStatAction} confirm={`حذف "${r.value}"؟`} />}

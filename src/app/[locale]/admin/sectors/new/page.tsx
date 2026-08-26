@@ -4,7 +4,7 @@ import { SectorForm } from '../SectorForm';
 export default function NewSectorPage() {
   return (
     <div>
-      <PageHeader title="New sector" backHref="/admin/sectors" />
+      <PageHeader title="قطاع جديد" backHref="/admin/sectors" />
       <SectorForm initial={{}} />
     </div>
   );

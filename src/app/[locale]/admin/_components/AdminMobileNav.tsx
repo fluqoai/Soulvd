@@ -86,7 +86,7 @@ export function AdminMobileNav({ role, userEmail, userName, groups }: Props) {
       <aside
         className="fixed inset-y-0 end-0 z-50 w-72 max-w-[85vw] flex flex-col bg-ink-900 text-paper md:hidden"
         role="dialog"
-        aria-label="Admin navigation"
+        aria-label="التنقل في الإدارة"
       >
         <div className="h-16 flex items-center justify-between px-5 border-b border-linen-400/10">
           <Link href="/admin" aria-label="لوحة التحكم" className="flex items-center gap-2">

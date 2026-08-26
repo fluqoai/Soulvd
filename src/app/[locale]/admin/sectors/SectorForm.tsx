@@ -52,16 +52,16 @@ export function SectorForm({ initial: row }: { initial: Initial }) {
   return (
     <form action={formAction} className="space-y-6 max-w-3xl">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Key" hint="Used in URL" required>
+        <Field label="المعرّف" hint="يستخدم في الرابط (مثل: restaurants)" required>
           <TextInput name="key" defaultValue={row.key} required />
         </Field>
-        <Field label="Icon" hint="Lucide icon name" required>
+        <Field label="الأيقونة" hint="اسم أيقونة Lucide (مثل: Building2، UtensilsCrossed)" required>
           <TextInput name="icon" defaultValue={row.icon} required />
         </Field>
       </div>
 
       <BilingualInput name="title" label="العنوان" value={row.title} required />
-      <BilingualInput name="description" label="Short description" value={row.description} multiline rows={3} required />
+      <BilingualInput name="description" label="وصف مختصر" value={row.description} multiline rows={3} required />
 
       <fieldset className="space-y-2">
         <legend className="block text-sm font-medium text-ink-800">Long description (optional)</legend>
@@ -81,10 +81,10 @@ export function SectorForm({ initial: row }: { initial: Initial }) {
       </fieldset>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Order">
+        <Field label="الترتيب">
           <TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} />
         </Field>
-        <Field label="Visibility" className="self-end">
+        <Field label="الظهور" className="self-end">
           <Toggle name="published" defaultChecked={row.published !== false} label="منشور" />
         </Field>
       </div>

@@ -87,7 +87,7 @@ export function ServiceForm({ initial: row }: { initial: Initial }) {
 
       <BilingualInput
         name="description"
-        label="Short description"
+        label="وصف مختصر"
         value={row.description}
         multiline
         rows={3}
@@ -118,7 +118,7 @@ export function ServiceForm({ initial: row }: { initial: Initial }) {
       </fieldset>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Order">
+        <Field label="الترتيب">
           <TextInput
             name="order_index"
             type="number"
@@ -126,7 +126,7 @@ export function ServiceForm({ initial: row }: { initial: Initial }) {
             min={0}
           />
         </Field>
-        <Field label="Visibility" className="self-end">
+        <Field label="الظهور" className="self-end">
           <Toggle name="published" defaultChecked={row.published !== false} label="منشور" hint="يظهر في الموقع العام" />
         </Field>
       </div>

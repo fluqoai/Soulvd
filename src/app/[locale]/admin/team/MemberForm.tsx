@@ -24,17 +24,17 @@ export function MemberForm({ initial: row }: { initial: Initial }) {
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Full name" required><TextInput name="full_name" defaultValue={row.full_name ?? ''} required /></Field>
+        <Field label="الاسم الكامل" required><TextInput name="full_name" defaultValue={row.full_name ?? ''} required /></Field>
         <Field label="Role" required><TextInput name="role" defaultValue={row.role ?? ''} required /></Field>
       </div>
       <BilingualInput name="bio" label="Bio (optional)" value={row.bio ?? undefined} multiline rows={3} />
-      <Field label="Photo URL" hint="Path in media bucket or external URL"><TextInput name="photo_url" defaultValue={row.photo_url ?? ''} /></Field>
+      <Field label="رابط الصورة" hint="المسار في bucket media أو رابط خارجي"><TextInput name="photo_url" defaultValue={row.photo_url ?? ''} /></Field>
       <Field label="Links (JSON)" hint='{"linkedin": "https://...", "twitter": "https://..."}'>
         <Textarea name="links_json" defaultValue={row.links ? JSON.stringify(row.links, null, 2) : ''} rows={4} dir="ltr" />
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Order"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
-        <Field label="Visibility" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="منشور" /></Field>
+        <Field label="الترتيب"><TextInput name="order_index" type="number" defaultValue={row.order_index ?? 0} /></Field>
+        <Field label="الظهور" className="self-end"><Toggle name="published" defaultChecked={row.published !== false} label="منشور" /></Field>
       </div>
       <Button type="submit" disabled={isPending}><Save className="size-4" />{isPending ? 'جاري الحفظ…' : isEdit ? 'حفظ التغييرات' : 'إضافة عضو فريق'}</Button>
     </form>

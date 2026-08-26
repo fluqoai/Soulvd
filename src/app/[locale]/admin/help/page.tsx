@@ -560,7 +560,7 @@ export default function HelpPage() {
             <strong>لإدارة متقدمة</strong> (SQL، حذف بالجملة، إعدادات حساسة): افتح Supabase Dashboard → Table Editor / SQL Editor. راجع كل جدول في الأسفل لمعرفة الحقول.
           </li>
           <li>
-            <strong>للوصول لـ Supabase</strong>: ادخل على <a className="text-sage-700 hover:تحتline font-medium" href="https://supabase.com/dashboard" target="_blank" rel="noreferrer">supabase.com/dashboard</a> وافتح مشروع <code className="px-1.5 py-0.5 rounded bg-linen-100 text-ink-900">lyvoiipsmcbffvpkrxhy</code>.
+            <strong>للوصول لـ Supabase</strong>: ادخل على <a className="text-sage-700 hover:underline font-medium" href="https://supabase.com/dashboard" target="_blank" rel="noreferrer">supabase.com/dashboard</a> وافتح مشروع <code className="px-1.5 py-0.5 rounded bg-linen-100 text-ink-900">lyvoiipsmcbffvpkrxhy</code>.
           </li>
         </ol>
       </section>
@@ -707,7 +707,7 @@ function StepWithLink({ step }: { step: string }) {
       {before}
       <Link
         href={href}
-        className="text-sage-700 hover:text-sage-900 hover:تحتline font-medium"
+        className="text-sage-700 hover:text-sage-900 hover:underline font-medium"
       >
         {link}
       </Link>
