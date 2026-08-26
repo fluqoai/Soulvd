@@ -11,7 +11,7 @@ export async function FAQSection() {
   const list = (t.raw('list') as QA[]) ?? [];
 
   return (
-    <Section id="faq" tone="linen" size="lg">
+    <Section id="faq" tone="paper" size="lg">
       <div className="grid gap-10 md:gap-16 md:grid-cols-12">
         <div className="md:col-span-4">
           <SectionLabel text={{ ar: t('label'), en: t('label') }}>

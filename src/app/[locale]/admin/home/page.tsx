@@ -4,7 +4,6 @@ import {
   Settings,
   Inbox,
   Briefcase,
-  PlugZap,
   MessageSquareQuote,
   Sparkles,
 } from 'lucide-react';
@@ -13,13 +12,13 @@ import {
  * Home admin index — jump-board to every content table that
  * feeds the public home page.
  *
- * Home page composition (top → bottom, 6 sections):
+ * Home page composition (top → bottom, 4 sections):
  *   1. Hero + chat preview — hardcoded copy in messages/ + HeroChat
- *   2. Services            — hardcoded copy + ServicePreview art
- *   3. Case studies        — /admin/case-studies
- *   4. Integrations        — /admin/integrations
- *   5. FAQ                 — translated strings in messages/
- *   6. CTA + form          — CTA copy in messages/ + built-in form
+ *   2. Case studies        — /admin/case-studies
+ *   3. FAQ                 — translated strings in messages/
+ *   4. CTA + form          — CTA copy in messages/ + built-in form
+ *
+ * Service and integration details live on /services and /integrations.
  */
 export default function HomeAdminPage() {
   const sections = [
@@ -36,18 +35,6 @@ export default function HomeAdminPage() {
       desc: 'Featured client stories with metrics (3 shown)',
     },
     {
-      href: '/admin/integrations',
-      icon: PlugZap,
-      title: 'Integrations',
-      desc: 'The 4-col grid of platform logos',
-    },
-    {
-      href: '/admin/testimonials',
-      icon: MessageSquareQuote,
-      title: 'Testimonials',
-      desc: 'Currently unused on home — available for /about and other pages',
-    },
-    {
       href: '/admin/leads',
       icon: Inbox,
       title: 'Leads',
@@ -59,7 +46,7 @@ export default function HomeAdminPage() {
     <div>
       <PageHeader
         title="Home content"
-        description="The public home page is composed of 6 sections. Use the links below to manage each data-driven piece."
+        description="The public home page is composed of 4 sections. Use the links below to manage each data-driven piece."
       />
 
       <div className="grid gap-3 sm:grid-cols-2 max-w-3xl">
@@ -89,10 +76,11 @@ export default function HomeAdminPage() {
           <div>
             <p className="font-medium mb-1">Hardcoded in code or translations</p>
             <p className="text-amber-200/80 text-xs leading-relaxed">
-              The Hero (with chat preview and headline), the 3-service
-              showcase, and the FAQ questions are in code or in&nbsp;
+              The Hero (with chat preview and headline) and the FAQ
+              questions are in code or in&nbsp;
               <code className="text-xs">messages/{'{ar,en}.json'}</code>
-              &nbsp;under <code className="text-xs">home.hero</code>, <code className="text-xs">home.services</code>, and <code className="text-xs">home.faq</code>.
+              &nbsp;under <code className="text-xs">home.hero</code> and <code className="text-xs">home.faq</code>. Service and integration details live on the&nbsp;
+              <code className="text-xs">/services</code> page (managed there).
             </p>
           </div>
         </div>

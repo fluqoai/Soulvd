@@ -142,27 +142,19 @@
       "list": [
         {
           "q": "Is Soulvd officially licensed by Meta?",
-          "a": "Yes. Soulvd is an officially certified WhatsApp Business partner of Meta since 2026. Your accounts run on the official WhatsApp Business API infrastructure, with full compliance to Meta's policies, security, and privacy standards."
+          "a": "Yes. Soulvd is an officially certified WhatsApp Business partner of Meta since 2026. Your accounts run on the official WhatsApp Business API infrastructure, with full compliance to Meta's security and privacy standards."
         },
         {
           "q": "How long until we're actually live?",
-          "a": "Two weeks for most projects. The first week is for discovery and setup, the second for testing and launch. Smaller projects (like connecting one account to a ready template) can wrap in 3-5 days."
-        },
-        {
-          "q": "Does the bot really understand Saudi Arabic?",
-          "a": "Yes. We train the bot on your data and your sector's data, and we test it on specific Saudi dialects before launch. If you have particular phrases or product names, we add them to the model before going live."
+          "a": "Two weeks for most projects — one for discovery and setup, one for testing and launch. Smaller projects can wrap in 3-5 days."
         },
         {
           "q": "Where is customer data stored?",
-          "a": "All data is stored in data centers within the Kingdom of Saudi Arabia, encrypted at rest and in transit. Full compliance with the Personal Data Protection Law (PDPL) and sector-specific regulations."
+          "a": "All data is stored in data centers within the Kingdom of Saudi Arabia, encrypted at rest and in transit. Full compliance with the Personal Data Protection Law (PDPL)."
         },
         {
           "q": "Can I try before I commit?",
           "a": "Absolutely. We offer a free, no-commitment 45-minute demo with a solutions engineer who runs the bot on your actual data before you pay a single riyal."
-        },
-        {
-          "q": "How much does Soulvd cost?",
-          "a": "Pricing depends on conversation volume and integrations. We give a detailed quote after the discovery call. There are no hidden setup fees and no long-term commitments."
         }
       ]
     },

@@ -51,7 +51,7 @@ export async function CaseStudies() {
   const [featured, ...rest] = items;
 
   return (
-    <Section id="case-studies" tone="linen" size="lg" className="relative overflow-hidden">
+    <Section id="case-studies" tone="sage" size="lg" className="relative overflow-hidden">
       {/* Decorative number in the background */}
       <span
         className="absolute -top-6 end-4 md:end-12 text-[8rem] md:text-[14rem] leading-none font-display font-semibold text-ink-900/[0.04] select-none pointer-events-none"
