@@ -8,22 +8,26 @@ import {
   Layers,
   BarChart3,
   ListOrdered,
+  MessageSquareQuote,
   Sparkles,
+  PlugZap,
 } from 'lucide-react';
 
 /**
- * Home admin index — a jump-board to every content table that
- * feeds the public home page.
+ * Home admin index — jump-board to every content table that feeds
+ * the public home page.
  *
  * Home page composition (top → bottom):
- *   1. Hero              — static (3D mark + text in code)
- *   2. Stats             — /admin/stats
- *   3. Services          — /admin/services
- *   4. Sectors           — /admin/sectors
- *   5. Process           — hardcoded in code (4 steps)
- *   6. Partners          — /admin/partners
- *   7. CTA               — static in code
- *   8. Home contact form — built-in (writes to leads)
+ *   1. Hero          — static (chat preview in code) + outcome copy
+ *   2. Stats         — /admin/stats
+ *   3. Services      — 3-up showcase with mini UI previews (in code)
+ *   4. Case studies  — /admin/case-studies
+ *   5. Process       — 3-step horizontal timeline (in code)
+ *   6. Sectors       — /admin/sectors
+ *   7. Integrations  — /admin/integrations
+ *   8. Testimonials  — /admin/testimonials
+ *   9. FAQ           — translated strings in messages/{ar,en}.json
+ *  10. CTA + form    — translated strings + built-in form
  */
 export default function HomeAdminPage() {
   const sections = [
@@ -40,10 +44,10 @@ export default function HomeAdminPage() {
       desc: 'The 4 big numbers in the "By the numbers" section',
     },
     {
-      href: '/admin/services',
+      href: '/admin/case-studies',
       icon: Briefcase,
-      title: 'Services',
-      desc: 'The 6 cards in the services bento grid',
+      title: 'Case studies',
+      desc: 'Featured client stories with metrics (3 shown)',
     },
     {
       href: '/admin/sectors',
@@ -52,10 +56,16 @@ export default function HomeAdminPage() {
       desc: 'The 6 sector cards with hex pattern backgrounds',
     },
     {
-      href: '/admin/partners',
-      icon: Handshake,
-      title: 'Partners',
-      desc: 'Client logos in the scrolling marquee',
+      href: '/admin/integrations',
+      icon: PlugZap,
+      title: 'Integrations',
+      desc: 'The 4-col grid of platform logos',
+    },
+    {
+      href: '/admin/testimonials',
+      icon: MessageSquareQuote,
+      title: 'Testimonials',
+      desc: 'Named client quotes shown 3-up',
     },
     {
       href: '/admin/leads',
@@ -97,16 +107,13 @@ export default function HomeAdminPage() {
         <div className="flex items-start gap-2">
           <Sparkles className="size-4 mt-0.5 shrink-0" />
           <div>
-            <p className="font-medium mb-1">Hardcoded in code</p>
+            <p className="font-medium mb-1">Hardcoded in code or translations</p>
             <p className="text-amber-200/80 text-xs leading-relaxed">
-              The Hero (with 3D mark and headline), the Process timeline
-              (4 steps: Discovery → Build → Launch → Optimize), and the
-              closing CTA are written in code for now. The 4 process steps
-              and the CTA copy are translated in&nbsp;
+              The Hero (with chat preview and headline), the 3-service
+              showcase, the 3-step Process timeline, and the FAQ
+              questions are in code or in&nbsp;
               <code className="text-xs">messages/{'{ar,en}.json'}</code>
-              &nbsp;under <code className="text-xs">home.process</code> and
-              <code className="text-xs"> home.cta</code>. Edit those to
-              change the content.
+              &nbsp;under <code className="text-xs">home.hero</code>, <code className="text-xs">home.services</code>, <code className="text-xs">home.process</code>, and <code className="text-xs">home.faq</code>.
             </p>
           </div>
         </div>

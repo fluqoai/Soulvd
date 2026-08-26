@@ -15,7 +15,7 @@ export async function ProcessTimeline() {
   const steps = (t.raw('steps') as Step[]) ?? [];
 
   return (
-    <Section id="process" tone="sage" size="lg" className="relative overflow-hidden">
+    <Section id="how-it-works" tone="sage" size="lg" className="relative overflow-hidden">
       {/* Subtle hex pattern overlay (echoes the brand mark) */}
       <svg
         className="absolute inset-0 w-full h-full opacity-[0.04] pointer-events-none"

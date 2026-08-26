@@ -13,11 +13,21 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Official Meta Partner — 2026",
-      "title": "We turn WhatsApp conversations into sales",
-      "subtitle": "An integrated AI platform for Saudi businesses. It understands local dialect, replies 24/7, and converts leads into real deals.",
-      "cta_primary": "Contact us",
-      "cta_secondary": "Explore services"
+      "eyebrow": "Official Meta WhatsApp Business Partner · 2026",
+      "title": "Turn WhatsApp conversations into real revenue",
+      "subtitle": "Soulvd is the platform Saudi businesses use to reply to customers in Arabic within seconds, qualify leads automatically, and close deals — right inside WhatsApp, with zero code to write.",
+      "cta_primary": "Book a free demo",
+      "cta_secondary": "See how it works",
+      "trust_line_1": "Live now",
+      "trust_line_2": "No credit card · Cancel anytime",
+      "trust_meta": "Meta-certified partner",
+      "trust_meta_sub": "Officially licensed since 2026",
+      "trust_ai": "AI that speaks Saudi",
+      "trust_ai_sub": "Trained on local Saudi dialects",
+      "trust_local": "Data stays in KSA",
+      "trust_local_sub": "Full PDPL compliance",
+      "trust_247": "24/7 human support",
+      "trust_247_sub": "Saudi team, replies in Arabic"
     },
     "why": {
       "title": "Why Soulvd?",
@@ -70,50 +80,89 @@
     },
     "services": {
       "label": "What we do",
-      "title": "A complete WhatsApp platform",
-      "subtitle": "Everything a Saudi business needs to run WhatsApp conversations — from AI to campaigns to analytics — in one Meta-certified platform.",
+      "title": "Three tools. One platform. Measurable results.",
+      "subtitle": "We focus on what actually moves the needle for Saudi businesses: faster replies, smarter campaigns, and data you can act on.",
+      "learn_more": "Learn more",
       "list": [
         {
           "key": "bot",
           "icon": "Bot",
-          "title": "Smart WhatsApp bot",
-          "description": "A 24/7 bot in Arabic and English, trained on your data and local dialects. Closes deals, not just answers.",
-          "accent": "primary"
-        },
-        {
-          "key": "inbox",
-          "icon": "Inbox",
-          "title": "Unified inbox",
-          "description": "All channels in one place, with smart routing and a complete customer history.",
-          "accent": "secondary"
+          "title": "An AI bot that speaks Saudi",
+          "description": "A 24/7 bot in Arabic and English that replies in seconds, answers questions, and turns conversations into sales when needed.",
+          "bullets": [
+            "Trained on Saudi Arabic and local dialects",
+            "Learns from your knowledge base and your team",
+            "Hands off smoothly to any human agent"
+          ]
         },
         {
           "key": "campaigns",
           "icon": "Megaphone",
-          "title": "Marketing campaigns",
-          "description": "Targeted broadcasts, A/B testing, and real-time performance tracking.",
-          "accent": "secondary"
+          "title": "Marketing campaigns that convert",
+          "description": "Send targeted broadcasts with smart templates, A/B test them automatically, and track open, engagement, and conversion rates in real time.",
+          "bullets": [
+            "Customizable templates per sector",
+            "Automatic A/B testing on broadcasts",
+            "Exportable performance reports"
+          ]
         },
         {
-          "key": "flows",
-          "icon": "Workflow",
-          "title": "No-code flow builder",
-          "description": "Build complex conversation paths with drag-and-drop, no developer required.",
-          "accent": "tertiary"
+          "key": "inbox",
+          "icon": "Inbox",
+          "title": "Smart inbox + analytics",
+          "description": "All conversations in one place. Complete customer profiles, smart routing, SLA alerts, and an analytics dashboard that shows you what's actually happening.",
+          "bullets": [
+            "Smart routing by content or department",
+            "Full customer profile with interaction history",
+            "Real-time analytics with export"
+          ]
+        }
+      ]
+    },
+    "case_studies": {
+      "label": "Real results",
+      "title": "Numbers from the field, not promises",
+      "subtitle": "Three Saudi businesses, three stories, outcomes you can verify. We share them as they happened."
+    },
+    "testimonials": {
+      "label": "What our clients say",
+      "title": "Trust built on real experience",
+      "subtitle": "Every client here started with a first conversation. Today, Soulvd is part of their team."
+    },
+    "integrations": {
+      "label": "Ready integrations",
+      "title": "Connect Soulvd to your stack in minutes",
+      "subtitle": "100+ direct integrations with the platforms your business already runs on. Two-way sync, no code.",
+      "view_all": "View all integrations"
+    },
+    "faq": {
+      "label": "FAQ",
+      "title": "Before you start, honest answers",
+      "subtitle": "The questions our clients ask most before signing.",
+      "list": [
+        {
+          "q": "Is Soulvd officially licensed by Meta?",
+          "a": "Yes. Soulvd is an officially certified WhatsApp Business partner of Meta since 2026. Your accounts run on the official WhatsApp Business API infrastructure, with full compliance to Meta's policies, security, and privacy standards."
         },
         {
-          "key": "analytics",
-          "icon": "LineChart",
-          "title": "Real-time analytics",
-          "description": "Interactive dashboards for every interaction, conversion rate, and response time.",
-          "accent": "tertiary"
+          "q": "How long until we're actually live?",
+          "a": "Two weeks for most projects. The first week is for discovery and setup, the second for testing and launch. Smaller projects (like connecting one account to a ready template) can wrap in 3-5 days."
         },
         {
-          "key": "integrations",
-          "icon": "PlugZap",
-          "title": "100+ integrations",
-          "description": "Shopify, HubSpot, Salesforce, Zapier, Stripe, Google, and more.",
-          "accent": "tertiary"
+          "q": "Does the bot really understand Saudi Arabic?",
+          "a": "Yes. We train the bot on your data and your sector's data, and we test it on specific Saudi dialects before launch. If you have particular phrases or product names, we add them to the model before going live."
+        },
+        {
+          "q": "Where is customer data stored?",
+          "a": "All data is stored in data centers within the Kingdom of Saudi Arabia, encrypted at rest and in transit. Full compliance with the Personal Data Protection Law (PDPL) and sector-specific regulations."
+        },
+        {
+          "q": "Can I try before I commit?",
+          "a": "Absolutely. We offer a free, no-commitment 45-minute demo with a solutions engineer who runs the bot on your actual data before you pay a single riyal."
+        },
+        {
+          "q": "How much does Soulvd cost?",
+          "a": "Pricing depends on conversation volume and integrations. We give a detailed quote after the discovery call. There are no hidden setup fees and no long-term commitments."
         }
       ]
     },
