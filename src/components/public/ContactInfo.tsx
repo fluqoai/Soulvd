@@ -7,9 +7,9 @@ export async function ContactInfo() {
   const t = await getTranslations('contact.info');
 
   const channels = [
-    { icon: Mail, label: t('email_label'), value: 'hello@soulvd.sa', href: 'mailto:hello@soulvd.sa' },
-    { icon: Phone, label: t('phone_label'), value: '+966 50 000 0000', href: 'tel:+966500000000' },
-    { icon: MessageCircle, label: t('whatsapp_label'), value: '+966 50 000 0000', href: 'https://wa.me/966500000000' },
+    { icon: Mail, label: t('email_label'), value: 'mohammad@soulvd.net', href: 'mailto:mohammad@soulvd.net' },
+    { icon: Phone, label: t('phone_label'), value: '05 696 688 73', href: 'tel:+966569668873' },
+    { icon: MessageCircle, label: t('whatsapp_label'), value: '05 696 688 73', href: 'https://wa.me/966569668873' },
   ];
 
   return (

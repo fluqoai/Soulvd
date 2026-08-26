@@ -584,7 +584,9 @@
   "footer": {
     "description": "Soulvd is a Saudi company specializing in AI automation solutions for businesses in the Kingdom of Saudi Arabia. Officially licensed by Meta, 2026.",
     "rights": "© 2026 Soulvd. All rights reserved.",
-    "built_in_sa": "Made in Saudi Arabia"
+    "built_in_sa": "Made in Saudi Arabia",
+    "cr_label": "Commercial Registration",
+    "tax_label": "VAT Number"
   },
   "lang": {
     "ar": "العربية",

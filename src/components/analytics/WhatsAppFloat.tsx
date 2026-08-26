@@ -15,7 +15,7 @@ import { track } from '@/lib/analytics';
  * the message is pre-filled so the visitor lands in a useful state.
  */
 
-const DEFAULT_NUMBER = '966500000000'; // Placeholder — replace via env
+const DEFAULT_NUMBER = '966569668873'; // Default — override via NEXT_PUBLIC_WHATSAPP_NUMBER env
 const DEFAULT_MESSAGE_AR = 'مرحباً، أريد الاستفسار عن خدمات سولڤد';
 const DEFAULT_MESSAGE_EN = "Hi, I'd like to learn more about Soulvd";
 
