@@ -1,0 +1,39 @@
+{
+  "name": "Soulvd · سولڤد",
+  "short_name": "Soulvd",
+  "description": "Official Meta WhatsApp Business Partner for Saudi Arabia. Turn WhatsApp conversations into revenue.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "ar",
+  "dir": "rtl",
+  "background_color": "#F5F0E4",
+  "theme_color": "#1B2A22",
+  "icons": [
+    {
+      "src": "/brand/favicon-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/favicon-64.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/brand/favicon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/favicon-32.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

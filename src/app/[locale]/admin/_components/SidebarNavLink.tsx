@@ -1,26 +1,39 @@
 'use client';
 
 // Client component for nav links (to detect active route).
+//
+// Receives `iconName` (a string) instead of a Lucide component, because
+// server components cannot serialize functions across the boundary.
+// The icon is resolved locally via the shared map.
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getAdminIcon } from './adminIcons';
 
 type Props = {
   href: string;
   label: string; // already-translated label
-  icon: LucideIcon;
+  iconName: string;
 };
 
-export function SidebarNavLink({ href, label, icon: Icon }: Props) {
+export function SidebarNavLink({ href, label, iconName }: Props) {
   const pathname = usePathname();
   const tNav = useTranslations('admin.nav');
+
   // We receive the key (not the label) — translate here.
   // Resolve by stripping the locale prefix from href and looking up the key
-  const key = href.split('/').pop() === 'admin' ? 'dashboard' : (href.split('/').pop() ?? 'dashboard');
-  const translated = tNav.has(key) ? tNav(key as never) : label;
-  const isActive = pathname === href || (href.endsWith('/admin') && pathname === href.replace(/\/$/, ''));
+  const key =
+    href.split('/').pop() === 'admin'
+      ? 'dashboard'
+      : href.split('/').pop() ?? 'dashboard';
+  const translated = tNav.has(key as never) ? tNav(key as never) : label;
+
+  const isActive =
+    pathname === href || (href.endsWith('/admin') && pathname === href.replace(/\/$/, ''));
+
+  const Icon = getAdminIcon(iconName);
 
   return (
     <Link

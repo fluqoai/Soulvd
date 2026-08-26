@@ -18,7 +18,10 @@ export async function Footer() {
               alt={tSite('name')}
               width={240}
               height={64}
-              className="h-14 w-auto mb-4"
+              // CSS sets height only; explicit `width: auto` keeps
+              // the intrinsic aspect ratio and silences next/image.
+              style={{ width: 'auto', height: 'auto' }}
+              className="h-14 mb-4"
             />
             <p className="text-sm leading-relaxed text-linen-300 max-w-sm">
               {t('description')}

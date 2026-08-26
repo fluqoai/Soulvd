@@ -1,29 +1,12 @@
 // src/app/[locale]/admin/_components/Sidebar.tsx
 // Server component. Renders the dark sidebar with nav groups and the user footer.
+//
+// IMPORTANT: This is a server component, so it cannot pass Lucide icon
+// functions to client children. We pass icon NAMES (strings) instead, and
+// `SidebarNavLink` (client) resolves them via `adminIcons.tsx`.
 
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
-import {
-  LayoutDashboard,
-  Home,
-  Sparkles,
-  Building2,
-  BarChart3,
-  Wand2,
-  PlugZap,
-  Quote,
-  Star,
-  Handshake,
-  Users,
-  Inbox,
-  UserSquare2,
-  FileText,
-  Receipt,
-  ScrollText,
-  Activity,
-  Settings,
-  type LucideIcon,
-} from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { LogoutButton } from './LogoutButton';
 import { SidebarNavLink } from './SidebarNavLink';
@@ -31,30 +14,30 @@ import { SidebarNavLink } from './SidebarNavLink';
 type NavItem = {
   href: string;
   labelKey: string;
-  icon: LucideIcon;
+  iconName: string;
   ownerOnly?: boolean;
 };
 
-const ICONS: Record<string, LucideIcon> = {
-  dashboard: LayoutDashboard,
-  home: Home,
-  services: Sparkles,
-  sectors: Building2,
-  stats: BarChart3,
-  value_props: Wand2,
-  integrations: PlugZap,
-  case_studies: Quote,
-  testimonials: Star,
-  team: Users,
-  partners: Handshake,
-  leads: Inbox,
-  clients: UserSquare2,
-  templates: FileText,
-  invoices: Receipt,
-  quotes: ScrollText,
-  users: Users,
-  activity_log: Activity,
-  settings: Settings,
+const ICON: Record<string, string> = {
+  dashboard: 'dashboard',
+  home: 'home',
+  services: 'services',
+  sectors: 'sectors',
+  stats: 'stats',
+  value_props: 'value_props',
+  integrations: 'integrations',
+  case_studies: 'case_studies',
+  testimonials: 'testimonials',
+  team: 'team',
+  partners: 'partners',
+  leads: 'leads',
+  clients: 'clients',
+  templates: 'templates',
+  invoices: 'invoices',
+  quotes: 'quotes',
+  users: 'users',
+  activity_log: 'activity_log',
+  settings: 'settings',
 };
 
 export async function Sidebar({
@@ -73,31 +56,31 @@ export async function Sidebar({
   const tRole = await getTranslations('admin.role');
 
   const contentItems: NavItem[] = [
-    { href: `/${locale}/admin`, labelKey: 'dashboard', icon: ICONS.dashboard },
-    { href: `/${locale}/admin/home`, labelKey: 'home', icon: ICONS.home },
-    { href: `/${locale}/admin/services`, labelKey: 'services', icon: ICONS.services },
-    { href: `/${locale}/admin/sectors`, labelKey: 'sectors', icon: ICONS.sectors },
-    { href: `/${locale}/admin/stats`, labelKey: 'stats', icon: ICONS.stats },
-    { href: `/${locale}/admin/value-props`, labelKey: 'value_props', icon: ICONS.value_props },
-    { href: `/${locale}/admin/integrations`, labelKey: 'integrations', icon: ICONS.integrations },
-    { href: `/${locale}/admin/case-studies`, labelKey: 'case_studies', icon: ICONS.case_studies },
-    { href: `/${locale}/admin/testimonials`, labelKey: 'testimonials', icon: ICONS.testimonials },
-    { href: `/${locale}/admin/team`, labelKey: 'team', icon: ICONS.team },
-    { href: `/${locale}/admin/partners`, labelKey: 'partners', icon: ICONS.partners },
+    { href: `/${locale}/admin`, labelKey: 'dashboard', iconName: ICON.dashboard },
+    { href: `/${locale}/admin/home`, labelKey: 'home', iconName: ICON.home },
+    { href: `/${locale}/admin/services`, labelKey: 'services', iconName: ICON.services },
+    { href: `/${locale}/admin/sectors`, labelKey: 'sectors', iconName: ICON.sectors },
+    { href: `/${locale}/admin/stats`, labelKey: 'stats', iconName: ICON.stats },
+    { href: `/${locale}/admin/value-props`, labelKey: 'value_props', iconName: ICON.value_props },
+    { href: `/${locale}/admin/integrations`, labelKey: 'integrations', iconName: ICON.integrations },
+    { href: `/${locale}/admin/case-studies`, labelKey: 'case_studies', iconName: ICON.case_studies },
+    { href: `/${locale}/admin/testimonials`, labelKey: 'testimonials', iconName: ICON.testimonials },
+    { href: `/${locale}/admin/team`, labelKey: 'team', iconName: ICON.team },
+    { href: `/${locale}/admin/partners`, labelKey: 'partners', iconName: ICON.partners },
   ];
 
   const adminItems: NavItem[] = [
-    { href: `/${locale}/admin/leads`, labelKey: 'leads', icon: ICONS.leads, ownerOnly: true },
-    { href: `/${locale}/admin/clients`, labelKey: 'clients', icon: ICONS.clients, ownerOnly: true },
-    { href: `/${locale}/admin/templates`, labelKey: 'templates', icon: ICONS.templates, ownerOnly: true },
-    { href: `/${locale}/admin/invoices`, labelKey: 'invoices', icon: ICONS.invoices, ownerOnly: true },
-    { href: `/${locale}/admin/quotes`, labelKey: 'quotes', icon: ICONS.quotes, ownerOnly: true },
+    { href: `/${locale}/admin/leads`, labelKey: 'leads', iconName: ICON.leads, ownerOnly: true },
+    { href: `/${locale}/admin/clients`, labelKey: 'clients', iconName: ICON.clients, ownerOnly: true },
+    { href: `/${locale}/admin/templates`, labelKey: 'templates', iconName: ICON.templates, ownerOnly: true },
+    { href: `/${locale}/admin/invoices`, labelKey: 'invoices', iconName: ICON.invoices, ownerOnly: true },
+    { href: `/${locale}/admin/quotes`, labelKey: 'quotes', iconName: ICON.quotes, ownerOnly: true },
   ];
 
   const systemItems: NavItem[] = [
-    { href: `/${locale}/admin/users`, labelKey: 'users', icon: ICONS.users, ownerOnly: true },
-    { href: `/${locale}/admin/activity-log`, labelKey: 'activity_log', icon: ICONS.activity_log, ownerOnly: true },
-    { href: `/${locale}/admin/settings`, labelKey: 'settings', icon: ICONS.settings, ownerOnly: true },
+    { href: `/${locale}/admin/users`, labelKey: 'users', iconName: ICON.users, ownerOnly: true },
+    { href: `/${locale}/admin/activity-log`, labelKey: 'activity_log', iconName: ICON.activity_log, ownerOnly: true },
+    { href: `/${locale}/admin/settings`, labelKey: 'settings', iconName: ICON.settings, ownerOnly: true },
   ];
 
   const visible = (items: NavItem[]) => items.filter((i) => role === 'owner' || !i.ownerOnly);
@@ -110,9 +93,13 @@ export async function Sidebar({
           <Image
             src="/brand/soulvd-logo-white.png"
             alt="Soulvd"
-            width={140}
-            height={32}
-            className="h-7 w-auto"
+            width={240}
+            height={64}
+            // The CSS `h-7 w-auto` overrides the intrinsic dimensions;
+            // tell next/image to keep the aspect ratio by setting the
+            // missing dim to "auto" via inline style.
+            style={{ width: 'auto', height: 'auto' }}
+            className="h-7"
           />
         </Link>
       </div>
@@ -154,15 +141,14 @@ function NavGroup({ title, items }: { title: string; items: NavItem[] }) {
       <ul className="space-y-0.5">
         {items.map((item) => (
           <li key={item.href}>
-            <SidebarNavLink href={item.href} label={getLabel(item.labelKey)} icon={item.icon} />
+            <SidebarNavLink
+              href={item.href}
+              label={item.labelKey}
+              iconName={item.iconName}
+            />
           </li>
         ))}
       </ul>
     </div>
   );
-}
-
-// Helper to translate the label — called inside NavGroup which is a client subtree
-function getLabel(key: string) {
-  return key; // resolved by the client via t(labelKey) — see SidebarNavLink
 }

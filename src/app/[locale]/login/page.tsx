@@ -23,7 +23,11 @@ export default async function LoginPage({
               alt="Soulvd"
               width={140}
               height={32}
-              className="h-8 w-auto"
+              // CSS `h-8` overrides one intrinsic dimension; explicit
+              // `width: auto` keeps the aspect ratio. Avoids the
+              // next/image "width or height modified" warning.
+              style={{ width: 'auto', height: 'auto' }}
+              className="h-8"
             />
           </Link>
           <h1 className="text-2xl md:text-3xl font-semibold text-ink-900 leading-tight mb-2">
