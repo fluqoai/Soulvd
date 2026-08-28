@@ -2,10 +2,12 @@
 // Dashboard overview.
 
 import { getTranslations } from 'next-intl/server';
-import { ArrowUpRight, ListChecks, Calendar, Flag } from 'lucide-react';
+import { ArrowUpRight, ListChecks, Calendar, Flag, Repeat, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { countDueRecurring } from '@/lib/projects/actions';
+import { ProcessAllDueRecurring } from '@/components/admin/ProcessAllDueRecurring';
 
 export default async function AdminDashboard({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,6 +40,7 @@ export default async function AdminDashboard({
   let stats: { label: string; value: string | number; href?: string; icon: 'inbox' | 'receipt' | 'file' | 'users' }[] = [];
   let myOpenTasksCount = 0;
   let overdueTasksCount = 0;
+  let dueRecurringCount = 0;
 
   if (isOwner) {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -60,6 +63,7 @@ export default async function AdminDashboard({
         .gte('entry_date', weekStart.toISOString().slice(0, 10)),
     ]);
     const weekHours = (myHoursThisWeek.data ?? []).reduce((s: number, e: { hours: number }) => s + Number(e.hours || 0), 0);
+    dueRecurringCount = await countDueRecurring();
     stats = [
       { label: t('stats.new_leads'), value: newLeads.count ?? 0, href: '/admin/leads', icon: 'inbox' },
       { label: t('stats.active_projects'), value: activeProjects.count ?? 0, href: '/admin/projects', icon: 'file' },
@@ -114,6 +118,25 @@ export default async function AdminDashboard({
           {welcome} · {t('subtitle')}
         </p>
       </header>
+
+      {isOwner && dueRecurringCount > 0 && (
+        <div className="mb-6 rounded-2xl border-2 border-purple-300 bg-purple-50/60 p-5 flex items-center gap-4 flex-wrap">
+          <div className="shrink-0 size-12 rounded-xl bg-purple-600 text-paper grid place-items-center">
+            <Repeat className="size-6" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-base font-semibold text-purple-900">
+              {dueRecurringCount === 1
+                ? 'مشروع دوري واحد جاهز للتجديد'
+                : `${dueRecurringCount} مشاريع دورية جاهزة للتجديد`}
+            </h2>
+            <p className="text-sm text-purple-800 mt-0.5">
+              هذه المشاريع وصلت إلى تاريخ التجديد التالي. كل تجديد ينشئ مشروعاً جديداً + فاتورة مسودة (إذا كانت auto_invoice مفعّلة).
+            </p>
+          </div>
+          <ProcessAllDueRecurring count={dueRecurringCount} />
+        </div>
+      )}
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, User as UserIcon, Trash2, ExternalLink, FileText, Receipt } from 'lucide-react';
+import { Calendar, User as UserIcon, Trash2, ExternalLink, FileText, Receipt, Repeat, ArrowRight } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { ProjectForm } from '../ProjectForm';
@@ -9,6 +9,7 @@ import { MilestonesSection } from '@/components/admin/MilestonesSection';
 import { NotesSection } from '@/components/admin/NotesSection';
 import { TasksSection } from '@/components/admin/TasksSection';
 import { GenerateInvoiceButton } from '@/components/admin/GenerateInvoiceButton';
+import { RenewNowButton } from '@/components/admin/RenewNowButton';
 import { deleteProject } from '@/lib/projects/actions';
 import type { Project, ProjectStatus } from '@/lib/projects/actions';
 import type { Note } from '@/lib/notes/actions';
@@ -131,10 +132,15 @@ export default async function ProjectDetailPage({
         backHref="/admin/projects"
         description={`${client ? `العميل: ${client.name}${client.company ? ` (${client.company})` : ''}` : 'بدون عميل'} · أنشئ ${new Date(t.created_at).toLocaleDateString('ar-SA')}`}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${STATUS_STYLES[t.status]}`}>
               {STATUS_LABELS[t.status]}
             </span>
+            {t.is_recurring && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 ring-1 ring-purple-200">
+                <Repeat className="size-3" /> {t.recurrence_pattern === 'monthly' ? 'شهري' : 'ربع سنوي'}
+              </span>
+            )}
             {client && (
               <Link
                 href={`/admin/clients/${client.id}`}
@@ -143,6 +149,9 @@ export default async function ProjectDetailPage({
                 <span>بطاقة العميل</span>
                 <ExternalLink className="size-3.5" />
               </Link>
+            )}
+            {t.is_recurring && (
+              <RenewNowButton projectId={t.id} />
             )}
             <GenerateInvoiceButton
               projectId={t.id}

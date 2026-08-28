@@ -165,6 +165,10 @@ export function ProjectsSection({
                 budget_amount: '',
                 currency: 'SAR',
                 owner_id: '',
+                is_recurring: '',
+                recurrence_pattern: '',
+                next_occurrence_at: '',
+                auto_invoice: '',
               });
               if (!r.ok) {
                 setError(r.error);

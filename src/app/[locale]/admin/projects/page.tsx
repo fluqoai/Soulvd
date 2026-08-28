@@ -1,11 +1,12 @@
 import Link from 'next/link';
-import { Plus, Calendar, Briefcase, User as UserIcon, Clock } from 'lucide-react';
+import { Plus, Calendar, Briefcase, User as UserIcon, Clock, Repeat, RefreshCw } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { ButtonLink } from '@/components/ui/Button';
 import { DeleteButton } from '@/components/admin/DeleteButton';
-import { deleteProject } from '@/lib/projects/actions';
+import { deleteProject, countDueRecurring } from '@/lib/projects/actions';
+import { ProcessAllDueRecurring } from '@/components/admin/ProcessAllDueRecurring';
 import type { ProjectStatus } from '@/lib/projects/actions';
 
 type Row = {
@@ -20,6 +21,10 @@ type Row = {
   currency: string;
   owner_id: string | null;
   created_at: string;
+  is_recurring: boolean;
+  recurrence_pattern: 'monthly' | 'quarterly' | null;
+  next_occurrence_at: string | null;
+  parent_project_id: string | null;
   // joined
   client_name: string | null;
   client_company: string | null;
@@ -58,7 +63,7 @@ export default async function ProjectsPage({
 
   let query = admin
     .from('projects')
-    .select('id, client_id, name, status, start_date, due_date, budget_hours, budget_amount, currency, owner_id, created_at')
+    .select('id, client_id, name, status, start_date, due_date, budget_hours, budget_amount, currency, owner_id, created_at, is_recurring, recurrence_pattern, next_occurrence_at, parent_project_id')
     .order('created_at', { ascending: false });
 
   if (statusFilter && statusFilter !== 'all') query = query.eq('status', statusFilter as ProjectStatus);
@@ -116,11 +121,12 @@ export default async function ProjectsPage({
   });
 
   // Counts
-  const [{ count: allCount }, { count: planCount }, { count: progCount }, { count: doneCount }] = await Promise.all([
+  const [{ count: allCount }, { count: planCount }, { count: progCount }, { count: doneCount }, dueRecurringCount] = await Promise.all([
     admin.from('projects').select('*', { count: 'exact', head: true }),
     admin.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'planning'),
     admin.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'in_progress'),
     admin.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'delivered'),
+    countDueRecurring(),
   ]);
 
   const tabs = [
@@ -160,9 +166,14 @@ export default async function ProjectsPage({
           ? `مشاريع العميل: ${clientContext.name}${clientContext.company ? ` (${clientContext.company})` : ''}`
           : 'مشاريع العملاء النشطين — كل مشروع مرتبط بعميل ويمكن أن يحوي سجل وقت.'}
         actions={
-          <ButtonLink href={`/admin/projects/new${clientFilter ? `?client_id=${clientFilter}` : ''}`} size="sm" variant="primary">
-            <Plus className="size-4" /> مشروع جديد
-          </ButtonLink>
+          <div className="flex items-center gap-2">
+            {dueRecurringCount > 0 && (
+              <ProcessAllDueRecurring count={dueRecurringCount} />
+            )}
+            <ButtonLink href={`/admin/projects/new${clientFilter ? `?client_id=${clientFilter}` : ''}`} size="sm" variant="primary">
+              <Plus className="size-4" /> مشروع جديد
+            </ButtonLink>
+          </div>
         }
       />
 
@@ -269,6 +280,7 @@ export default async function ProjectsPage({
         <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {enriched.map((p) => {
             const isOverdue = p.due_date && p.status !== 'delivered' && p.status !== 'cancelled' && p.due_date < new Date().toISOString().slice(0, 10);
+            const isDueNow = p.is_recurring && (!p.next_occurrence_at || p.next_occurrence_at <= new Date().toISOString());
             return (
               <li
                 key={p.id}
@@ -289,6 +301,17 @@ export default async function ProjectsPage({
                   <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_STYLES[p.status]}`}>
                     {STATUS_LABELS[p.status]}
                   </span>
+                  {p.is_recurring && (
+                    <span className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
+                      isDueNow
+                        ? 'bg-red-100 text-red-800 ring-1 ring-red-200'
+                        : 'bg-purple-100 text-purple-800 ring-1 ring-purple-200'
+                    }`}>
+                      <Repeat className="size-3" />
+                      {p.recurrence_pattern === 'monthly' ? 'شهري' : 'ربع سنوي'}
+                      {isDueNow && <span className="text-[10px]">· مستحق</span>}
+                    </span>
+                  )}
                 </div>
 
                 <div className="mt-3 space-y-1.5 text-xs text-ink-700">
