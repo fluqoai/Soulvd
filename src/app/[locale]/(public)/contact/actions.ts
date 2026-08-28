@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
+import { sendLeadNotification, sendLeadAutoReply } from '@/lib/email';
 
 const leadSchema = z.object({
   name: z.string().min(2, 'name_required').max(200),
@@ -48,20 +49,50 @@ export async function submitLead(
 
   // Use the anon client — the leads table RLS policy allows anyone to insert
   const supabase = createClient(url, anon, { auth: { persistSession: false } });
-  const { error } = await supabase.from('leads').insert({
-    name: parsed.data.name,
-    email: parsed.data.email || null,
-    phone: parsed.data.phone || null,
-    company: parsed.data.company || null,
-    message: parsed.data.message,
-    source: 'contact_form',
-    metadata: { locale: parsed.data.locale ?? 'en' },
-  });
+  const { data: inserted, error } = await supabase
+    .from('leads')
+    .insert({
+      name: parsed.data.name,
+      email: parsed.data.email || null,
+      phone: parsed.data.phone || null,
+      company: parsed.data.company || null,
+      message: parsed.data.message,
+      source: 'contact_form',
+      metadata: { locale: parsed.data.locale ?? 'en' },
+    })
+    .select('id, created_at')
+    .single();
 
-  if (error) {
+  if (error || !inserted) {
     console.error('Lead insert failed:', error);
     return { status: 'error', message: 'insert_failed' };
   }
 
+  // Email pipeline — best-effort, never blocks the form.
+  // The DB insert above is the source of truth; emails are notifications.
+  await Promise.allSettled([
+    sendLeadNotification({
+      id: inserted.id,
+      name: parsed.data.name,
+      email: parsed.data.email || null,
+      phone: parsed.data.phone || null,
+      company: parsed.data.company || null,
+      message: parsed.data.message,
+      locale: parsed.data.locale ?? 'en',
+      createdAt: inserted.created_at,
+    }),
+    sendLeadAutoReply({
+      id: inserted.id,
+      name: parsed.data.name,
+      email: parsed.data.email || null,
+      phone: parsed.data.phone || null,
+      company: parsed.data.company || null,
+      message: parsed.data.message,
+      locale: parsed.data.locale ?? 'en',
+      createdAt: inserted.created_at,
+    }),
+  ]);
+
   return { status: 'success' };
 }
+
