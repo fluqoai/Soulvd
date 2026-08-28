@@ -61,6 +61,13 @@ public/brand/concepts/
 # tmp scratch (verification scripts, scraped HTML, etc.)
 /tmp/
 
+# pnpm lockfile — project uses npm. If you accidentally ran `pnpm install`
+# locally and committed the lockfile, Vercel will switch to pnpm and the
+# build will fail with ERR_PNPM_OUTDATED_LOCKFILE. The packageManager
+# field in package.json is the source of truth; ignore pnpm-lock.yaml.
+pnpm-lock.yaml
+pnpm-workspace.yaml
+
 # secrets (extra safety)
 *.pem
 *.key
