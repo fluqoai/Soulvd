@@ -47,6 +47,19 @@ export default async function TemplatesPage() {
 
   const templates = (rows ?? []) as unknown as Template[];
 
+  // The templates bucket is private. Generate a short-lived signed
+  // URL per template so the download link actually resolves to the
+  // .docx in storage instead of /admin/<filename> (which 404s).
+  const DOWNLOAD_TTL_SECONDS = 60 * 60; // 1 hour
+  const templatesWithUrls = await Promise.all(
+    templates.map(async (t) => {
+      const { data: signed } = await supabase.storage
+        .from('templates')
+        .createSignedUrl(t.file_path, DOWNLOAD_TTL_SECONDS);
+      return { ...t, downloadUrl: signed?.signedUrl ?? null };
+    })
+  );
+
   return (
     <div>
       <PageHeader
@@ -63,7 +76,7 @@ export default async function TemplatesPage() {
         <EmptyState />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {templates.map((t) => {
+          {templatesWithUrls.map((t) => {
             const fieldCount = Array.isArray(t.field_schema) ? t.field_schema.length : 0;
             return (
               <article
@@ -103,15 +116,25 @@ export default async function TemplatesPage() {
                 </div>
 
                 <div className="flex items-center gap-1 pt-3 border-t border-ink-900/10">
-                  <Link
-                    href={t.file_path}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-ink-700 hover:text-sage-800 hover:bg-sage-50 transition-colors"
-                  >
-                    <Download className="size-3.5" />
-                    <span>تحميل</span>
-                  </Link>
+                  {t.downloadUrl ? (
+                    <a
+                      href={t.downloadUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-ink-700 hover:text-sage-800 hover:bg-sage-50 transition-colors"
+                    >
+                      <Download className="size-3.5" />
+                      <span>تحميل</span>
+                    </a>
+                  ) : (
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-ink-400 cursor-not-allowed"
+                      title="الملف غير موجود في التخزين"
+                    >
+                      <Download className="size-3.5" />
+                      <span>تحميل</span>
+                    </span>
+                  )}
                   <Link
                     href={`/admin/templates/${t.id}`}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-sage-700 hover:text-paper hover:bg-sage-600 transition-colors"
