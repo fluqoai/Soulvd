@@ -2,7 +2,7 @@
   "name": "soulvd",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "npm@10.9.0",
+  
   "scripts": {
     "dev": "next dev",
     "build": "next build",
