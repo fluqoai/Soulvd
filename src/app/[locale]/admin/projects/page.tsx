@@ -50,9 +50,9 @@ export default async function ProjectsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ status?: string; client_id?: string }>;
+  searchParams: Promise<{ status?: string; client_id?: string; owner?: string; from?: string; to?: string }>;
 }) {
-  const { status: statusFilter, client_id: clientFilter } = await searchParams;
+  const { status: statusFilter, client_id: clientFilter, owner: ownerFilter, from: fromFilter, to: toFilter } = await searchParams;
   const supabase = await createClient();
   const admin = createAdminClient();
 
@@ -63,9 +63,18 @@ export default async function ProjectsPage({
 
   if (statusFilter && statusFilter !== 'all') query = query.eq('status', statusFilter as ProjectStatus);
   if (clientFilter) query = query.eq('client_id', clientFilter);
+  if (ownerFilter) query = query.eq('owner_id', ownerFilter);
+  if (fromFilter) query = query.gte('due_date', fromFilter);
+  if (toFilter) query = query.lte('due_date', toFilter);
 
   const { data: rows } = await query;
   const items = (rows ?? []) as unknown as Omit<Row, 'client_name' | 'client_company' | 'owner_name' | 'owner_email' | 'total_hours'>[];
+
+  // Fetch owners for the filter dropdown (regardless of join below)
+  const { data: ownersForFilter } = await admin
+    .from('users')
+    .select('id, full_name, email')
+    .order('full_name', { ascending: true });
 
   // Join: client + owner names, total hours
   const clientIds = Array.from(new Set(items.map((r) => r.client_id)));
@@ -131,9 +140,14 @@ export default async function ProjectsPage({
     const s = overrides.status !== undefined ? overrides.status : statusFilter;
     if (s && s !== 'all') sp.set('status', s);
     if (clientFilter) sp.set('client_id', clientFilter);
+    if (ownerFilter) sp.set('owner', ownerFilter);
+    if (fromFilter) sp.set('from', fromFilter);
+    if (toFilter) sp.set('to', toFilter);
     const q = sp.toString();
     return q ? `/admin/projects?${q}` : '/admin/projects';
   };
+
+  const hasAdvancedFilter = !!(ownerFilter || fromFilter || toFilter);
 
   // If client filter is set, show context
   const clientContext = clientFilter ? clientById.get(clientFilter) : null;
@@ -177,15 +191,71 @@ export default async function ProjectsPage({
             </Link>
           );
         })}
-        {clientFilter && (
+        {(clientFilter || hasAdvancedFilter) && (
           <Link
             href="/admin/projects"
             className="ms-2 text-xs text-ink-600 hover:text-sage-700 underline underline-offset-4"
           >
-            إزالة فلتر العميل
+            مسح كل الفلاتر
           </Link>
         )}
       </div>
+
+      {/* Advanced filters row */}
+      <form
+        method="get"
+        action="/admin/projects"
+        className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border border-ink-900/10 bg-paper p-3"
+      >
+        {statusFilter && <input type="hidden" name="status" value={statusFilter} />}
+        {clientFilter && <input type="hidden" name="client_id" value={clientFilter} />}
+
+        <div className="min-w-40">
+          <label className="block text-[11px] uppercase tracking-wider text-ink-600 mb-1">المسؤول</label>
+          <select
+            name="owner"
+            defaultValue={ownerFilter ?? ''}
+            className="w-full rounded-lg border border-ink-900/15 bg-paper px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sage-600/30 focus:border-sage-600"
+          >
+            <option value="">الكل</option>
+            {((ownersForFilter ?? []) as Array<{ id: string; full_name: string | null; email: string }>).map((o) => (
+              <option key={o.id} value={o.id}>{o.full_name || o.email}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider text-ink-600 mb-1">تاريخ التسليم من</label>
+          <input
+            type="date"
+            name="from"
+            defaultValue={fromFilter ?? ''}
+            className="rounded-lg border border-ink-900/15 bg-paper px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sage-600/30 focus:border-sage-600"
+          />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider text-ink-600 mb-1">إلى</label>
+          <input
+            type="date"
+            name="to"
+            defaultValue={toFilter ?? ''}
+            className="rounded-lg border border-ink-900/15 bg-paper px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sage-600/30 focus:border-sage-600"
+          />
+        </div>
+        <button
+          type="submit"
+          className="inline-flex items-center gap-1 rounded-lg bg-ink-900 text-paper text-xs font-medium px-3 py-1.5 hover:bg-ink-800"
+        >
+          تطبيق
+        </button>
+        {(ownerFilter || fromFilter || toFilter) && (
+          <Link
+            href={buildHref({})}
+            className="text-xs text-ink-600 hover:text-ink-800 underline underline-offset-4"
+          >
+            مسح
+          </Link>
+        )}
+      </form>
 
       {enriched.length === 0 ? (
         <div className="rounded-2xl bg-paper border border-ink-900/10 p-12 text-center">

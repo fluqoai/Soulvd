@@ -27,6 +27,7 @@ import {
   StickyNote,
   Briefcase,
   Clock,
+  Milestone as MilestoneIcon,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -470,6 +471,63 @@ const SECTIONS: Section[] = [
     publicShows: 'لا يظهر للزوار — هذه بيانات داخلية فقط.',
     supabase:
       'Table Editor → time_entries. مفهرس بـ project_id و user_id. cascade delete: حذف المشروع يحذف كل سجلات وقته. الفلتر: billable=true لعرض الساعات القابلة للفوترة فقط.',
+  },
+  {
+    id: 'milestones',
+    table: 'milestones',
+    title: 'المراحل الرئيسية',
+    short: 'نقاط تفتيش على مسار المشروع',
+    icon: MilestoneIcon,
+    why:
+      'كل مشروع يمكن تقسيمه إلى مراحل (kickoff، موافقة التصميم، الإطلاق…). المراحل تظهر كقائمة قابلة للوسم في صفحة المشروع، مع شريط تقدم.',
+    fields: [
+      { key: 'project_id', ar: 'المشروع' },
+      { key: 'name', ar: 'اسم المرحلة' },
+      { key: 'description', ar: 'الوصف (اختياري)' },
+      { key: 'due_date', ar: 'تاريخ الاستحقاق' },
+      { key: 'status', ar: 'الحالة (pending / done / cancelled)' },
+      { key: 'order_index', ar: 'ترتيب العرض' },
+      { key: 'completed_at', ar: 'يُملأ تلقائياً عند done' },
+    ],
+    editSteps: [
+      'افتح أي مشروع من /admin/projects',
+      'في قسم "المراحل الرئيسية" أسفل سجل الوقت: اضغط "إضافة مرحلة"',
+      'املأ الاسم، التاريخ، الوصف — اضغط "إضافة"',
+      'اضغط الدائرة على يسار المرحلة لوسمها كمنجزة',
+    ],
+    publicShows: 'لا يظهر للزوار — هذه بيانات داخلية فقط.',
+    supabase:
+      'Table Editor → milestones. cascade delete: حذف المشروع يحذف كل مراحله. الفلتر: status=pending لعرض المراحل المفتوحة فقط.',
+  },
+  {
+    id: 'invoices',
+    table: 'invoices',
+    title: 'الفواتير',
+    short: 'الفواتير المُولّدة — يمكن ربطها بمشروع وملؤها تلقائياً من سجلات الوقت',
+    icon: Receipt,
+    why:
+      'كل فاتورة لها رقم فريد (INV-2026-001)، عميل، بنود (وصف + كمية + سعر + ضريبة)، إجماليات محسوبة تلقائياً، وقالب .docx اختياري للتوليد.',
+    fields: [
+      { key: 'number', ar: 'الرقم الفريد (يُولّد تلقائياً)' },
+      { key: 'client_id', ar: 'العميل' },
+      { key: 'project_id', ar: 'المشروع (اختياري)' },
+      { key: 'template_id', ar: 'قالب .docx (اختياري)' },
+      { key: 'client_snapshot', ar: 'لقطة لبيانات العميل وقت الإنشاء', note: 'لا تتغير لو حدّثت العميل لاحقاً' },
+      { key: 'data', ar: 'JSON: البنود + الإجماليات (يقرأها القالب)' },
+      { key: 'subtotal / vat_amount / total', ar: 'محسوبة تلقائياً' },
+      { key: 'status', ar: 'الحالة (draft / sent / paid / overdue / cancelled)' },
+      { key: 'issue_date / due_date', ar: 'تاريخ الإصدار والاستحقاق' },
+      { key: 'generated_docx_path / generated_pdf_path', ar: 'مسارات الملفات المولّدة' },
+    ],
+    editSteps: [
+      'افتح /admin/invoices',
+      'لإنشاء فاتورة من الصفر: زر "فاتورة جديدة" → املأ البنود',
+      'لتوليد فاتورة من مشروع: افتح المشروع → "توليد فاتورة من السجلات" — يملأ البنود تلقائياً من السجلات القابلة للفوترة',
+      'لتغيير الحالة: افتح الفاتورة → "تحويل إلى مُرسلة" / "وضع كمدفوعة"',
+    ],
+    publicShows: 'لا يظهر للزوار — هذه بيانات داخلية فقط.',
+    supabase:
+      'Table Editor → invoices. لتوليد الأرقام تلقائياً: يستعلم النظام عن أعلى عدد في INV-{year}-%. البيانات (data) تُملأ من نموذج الإنشاء.',
   },
   {
     id: 'templates',

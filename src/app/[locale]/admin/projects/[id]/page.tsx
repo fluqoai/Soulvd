@@ -1,15 +1,18 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, User as UserIcon, Trash2, ExternalLink, FileText } from 'lucide-react';
+import { Calendar, User as UserIcon, Trash2, ExternalLink, FileText, Receipt } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { ProjectForm } from '../ProjectForm';
 import { TimeEntriesSection } from '@/components/admin/TimeEntriesSection';
+import { MilestonesSection } from '@/components/admin/MilestonesSection';
 import { NotesSection } from '@/components/admin/NotesSection';
 import { TasksSection } from '@/components/admin/TasksSection';
+import { GenerateInvoiceButton } from '@/components/admin/GenerateInvoiceButton';
 import { deleteProject } from '@/lib/projects/actions';
 import type { Project, ProjectStatus } from '@/lib/projects/actions';
 import type { Note } from '@/lib/notes/actions';
+import type { Milestone } from '@/lib/milestones/actions';
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
   planning:    'تخطيط',
@@ -38,13 +41,15 @@ export default async function ProjectDetailPage({
   const { data: project } = await admin.from('projects').select('*').eq('id', id).maybeSingle();
   if (!project) notFound();
 
-  // Fetch related data in parallel: clients, owners, time, notes, tasks
+  // Fetch related data in parallel: clients, owners, time, notes, tasks, milestones, templates
   const [
     { data: clientsData },
     { data: ownersData },
     { data: timeData },
     { data: notesData },
     { data: tasksData },
+    { data: milestonesData },
+    { data: templatesData },
   ] = await Promise.all([
     admin.from('clients').select('id, name, company, status').order('name', { ascending: true }),
     admin.from('users').select('id, full_name, email').order('full_name', { ascending: true }),
@@ -65,6 +70,12 @@ export default async function ProjectDetailPage({
       .eq('link_type', 'project')
       .eq('link_id', id)
       .order('created_at', { ascending: false }),
+    admin
+      .from('milestones')
+      .select('id, project_id, name, description, due_date, status, order_index, completed_at, created_at, updated_at')
+      .eq('project_id', id)
+      .order('order_index', { ascending: true }),
+    admin.from('templates').select('id, name, type').order('name', { ascending: true }),
   ]);
 
   const t = project as unknown as Project;
@@ -81,6 +92,7 @@ export default async function ProjectDetailPage({
     priority: 'low' | 'medium' | 'high'; status: 'pending' | 'in_progress' | 'done' | 'cancelled';
     assigned_to: string | null; created_at: string; completed_at: string | null;
   }>;
+  const milestones = (milestonesData ?? []) as Milestone[];
 
   // Resolve note authors
   const noteAuthorIds = Array.from(new Set(((notesData ?? []) as Array<{ author_id: string | null }>).map((n) => n.author_id).filter((x): x is string => !!x)));
@@ -132,12 +144,12 @@ export default async function ProjectDetailPage({
                 <ExternalLink className="size-3.5" />
               </Link>
             )}
-            <Link
-              href={`/admin/invoices?client_id=${t.client_id}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-ink-900/10 hover:border-sage-300 text-sm font-medium"
-            >
-              <FileText className="size-3.5" /> فاتورة
-            </Link>
+            <GenerateInvoiceButton
+              projectId={t.id}
+              projectName={t.name}
+              templates={((templatesData ?? []) as Array<{ id: string; name: string; type: string }>)}
+              hasBillableTime={timeEntries.some((e) => e.billable && e.hourly_rate != null)}
+            />
           </div>
         }
       />
@@ -160,6 +172,11 @@ export default async function ProjectDetailPage({
             projectCurrency={t.currency ?? 'SAR'}
             entries={timeEntries}
             users={timeUsers}
+          />
+
+          <MilestonesSection
+            projectId={id}
+            milestones={milestones}
           />
         </div>
 
