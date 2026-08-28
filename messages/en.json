@@ -458,6 +458,19 @@
           "General medical inquiries",
           "Post-visit follow-up"
         ]
+      },
+      {
+        "key": "other",
+        "icon": "MoreHorizontal",
+        "title": "Other sectors",
+        "subtitle": "Custom solutions for any sector not listed above.",
+        "description": "We design tailored solutions for any other sector — from logistics to hospitality, from retail to vocational training. If your business has customers on WhatsApp, we can help you automate how you talk to them.",
+        "useCases": [
+          "Custom solutions for unique sectors",
+          "Direct integration with your existing systems",
+          "Bot training on your data and knowledge base",
+          "Arabic-language support around the clock"
+        ]
       }
     ]
   },

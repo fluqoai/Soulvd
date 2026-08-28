@@ -8,6 +8,7 @@ import {
   Home,
   GraduationCap,
   HeartPulse,
+  MoreHorizontal,
   type LucideIcon,
 } from 'lucide-react';
 import { Section } from '@/components/ui/Section';
@@ -31,6 +32,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Home,
   GraduationCap,
   HeartPulse,
+  MoreHorizontal,
 };
 
 export async function SectorDetail({ slug }: { slug: string }) {

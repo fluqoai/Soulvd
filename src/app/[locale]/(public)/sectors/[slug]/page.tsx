@@ -13,6 +13,6 @@ export default async function SectorDetailPage({
 
 // Pre-generate the 6 sector slugs at build time
 export async function generateStaticParams() {
-  const slugs = ['nonprofit', 'public', 'restaurants', 'real-estate', 'education', 'healthcare'];
+  const slugs = ['nonprofit', 'public', 'restaurants', 'real-estate', 'education', 'healthcare', 'other'];
   return slugs.map((slug) => ({ slug }));
 }

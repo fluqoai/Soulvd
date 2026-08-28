@@ -6,6 +6,7 @@ import {
   Home,
   GraduationCap,
   HeartPulse,
+  MoreHorizontal,
   ArrowUpRight,
   type LucideIcon,
 } from 'lucide-react';
@@ -29,6 +30,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Home,
   GraduationCap,
   HeartPulse,
+  MoreHorizontal,
 };
 
 export async function SectorsList() {
