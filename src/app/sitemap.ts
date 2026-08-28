@@ -15,7 +15,7 @@ import { routing } from '@/i18n/routing';
  * sector slugs would be added here when those pages are wired up.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://soulvd.net';
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://soulvd.sa';
   const now = new Date();
 
   const staticPaths = ['/', '/about', '/services', '/sectors', '/contact'];

@@ -7,7 +7,7 @@ export async function ContactInfo() {
   const t = await getTranslations('contact.info');
 
   const channels = [
-    { icon: Mail, label: t('email_label'), value: 'mohammad@soulvd.net', href: 'mailto:mohammad@soulvd.net' },
+    { icon: Mail, label: t('email_label'), value: 'info@soulvd.sa', href: 'mailto:info@soulvd.sa' },
     { icon: Phone, label: t('phone_label'), value: '05 696 688 73', href: 'tel:+966569668873' },
     { icon: MessageCircle, label: t('whatsapp_label'), value: '05 696 688 73', href: 'https://wa.me/966569668873' },
   ];

@@ -9,7 +9,7 @@ import { Phone, Mail, MapPin, Clock, ShieldCheck } from 'lucide-react';
 const PHONE_DISPLAY = '05 696 688 73';
 const PHONE_INTL = '+966569668873';      // E.164 — tel: links
 const PHONE_WA = '966569668873';          // digits-only — wa.me links
-const CONTACT_EMAIL = 'mohammad@soulvd.net';
+const CONTACT_EMAIL = 'info@soulvd.sa';
 const CR_NUMBER = '7054075218';           // السجل التجاري
 const TAX_NUMBER = '314295103800003';     // الرقم الضريبي
 const WA_GREEN = '#25D366';

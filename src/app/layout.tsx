@@ -25,7 +25,7 @@ const fraunces = Fraunces({
   display: 'swap',
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://soulvd.net';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://soulvd.sa';
 
 export const viewport: Viewport = {
   width: 'device-width',

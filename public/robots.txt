@@ -7,4 +7,4 @@ Disallow: /admin
 Disallow: /login
 Disallow: /api
 
-Sitemap: https://soulvd.net/sitemap.xml
+Sitemap: https://soulvd.sa/sitemap.xml

@@ -106,7 +106,7 @@ export async function GET() {
             />
             <span>Official Meta WhatsApp Business Partner · 2026</span>
           </div>
-          <div style={{ fontWeight: 500 }}>soulvd.net</div>
+          <div style={{ fontWeight: 500 }}>soulvd.sa</div>
         </div>
       </div>
     ),
