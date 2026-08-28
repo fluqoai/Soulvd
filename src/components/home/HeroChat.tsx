@@ -22,14 +22,14 @@ function getConversation(locale: 'ar' | 'en'): Bubble[] {
     return [
       { side: 'in', text: 'السلام عليكم، أبغى أعرف عن خدماتكم في واتساب', time: '10:23 ص' },
       { side: 'out', text: 'وعليكم السلام، سولڤد معك. البوت يرد على عملائك بالعربي خلال ثوانٍ. إيش مجال عملك؟', time: '10:23 ص', read: true },
-      { side: 'in', text: 'عندي مطعم في الرياض، أبغى أزيد الطلبات خاصة في الويكند', time: '10:24 ص' },
+      { side: 'in', text: 'عندي مطعم في الخبر، أبغى أزيد الطلبات خاصة في الويكند', time: '10:24 ص' },
       { side: 'out', text: 'ممتاز. عندنا بوت يرد على العملاء بالعربي ٢٤/٧ وياخذ الطلبات تلقائياً. أحجز لك ديمو مجاني؟', time: '10:24 ص', read: true },
     ];
   }
   return [
     { side: 'in', text: 'Hi, I want to know more about your WhatsApp services', time: '10:23 AM' },
     { side: 'out', text: "Hi there — Soulvd here. I can book you a free demo in 2 minutes. What's your business?", time: '10:23 AM', read: true },
-    { side: 'in', text: 'I run a restaurant in Riyadh. I want to grow orders, especially on weekends.', time: '10:24 AM' },
+    { side: 'in', text: 'I run a restaurant in Al Khobar. I want to grow orders, especially on weekends.', time: '10:24 AM' },
     { side: 'out', text: 'Perfect. We have a 24/7 Arabic bot that takes orders automatically. Shall I book a free demo for you?', time: '10:24 AM', read: true },
   ];
 }

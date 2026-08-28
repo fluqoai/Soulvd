@@ -68,8 +68,8 @@ const caseStudies = [
       en: '40% more orders in 8 weeks',
     },
     summary: {
-      ar: 'سلسلة مطاعم في الرياض تستخدم بوت سولڤد لتلقي طلبات التوصيل والحجوزات عبر واتساب، بدلاً من خطوط الهاتف التقليدية.',
-      en: 'A Riyadh restaurant chain moved delivery and reservation orders from phone lines to a Soulvd WhatsApp bot.',
+      ar: 'سلسلة مطاعم في الخبر تستخدم بوت سولڤد لتلقي طلبات التوصيل والحجوزات عبر واتساب، بدلاً من خطوط الهاتف التقليدية.',
+      en: 'An Al Khobar restaurant chain moved delivery and reservation orders from phone lines to a Soulvd WhatsApp bot.',
     },
     results: [
       { label: 'More orders', value: '+40%' },
@@ -79,7 +79,7 @@ const caseStudies = [
     order_index: 0,
   },
   {
-    client_name: 'دار الرياض العقارية',
+    client_name: 'دار الخبر العقارية',
     title: {
       ar: 'مضاعفة العملاء المحتملين المؤهلين',
       en: '2x more qualified leads',
@@ -145,7 +145,7 @@ const testimonials = [
   {
     client_name: 'نورة الفهد',
     client_role: 'الرئيس التنفيذي',
-    client_company: 'دار الرياض العقارية',
+    client_company: 'دار الخبر العقارية',
     quote: {
       ar: 'وفرنا موظف استقبال كامل. البوت يجيب على الاستفسارات، يجدول المعاينات، ويرسل عروض الأسعار — كل ذلك في ثوانٍ. زبائننا يحكون إن الخدمة أصبحت أسرع بكثير.',
       en: 'We saved a full-time receptionist. The bot handles inquiries, schedules viewings, sends quotes — all in seconds. Our clients say service is much faster now.',
