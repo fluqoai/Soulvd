@@ -66,3 +66,4 @@ public/brand/concepts/
 *.key
 .env
 .env.*
+commit-msg.txt
