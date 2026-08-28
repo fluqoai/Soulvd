@@ -42,23 +42,29 @@ export default async function AdminDashboard({
   if (isOwner) {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-    const [newLeads, totalLeads, openInvoices, templatesCount, myOpenTasks, overdueTasks] = await Promise.all([
+    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 7); weekStart.setHours(0, 0, 0, 0);
+    const [newLeads, totalLeads, openInvoices, templatesCount, activeProjects, myOpenTasks, overdueTasks, myHoursThisWeek] = await Promise.all([
       admin.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo),
       admin.from('leads').select('*', { count: 'exact', head: true }),
       admin.from('invoices').select('*', { count: 'exact', head: true }).in('status', ['draft', 'sent', 'overdue']),
       admin.from('templates').select('*', { count: 'exact', head: true }),
+      admin.from('projects').select('*', { count: 'exact', head: true }).in('status', ['planning', 'in_progress', 'on_hold']),
       admin.from('tasks').select('*', { count: 'exact', head: true })
         .eq('assigned_to', user.id)
         .in('status', ['pending', 'in_progress']),
       admin.from('tasks').select('*', { count: 'exact', head: true })
         .in('status', ['pending', 'in_progress'])
         .lt('due_date', todayStart.toISOString().slice(0, 10)),
+      admin.from('time_entries').select('hours')
+        .eq('user_id', user.id)
+        .gte('entry_date', weekStart.toISOString().slice(0, 10)),
     ]);
+    const weekHours = (myHoursThisWeek.data ?? []).reduce((s: number, e: { hours: number }) => s + Number(e.hours || 0), 0);
     stats = [
       { label: t('stats.new_leads'), value: newLeads.count ?? 0, href: '/admin/leads', icon: 'inbox' },
-      { label: t('stats.total_leads'), value: totalLeads.count ?? 0, href: '/admin/leads', icon: 'inbox' },
+      { label: t('stats.active_projects'), value: activeProjects.count ?? 0, href: '/admin/projects', icon: 'file' },
       { label: t('stats.open_invoices'), value: openInvoices.count ?? 0, href: '/admin/invoices', icon: 'receipt' },
-      { label: t('stats.templates_count'), value: templatesCount.count ?? 0, href: '/admin/templates', icon: 'file' },
+      { label: t('stats.hours_this_week'), value: weekHours.toFixed(1), href: '/admin/projects', icon: 'file' },
     ];
     myOpenTasksCount = myOpenTasks.count ?? 0;
     overdueTasksCount = overdueTasks.count ?? 0;

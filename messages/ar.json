@@ -553,6 +553,7 @@
       "partners": "الشركاء",
       "leads": "العملاء المحتملون",
       "clients": "العملاء",
+      "projects": "المشاريع",
       "tasks": "المهام",
       "templates": "القوالب",
       "invoices": "الفواتير",
@@ -579,7 +580,9 @@
       "stats": {
         "new_leads": "عملاء محتملون جدد",
         "total_leads": "إجمالي العملاء المحتملين",
+        "active_projects": "مشاريع نشطة",
         "open_invoices": "فواتير مفتوحة",
+        "hours_this_week": "ساعاتي هذا الأسبوع",
         "templates_count": "قوالب جاهزة"
       },
       "recent_leads": {

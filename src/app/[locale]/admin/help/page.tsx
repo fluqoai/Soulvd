@@ -25,6 +25,8 @@ import {
   Layout,
   ListChecks,
   StickyNote,
+  Briefcase,
+  Clock,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -412,6 +414,62 @@ const SECTIONS: Section[] = [
     publicShows: 'لا يظهر للزوار — هذه بيانات داخلية فقط.',
     supabase:
       'Table Editor → tasks. trigger تلقائي: عند نقل المهمة إلى done يُسجل completed_at. الفلتر السريع: status=in_progress لعرض المهام النشطة فقط.',
+  },
+  {
+    id: 'projects',
+    table: 'projects',
+    title: 'المشاريع',
+    short: 'العمل المنجز لصالح عميل (مدة، ميزانية، تسليم)',
+    icon: Briefcase,
+    why:
+      'كل مشروع مرتبط بعميل واحد. يحتوي على ميزانية (ساعات/مبلغ)، تاريخ بداية وتسليم، وحالة (تخطيط/جارٍ/متوقف/مُسلَّم/ملغى). يحوي سجلات وقت لمتابعة الجهد المبذول.',
+    fields: [
+      { key: 'client_id', ar: 'العميل (إلزامي)' },
+      { key: 'name / description', ar: 'الاسم والوصف' },
+      { key: 'status', ar: 'الحالة: planning / in_progress / on_hold / delivered / cancelled' },
+      { key: 'start_date / due_date', ar: 'تاريخ البداية والتسليم' },
+      { key: 'budget_hours', ar: 'ميزانية الساعات (اختياري)' },
+      { key: 'budget_amount', ar: 'ميزانية المبلغ بالريال (اختياري)' },
+      { key: 'currency', ar: 'العملة (افتراضي SAR)' },
+      { key: 'owner_id', ar: 'المسؤول (من users)' },
+    ],
+    editSteps: [
+      'افتح /admin/projects',
+      'استخدم التبويبات (الكل / تخطيط / جارٍ / مُسلَّم) أو فلتر حسب العميل',
+      'لإنشاء مشروع: زر "مشروع جديد" — اختر العميل واملأ التفاصيل',
+      'من بطاقة العميل: في /admin/clients/[id]، قسم "المشاريع" يتيح إنشاء مشروع سريع',
+      'لتسجيل وقت: افتح المشروع → "تسجيل وقت"',
+    ],
+    publicShows: 'لا يظهر للزوار — هذه بيانات داخلية فقط.',
+    supabase:
+      'Table Editor → projects. cascade delete: حذف العميل يحذف كل مشاريعه وسجلات وقتها. للبحث عن مشاريع متأخرة: status=in_progress AND due_date < today.',
+  },
+  {
+    id: 'time-entries',
+    table: 'time_entries',
+    title: 'سجلات الوقت',
+    short: 'ساعات عمل مسجلة على مشروع',
+    icon: Clock,
+    why:
+      'كل سجل يربط مستخدماً بمشروع، مع عدد الساعات وتاريخ العمل وقابلية الفوترة. تُجمع في صفحة المشروع لإظهار إجمالي الساعات والأموال القابلة للفوترة.',
+    fields: [
+      { key: 'project_id', ar: 'المشروع (إلزامي)' },
+      { key: 'user_id', ar: 'المستخدم الذي سجّل الوقت' },
+      { key: 'entry_date', ar: 'تاريخ العمل' },
+      { key: 'hours', ar: 'عدد الساعات (0 < h ≤ 24)' },
+      { key: 'description', ar: 'ماذا عملت؟' },
+      { key: 'billable', ar: 'قابلة للفوترة على العميل؟' },
+      { key: 'hourly_rate', ar: 'سعر الساعة بالريال (اختياري)' },
+    ],
+    editSteps: [
+      'افتح أي مشروع من /admin/projects',
+      'في قسم "سجل الوقت": اضغط "تسجيل وقت"',
+      'املأ التاريخ، الساعات، الوصف، سعر الساعة، وعلامة "قابلة للفوترة"',
+      'الإجمالي يُحسب تلقائياً في أسفل الجدول',
+    ],
+    publicShows: 'لا يظهر للزوار — هذه بيانات داخلية فقط.',
+    supabase:
+      'Table Editor → time_entries. مفهرس بـ project_id و user_id. cascade delete: حذف المشروع يحذف كل سجلات وقته. الفلتر: billable=true لعرض الساعات القابلة للفوترة فقط.',
   },
   {
     id: 'templates',

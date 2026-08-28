@@ -29,6 +29,7 @@ import {
   Settings,
   HelpCircle,
   ListChecks,
+  Briefcase,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -55,6 +56,7 @@ export const ADMIN_ICON_MAP: Record<string, LucideIcon> = {
   settings: Settings,
   help: HelpCircle,
   tasks: ListChecks,
+  projects: Briefcase,
 };
 
 /** Resolve a string name to a Lucide icon, with a safe fallback. */

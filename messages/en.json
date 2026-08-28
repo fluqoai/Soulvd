@@ -553,6 +553,7 @@
       "partners": "Partners",
       "leads": "Leads",
       "clients": "Clients",
+      "projects": "Projects",
       "tasks": "Tasks",
       "templates": "Templates",
       "invoices": "Invoices",
@@ -579,7 +580,9 @@
       "stats": {
         "new_leads": "New leads",
         "total_leads": "Total leads",
+        "active_projects": "Active projects",
         "open_invoices": "Open invoices",
+        "hours_this_week": "My hours this week",
         "templates_count": "Templates ready"
       },
       "recent_leads": {

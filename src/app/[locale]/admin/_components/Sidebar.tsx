@@ -32,13 +32,14 @@ const ICON: Record<string, string> = {
   partners: 'partners',
   leads: 'leads',
   clients: 'clients',
+  projects: 'projects',
+  tasks: 'tasks',
   templates: 'templates',
   invoices: 'invoices',
   quotes: 'quotes',
   users: 'users',
   activity_log: 'activity_log',
   settings: 'settings',
-  tasks: 'tasks',
 };
 
 export async function Sidebar({
@@ -71,6 +72,7 @@ export async function Sidebar({
   const adminItems: NavItem[] = [
     { href: '/admin/leads', labelKey: 'leads', iconName: ICON.leads, ownerOnly: true },
     { href: '/admin/clients', labelKey: 'clients', iconName: ICON.clients, ownerOnly: true },
+    { href: '/admin/projects', labelKey: 'projects', iconName: ICON.projects, ownerOnly: true },
     { href: '/admin/tasks', labelKey: 'tasks', iconName: ICON.tasks, ownerOnly: true },
     { href: '/admin/templates', labelKey: 'templates', iconName: ICON.templates, ownerOnly: true },
     { href: '/admin/invoices', labelKey: 'invoices', iconName: ICON.invoices, ownerOnly: true },
