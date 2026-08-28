@@ -577,6 +577,18 @@
       "title": "Dashboard",
       "welcome": "Welcome, {name}",
       "subtitle": "Overview of site performance and operations.",
+      "kpi": {
+        "mrr": "MRR",
+        "mrr_sub": "Active recurring projects",
+        "pipeline": "Pipeline",
+        "pipeline_sub": "Leads in proposal/negotiation",
+        "outstanding": "Outstanding",
+        "outstanding_sub": "Draft + sent + overdue",
+        "mtd_revenue": "MTD revenue",
+        "mtd_revenue_sub": "Paid invoices this month",
+        "hours_this_week": "My hours this week",
+        "hours_this_week_sub": "From time entries"
+      },
       "stats": {
         "new_leads": "New leads",
         "total_leads": "Total leads",

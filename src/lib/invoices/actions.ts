@@ -243,6 +243,171 @@ export async function deleteInvoice(id: string) {
   return { ok: true as const };
 }
 
+// ============================================================
+//  .docx generation
+// ============================================================
+
+import { fillDocxTemplate, numberToArabicWords } from '@/lib/docx/generate';
+
+const STATUS_TO_DROPDOWN: Record<InvoiceStatus, string> = {
+  draft:     'unpaid',
+  sent:      'unpaid',
+  overdue:   'unpaid',
+  cancelled: 'unpaid',
+  paid:      'paid',
+};
+
+const STATUS_DISPLAY_AR: Record<InvoiceStatus, string> = {
+  draft:     'مسودة',
+  sent:      'مُرسلة',
+  paid:      'مدفوعة',
+  overdue:   'متأخرة',
+  cancelled: 'ملغاة',
+};
+
+/**
+ * Generate a filled .docx for an invoice using the assigned template.
+ *  - Reads the template from the `templates` storage bucket
+ *  - Fills each SDT placeholder with the corresponding invoice field value
+ *  - Uploads the result to the `documents` bucket
+ *  - Updates invoices.generated_docx_path
+ *
+ * Supports up to 3 line items (the tax-invoice template has 3 slots).
+ * If the invoice has more, a warning is returned but the file is still
+ * generated with the first 3.
+ */
+export async function generateInvoiceDocx(invoiceId: string) {
+  const supabase = await createClient();
+  if (!supabase) return { ok: false as const, error: 'unauthorized' };
+
+  // Fetch the invoice
+  const { data: inv, error: invErr } = await supabase
+    .from('invoices')
+    .select('*')
+    .eq('id', invoiceId)
+    .maybeSingle();
+  if (invErr) return { ok: false as const, error: invErr.message };
+  if (!inv) return { ok: false as const, error: 'invoice_not_found' };
+
+  const invRow = inv as unknown as {
+    id: string;
+    number: string;
+    template_id: string | null;
+    client_id: string | null;
+    client_snapshot: { name?: string; email?: string; phone?: string; vat_number?: string; address?: string; company?: string };
+    data: { line_items?: LineItem[] };
+    subtotal: number | null;
+    vat_rate: number | null;
+    vat_amount: number | null;
+    total: number | null;
+    currency: string;
+    status: InvoiceStatus;
+    issue_date: string;
+    due_date: string | null;
+  };
+
+  if (!invRow.template_id) {
+    return { ok: false as const, error: 'no_template_assigned' };
+  }
+
+  // Fetch the template row to get file_path
+  const { data: tpl, error: tplErr } = await supabase
+    .from('templates')
+    .select('id, name, type, file_path')
+    .eq('id', invRow.template_id)
+    .maybeSingle();
+  if (tplErr) return { ok: false as const, error: tplErr.message };
+  if (!tpl) return { ok: false as const, error: 'template_not_found' };
+  const tplRow = tpl as { name: string; type: string; file_path: string };
+
+  // Download the .docx template from storage
+  const { data: tplBlob, error: dlErr } = await supabase.storage
+    .from('templates')
+    .download(tplRow.file_path);
+  if (dlErr || !tplBlob) return { ok: false as const, error: dlErr?.message ?? 'template_download_failed' };
+
+  const tplBytes = new Uint8Array(await tplBlob.arrayBuffer());
+
+  // Build the data map
+  const lineItems = invRow.data?.line_items ?? [];
+  const fmt = (n: number | null) =>
+    n == null ? '' : new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+  const fmtDate = (d: string | null) => {
+    if (!d) return '';
+    try {
+      return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch { return d; }
+  };
+
+  const warning =
+    lineItems.length > 3
+      ? `الفاتورة بها ${lineItems.length} بنود، لكن قالب "${tplRow.name}" يدعم 3 فقط. البنود الزائدة لم تُدرج.`
+      : null;
+
+  // Drop-down display values must be in the listItem set, or Word will
+  // fall back to the first item. The tax-invoice template has:
+  //   PAYMENT_STATUS: unpaid / part_paid / paid
+  //   BANK_ACCOUNT:   we use a static value from a const (the .docx lists
+  //                   "SNB" / "NCB" / "Rajhi" as the 3 options)
+  const data: Record<string, string> = {
+    CLIENT_NAME: invRow.client_snapshot?.name ?? '',
+    CLIENT_VAT_NO: invRow.client_snapshot?.vat_number ?? '',
+    INVOICE_NUMBER: invRow.number,
+    ISSUE_DATE: fmtDate(invRow.issue_date),
+    DUE_DATE: fmtDate(invRow.due_date),
+
+    ITEM_1_DESC: lineItems[0]?.description ?? '',
+    ITEM_1_PRICE: fmt(Number(lineItems[0]?.unit_price ?? 0)),
+    ITEM_1_VAT: fmt(Number(lineItems[0]?.unit_price ?? 0) * (Number(invRow.vat_rate ?? 0) / 100)),
+    ITEM_1_TOTAL: fmt(Number(lineItems[0]?.quantity ?? 0) * Number(lineItems[0]?.unit_price ?? 0)),
+
+    ITEM_2_DESC: lineItems[1]?.description ?? '',
+    ITEM_2_PRICE: fmt(Number(lineItems[1]?.unit_price ?? 0)),
+    ITEM_2_VAT: fmt(Number(lineItems[1]?.unit_price ?? 0) * (Number(invRow.vat_rate ?? 0) / 100)),
+    ITEM_2_TOTAL: fmt(Number(lineItems[1]?.quantity ?? 0) * Number(lineItems[1]?.unit_price ?? 0)),
+
+    ITEM_3_DESC: lineItems[2]?.description ?? '',
+    ITEM_3_PRICE: fmt(Number(lineItems[2]?.unit_price ?? 0)),
+    ITEM_3_VAT: fmt(Number(lineItems[2]?.unit_price ?? 0) * (Number(invRow.vat_rate ?? 0) / 100)),
+    ITEM_3_TOTAL: fmt(Number(lineItems[2]?.quantity ?? 0) * Number(lineItems[2]?.unit_price ?? 0)),
+
+    TOTAL_TAXABLE: fmt(invRow.subtotal),
+    TOTAL_VAT: fmt(invRow.vat_amount),
+    GRAND_TOTAL: fmt(invRow.total),
+    AMOUNT_IN_WORDS: numberToArabicWords(Number(invRow.total ?? 0), invRow.currency === 'SAR' ? 'ريال سعودي' : invRow.currency),
+
+    // Drop-downs — we pass the Arabic display text, but the .docx listItem
+    // values are English codes. We pass the CODE so Word picks the right
+    // entry from the drop-down list.
+    PAYMENT_STATUS: STATUS_TO_DROPDOWN[invRow.status],
+    BANK_ACCOUNT: 'SNB', // Default — user can change in Word
+  };
+
+  // Fill the template
+  const outBytes = fillDocxTemplate(tplBytes, data);
+
+  // Upload to the documents bucket
+  const path = `invoices/${invRow.number.replace(/[^A-Z0-9-]/gi, '_')}.docx`;
+  const { error: upErr } = await supabase.storage
+    .from('documents')
+    .upload(path, outBytes, {
+      contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      upsert: true,
+    });
+  if (upErr) return { ok: false as const, error: upErr.message };
+
+  // Get a public URL (documents bucket is public)
+  const { data: pub } = supabase.storage.from('documents').getPublicUrl(path);
+
+  // Update the invoice row
+  await supabase.from('invoices').update({
+    generated_docx_path: pub.publicUrl,
+  }).eq('id', invoiceId);
+
+  revalidatePath('/admin', 'layout');
+  return { ok: true as const, path: pub.publicUrl, warning };
+}
+
 /**
  * Build a draft invoice from a project's billable time entries.
  * The user lands on /admin/invoices/[new id] with line items pre-filled.

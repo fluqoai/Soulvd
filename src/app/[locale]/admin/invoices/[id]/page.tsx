@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, FileText, ExternalLink, Trash2, Download, User as UserIcon, Briefcase } from 'lucide-react';
+import { Calendar, FileText, ExternalLink, Trash2, Download, User as UserIcon, Briefcase, FileType } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { InvoiceForm } from '../InvoiceForm';
+import { GenerateDocxButton } from '@/components/admin/GenerateDocxButton';
 import { setInvoiceStatus, deleteInvoice, type InvoiceStatus, type LineItem } from '@/lib/invoices/actions';
 
 const STATUS_LABELS: Record<InvoiceStatus, string> = {
@@ -164,21 +165,36 @@ export default async function InvoiceDetailPage({
           </section>
 
           {/* Generated documents */}
-          {(inv.generated_docx_path || inv.generated_pdf_path) && (
-            <section className="rounded-2xl bg-paper border border-ink-900/5 p-5 space-y-2 text-sm">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-700">المستندات المولدة</h2>
-              {inv.generated_docx_path && (
-                <a href={inv.generated_docx_path} className="flex items-center gap-2 text-sage-700 hover:text-sage-800">
-                  <Download className="size-3.5" /> ملف .docx
-                </a>
-              )}
-              {inv.generated_pdf_path && (
-                <a href={inv.generated_pdf_path} className="flex items-center gap-2 text-sage-700 hover:text-sage-800">
-                  <Download className="size-3.5" /> ملف PDF
-                </a>
-              )}
-            </section>
-          )}
+          <section className="rounded-2xl bg-paper border border-ink-900/5 p-5 space-y-3 text-sm">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-700">المستندات المولدة</h2>
+            {!inv.template_id ? (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
+                اختر قالب .docx في النموذج أولاً لتوليد المستند.
+              </p>
+            ) : (
+              <GenerateDocxButton invoiceId={inv.id} hasExisting={!!inv.generated_docx_path} />
+            )}
+            {inv.generated_docx_path && (
+              <a
+                href={inv.generated_docx_path}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 text-sage-700 hover:text-sage-800 hover:underline"
+              >
+                <Download className="size-3.5" /> تنزيل ملف .docx الحالي
+              </a>
+            )}
+            {inv.generated_pdf_path && (
+              <a
+                href={inv.generated_pdf_path}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 text-sage-700 hover:text-sage-800 hover:underline"
+              >
+                <Download className="size-3.5" /> تنزيل ملف PDF
+              </a>
+            )}
+          </section>
 
           {/* Danger zone */}
           <section className="rounded-2xl border border-red-200/60 bg-red-50/40 p-4">
