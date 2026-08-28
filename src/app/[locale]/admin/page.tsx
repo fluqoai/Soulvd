@@ -2,7 +2,7 @@
 // Dashboard overview.
 
 import { getTranslations } from 'next-intl/server';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, ListChecks, Calendar, Flag } from 'lucide-react';
 import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
@@ -36,14 +36,23 @@ export default async function AdminDashboard({
 
   // Stats (different for owner vs editor)
   let stats: { label: string; value: string | number; href?: string; icon: 'inbox' | 'receipt' | 'file' | 'users' }[] = [];
+  let myOpenTasksCount = 0;
+  let overdueTasksCount = 0;
 
   if (isOwner) {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const [newLeads, totalLeads, openInvoices, templatesCount] = await Promise.all([
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const [newLeads, totalLeads, openInvoices, templatesCount, myOpenTasks, overdueTasks] = await Promise.all([
       admin.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo),
       admin.from('leads').select('*', { count: 'exact', head: true }),
       admin.from('invoices').select('*', { count: 'exact', head: true }).in('status', ['draft', 'sent', 'overdue']),
       admin.from('templates').select('*', { count: 'exact', head: true }),
+      admin.from('tasks').select('*', { count: 'exact', head: true })
+        .eq('assigned_to', user.id)
+        .in('status', ['pending', 'in_progress']),
+      admin.from('tasks').select('*', { count: 'exact', head: true })
+        .in('status', ['pending', 'in_progress'])
+        .lt('due_date', todayStart.toISOString().slice(0, 10)),
     ]);
     stats = [
       { label: t('stats.new_leads'), value: newLeads.count ?? 0, href: '/admin/leads', icon: 'inbox' },
@@ -51,6 +60,8 @@ export default async function AdminDashboard({
       { label: t('stats.open_invoices'), value: openInvoices.count ?? 0, href: '/admin/invoices', icon: 'receipt' },
       { label: t('stats.templates_count'), value: templatesCount.count ?? 0, href: '/admin/templates', icon: 'file' },
     ];
+    myOpenTasksCount = myOpenTasks.count ?? 0;
+    overdueTasksCount = overdueTasks.count ?? 0;
   } else {
     const [servicesCount, sectorsCount, statsCount, vpCount] = await Promise.all([
       admin.from('services').select('*', { count: 'exact', head: true }),
@@ -71,6 +82,18 @@ export default async function AdminDashboard({
     ? await admin.from('leads').select('id, name, email, status, created_at').order('created_at', { ascending: false }).limit(5)
     : { data: [] as { id: string; name: string; email: string | null; status: string; created_at: string }[] };
   const recentLeads = recentLeadsRes.data as Array<{ id: string; name: string; email: string | null; status: string; created_at: string }> | null;
+
+  // My open tasks (owner only — meaningful for the team)
+  const myTasksRes = isOwner
+    ? await admin
+        .from('tasks')
+        .select('id, title, due_date, priority, status')
+        .eq('assigned_to', user.id)
+        .in('status', ['pending', 'in_progress'])
+        .order('due_date', { ascending: true, nullsFirst: false })
+        .limit(8)
+    : { data: [] as Array<{ id: string; title: string; due_date: string | null; priority: string; status: string }> };
+  const myTasks = myTasksRes.data ?? [];
 
   const displayName = profile.full_name || profile.email?.split('@')[0] || 'there';
   const welcome = t('welcome', { name: displayName });
@@ -105,48 +128,107 @@ export default async function AdminDashboard({
         ))}
       </div>
 
-      {/* Recent leads (owner) */}
-      {isOwner && (
-        <section className="rounded-2xl bg-paper border border-ink-900/5 p-6 md:p-7">
-          <div className="flex items-center justify-between gap-4 mb-5">
-            <h2 className="text-lg font-semibold text-ink-900">{t('recent_leads.title')}</h2>
-            <Link href="/admin/leads" className="text-sm font-medium text-ink-700 hover:text-ink-900 underline-offset-4 hover:underline">
-              {t('recent_leads.view_all')}
-            </Link>
-          </div>
-          {recentLeads && recentLeads.length > 0 ? (
-            <ul className="divide-y divide-ink-900/5">
-              {recentLeads.map((lead) => (
-                <li key={lead.id} className="py-3 flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-ink-900 truncate">{lead.name}</p>
-                    <p className="text-xs text-ink-500 truncate">{lead.email ?? '—'}</p>
-                  </div>
-                  <div className="shrink-0 flex items-center gap-3">
-                    <span className={statusPill(lead.status)}>{lead.status}</span>
-                    <span className="text-xs text-ink-500">
-                      {new Date(lead.created_at).toLocaleDateString('ar-SA')}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-ink-500 py-6 text-center">{t('recent_leads.empty')}</p>
-          )}
-        </section>
-      )}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Recent leads (owner) */}
+        {isOwner && (
+          <section className="lg:col-span-2 rounded-2xl bg-paper border border-ink-900/5 p-6 md:p-7">
+            <div className="flex items-center justify-between gap-4 mb-5">
+              <h2 className="text-lg font-semibold text-ink-900">{t('recent_leads.title')}</h2>
+              <Link href="/admin/leads" className="text-sm font-medium text-ink-700 hover:text-ink-900 underline-offset-4 hover:underline">
+                {t('recent_leads.view_all')}
+              </Link>
+            </div>
+            {recentLeads && recentLeads.length > 0 ? (
+              <ul className="divide-y divide-ink-900/5">
+                {recentLeads.map((lead) => (
+                  <li key={lead.id} className="py-3 flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-ink-900 truncate">{lead.name}</p>
+                      <p className="text-xs text-ink-500 truncate">{lead.email ?? '—'}</p>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-3">
+                      <span className={statusPill(lead.status)}>{lead.status}</span>
+                      <span className="text-xs text-ink-500">
+                        {new Date(lead.created_at).toLocaleDateString('ar-SA')}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-ink-500 py-6 text-center">{t('recent_leads.empty')}</p>
+            )}
+          </section>
+        )}
+
+        {/* My tasks widget */}
+        {isOwner && (
+          <section className="rounded-2xl bg-paper border border-ink-900/5 p-6 md:p-7">
+            <div className="flex items-center justify-between gap-4 mb-5">
+              <div>
+                <h2 className="text-lg font-semibold text-ink-900 flex items-center gap-2">
+                  <ListChecks className="size-5 text-sage-700" />
+                  مهامي
+                </h2>
+                {overdueTasksCount > 0 ? (
+                  <p className="text-xs text-red-700 mt-1 font-medium">
+                    {overdueTasksCount} مهمة متأخرة عن موعدها
+                  </p>
+                ) : (
+                  <p className="text-xs text-ink-500 mt-1">{myOpenTasksCount} مهمة نشطة</p>
+                )}
+              </div>
+              <Link href="/admin/tasks?mine=1" className="text-sm font-medium text-ink-700 hover:text-ink-900 underline-offset-4 hover:underline">
+                عرض الكل
+              </Link>
+            </div>
+            {myTasks.length > 0 ? (
+              <ul className="space-y-2">
+                {myTasks.map((task) => {
+                  const isOverdue = task.due_date && task.due_date < new Date().toISOString().slice(0, 10);
+                  return (
+                    <li key={task.id}>
+                      <Link
+                        href={`/admin/tasks/${task.id}`}
+                        className="flex items-start gap-2.5 group py-1.5"
+                      >
+                        <Flag className={`size-3.5 mt-0.5 shrink-0 ${
+                          task.priority === 'high' ? 'text-red-600' : task.priority === 'medium' ? 'text-amber-600' : 'text-ink-400'
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-ink-900 group-hover:text-sage-700 truncate">{task.title}</p>
+                          {task.due_date && (
+                            <p className={`text-xs flex items-center gap-1 mt-0.5 ${isOverdue ? 'text-red-700 font-medium' : 'text-ink-500'}`}>
+                              <Calendar className="size-3" />
+                              <span className="tabular-nums">{new Date(task.due_date).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}</span>
+                              {isOverdue && <span className="text-red-700">· متأخر</span>}
+                            </p>
+                          )}
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-sm text-ink-500 py-6 text-center">لا توجد مهام مفتوحة.</p>
+            )}
+          </section>
+        )}
+      </div>
     </div>
   );
 }
 
 function statusPill(status: string) {
   const colors: Record<string, string> = {
-    new: 'bg-sage-100 text-sage-800',
-    contacted: 'bg-amber-100 text-amber-800',
-    qualified: 'bg-blue-100 text-blue-800',
-    closed: 'bg-gray-100 text-gray-700',
-    lost: 'bg-red-100 text-red-700',
+    new:         'bg-sage-100 text-sage-800',
+    contacted:   'bg-blue-100 text-blue-800',
+    qualified:   'bg-amber-100 text-amber-800',
+    proposal:    'bg-purple-100 text-purple-800',
+    negotiation: 'bg-orange-100 text-orange-800',
+    closed:      'bg-gray-100 text-gray-700',
+    lost:        'bg-red-100 text-red-700',
   };
   return `inline-block text-xs font-medium px-2 py-0.5 rounded-full ${colors[status] ?? colors.new}`;
 }

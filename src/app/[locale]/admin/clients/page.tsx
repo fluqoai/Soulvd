@@ -1,22 +1,60 @@
 import { Plus, Mail, Phone, Building2 } from 'lucide-react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { DataTable } from '@/components/admin/DataTable';
 import { DeleteButton } from '@/components/admin/DeleteButton';
 import { ButtonLink } from '@/components/ui/Button';
+import { ClientStatusPill } from './ClientStatusPill';
 import { deleteClientAction } from './actions';
 
-type C = { id: string; name: string; company: string | null; email: string | null; phone: string | null; vat_number: string | null; created_at: string };
+type C = {
+  id: string;
+  name: string;
+  company: string | null;
+  email: string | null;
+  phone: string | null;
+  vat_number: string | null;
+  status: 'active' | 'inactive' | 'archived';
+  created_at: string;
+};
 
 export default async function Page({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ status?: string }>;
 }) {
+  const { status: statusFilter } = await searchParams;
   const supabase = await createClient();
-  const { data } = await supabase.from('clients').select('id, name, company, email, phone, vat_number, created_at').order('created_at', { ascending: false });
+
+  let query = supabase
+    .from('clients')
+    .select('id, name, company, email, phone, vat_number, status, created_at')
+    .order('created_at', { ascending: false });
+
+  if (statusFilter && statusFilter !== 'all') {
+    query = query.eq('status', statusFilter);
+  }
+
+  const { data } = await query;
   const items = (data ?? []) as unknown as C[];
+
+  // counts per status (for the filter tabs)
+  const { data: allRows } = await supabase.from('clients').select('status', { count: 'exact' });
+  const counts: Record<string, number> = { all: items.length };
+  for (const r of (allRows ?? []) as Array<{ status: string }>) {
+    counts[r.status] = (counts[r.status] ?? 0) + 1;
+  }
+
+  const filterTabs = [
+    { value: 'all',      label: 'الكل' },
+    { value: 'active',   label: 'نشط' },
+    { value: 'inactive', label: 'متوقف' },
+    { value: 'archived', label: 'مؤرشف' },
+  ];
 
   return (
     <div>
@@ -29,11 +67,40 @@ export default async function Page({
           </ButtonLink>
         }
       />
+
+      {/* Filter tabs */}
+      <div className="mb-5 flex flex-wrap gap-2">
+        {filterTabs.map((tab) => {
+          const active = (statusFilter ?? 'all') === tab.value;
+          const count = counts[tab.value] ?? 0;
+          return (
+            <Link
+              key={tab.value}
+              href={`/admin/clients?status=${tab.value}`}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
+                active
+                  ? 'bg-sage-600 text-paper shadow-sm'
+                  : 'bg-paper text-ink-700 border border-ink-900/10 hover:border-sage-300 hover:text-sage-800'
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={`text-[11px] tabular-nums px-1.5 py-0.5 rounded-full ${
+                  active ? 'bg-paper/20 text-paper' : 'bg-ink-900/5 text-ink-600'
+                }`}
+              >
+                {count}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+
       <DataTable
         rows={items}
         rowKey={(r) => r.id}
         editHref={(r) => `/admin/clients/${r.id}`}
-        emptyMessage="لا يوجد عملاء بعد — أنشئ عميلاً أو حوّل استفساراً."
+        emptyMessage="لا يوجد عملاء بهذه الحالة بعد."
         columns={[
           {
             key: 'name',
@@ -74,6 +141,12 @@ export default async function Page({
             cell: (r) => r.vat_number
               ? <code className="text-xs px-2 py-1 rounded bg-linen-100 text-ink-700 border border-ink-900/10">{r.vat_number}</code>
               : <span className="text-ink-400">—</span>,
+          },
+          {
+            key: 'status',
+            header: 'الحالة',
+            width: '140px',
+            cell: (r) => <ClientStatusPill id={r.id} status={r.status} />,
           },
           {
             key: 'created',

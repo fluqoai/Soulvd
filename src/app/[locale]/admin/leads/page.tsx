@@ -15,25 +15,31 @@ type Lead = {
   message: string | null;
   source: string;
   status: string;
+  expected_value: number | null;
+  expected_close_date: string | null;
   created_at: string;
 };
 
-// Light-theme status pills. رجوعground is a soft tint of the color,
+// Light-theme status pills. Background is a soft tint of the color,
 // text is the deeper shade — easy to read on the white table.
 const STATUS_STYLES: Record<string, string> = {
-  new:        'bg-sage-100 text-sage-800 ring-1 ring-sage-200',
-  contacted:  'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
-  qualified:  'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
-  closed:     'bg-ink-100 text-ink-700 ring-1 ring-ink-900/10',
-  lost:       'bg-red-100 text-red-800 ring-1 ring-red-200',
+  new:         'bg-sage-100 text-sage-800 ring-1 ring-sage-200',
+  contacted:   'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
+  qualified:   'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  proposal:    'bg-purple-100 text-purple-800 ring-1 ring-purple-200',
+  negotiation: 'bg-orange-100 text-orange-800 ring-1 ring-orange-200',
+  closed:      'bg-ink-100 text-ink-700 ring-1 ring-ink-900/10',
+  lost:        'bg-red-100 text-red-800 ring-1 ring-red-200',
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  new:        'جديد',
-  contacted:  'تم التواصل',
-  qualified:  'مؤهل',
-  closed:     'مغلق',
-  lost:       'خاسر',
+  new:         'جديد',
+  contacted:   'تم التواصل',
+  qualified:   'مؤهل',
+  proposal:    'عرض مُرسل',
+  negotiation: 'تفاوض',
+  closed:      'مغلق (فاز)',
+  lost:        'خاسر',
 };
 
 export default async function LeadsAdminPage({
@@ -49,7 +55,7 @@ export default async function LeadsAdminPage({
 
   let query = supabase
     .from('leads')
-    .select('id, name, email, phone, company, message, source, status, created_at')
+    .select('id, name, email, phone, company, message, source, status, expected_value, expected_close_date, created_at')
     .order('created_at', { ascending: false });
 
   if (statusFilter && statusFilter !== 'all') {
@@ -69,13 +75,21 @@ export default async function LeadsAdminPage({
   }
 
   const filterTabs = [
-    { value: 'all',        label: 'الكل' },
-    { value: 'new',        label: 'جديد' },
-    { value: 'contacted',  label: 'تم التواصل' },
-    { value: 'qualified',  label: 'مؤهل' },
-    { value: 'closed',     label: 'مغلق' },
-    { value: 'lost',       label: 'خاسر' },
+    { value: 'all',         label: 'الكل' },
+    { value: 'new',         label: 'جديد' },
+    { value: 'contacted',   label: 'تم التواصل' },
+    { value: 'qualified',   label: 'مؤهل' },
+    { value: 'proposal',    label: 'عرض مُرسل' },
+    { value: 'negotiation', label: 'تفاوض' },
+    { value: 'closed',      label: 'مغلق' },
+    { value: 'lost',        label: 'خاسر' },
   ];
+
+  // Format SAR currency compactly
+  const formatSAR = (n: number | null) =>
+    n == null
+      ? '—'
+      : new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 0 }).format(n);
 
   return (
     <div>
@@ -156,13 +170,25 @@ export default async function LeadsAdminPage({
             ),
           },
           {
-            key: 'source',
-            header: 'المصدر',
-            width: '160px',
+            key: 'expected_value',
+            header: 'القيمة المتوقعة',
+            width: '140px',
             cell: (r) => (
-              <code className="text-xs px-2 py-1 rounded bg-linen-100 text-ink-700 border border-ink-900/10">
-                {r.source}
-              </code>
+              <span className="text-sm font-medium text-ink-900 tabular-nums" dir="ltr">
+                {formatSAR(r.expected_value)}
+              </span>
+            ),
+          },
+          {
+            key: 'expected_close',
+            header: 'إغلاق متوقع',
+            width: '130px',
+            cell: (r) => (
+              <span className="text-xs text-ink-700 tabular-nums">
+                {r.expected_close_date
+                  ? new Date(r.expected_close_date).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })
+                  : '—'}
+              </span>
             ),
           },
           {

@@ -4,20 +4,25 @@ import { useState, useTransition } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { Save, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Field, Textarea, Select } from '@/components/admin/Field';
+import { Field, Textarea, Select, TextInput } from '@/components/admin/Field';
 import {
   updateLeadStatus,
+  updateLeadPipeline,
   addLeadNote,
   convertLeadToClient,
 } from '../actions';
 
 const STATUSES = [
-  { value: 'new',        label: 'جديد' },
-  { value: 'contacted',  label: 'تم التواصل' },
-  { value: 'qualified',  label: 'مؤهل' },
-  { value: 'closed',     label: 'مغلق' },
-  { value: 'lost',       label: 'خاسر' },
+  { value: 'new',         label: 'جديد' },
+  { value: 'contacted',   label: 'تم التواصل' },
+  { value: 'qualified',   label: 'مؤهل' },
+  { value: 'proposal',    label: 'عرض مُرسل' },
+  { value: 'negotiation', label: 'تفاوض' },
+  { value: 'closed',      label: 'مغلق (فاز)' },
+  { value: 'lost',        label: 'خاسر' },
 ] as const;
+
+type Owner = { id: string; full_name: string | null; email: string };
 
 export function LeadStatusForm({ id, initialStatus }: { id: string; initialStatus: string }) {
   const router = useRouter();
@@ -55,6 +60,90 @@ export function LeadStatusForm({ id, initialStatus }: { id: string; initialStatu
       </Button>
       {error && <span className="text-xs text-red-700 self-center bg-red-50 px-2 py-1 rounded">{error}</span>}
     </div>
+  );
+}
+
+export function LeadPipelineForm({
+  id,
+  initial,
+  owners,
+}: {
+  id: string;
+  initial: {
+    expected_value: number | null;
+    expected_close_date: string | null;
+    owner_id: string | null;
+  };
+  owners: Owner[];
+}) {
+  const router = useRouter();
+  const [value, setValue] = useState<string>(initial.expected_value?.toString() ?? '');
+  const [date, setDate] = useState<string>(initial.expected_close_date ?? '');
+  const [ownerId, setOwnerId] = useState<string>(initial.owner_id ?? '');
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  const dirty =
+    (value === '' ? null : Number(value)) !== initial.expected_value ||
+    date !== (initial.expected_close_date ?? '') ||
+    ownerId !== (initial.owner_id ?? '');
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        startTransition(async () => {
+          setError(null);
+          const r = await updateLeadPipeline(id, {
+            expected_value: value === '' ? null : Number(value),
+            expected_close_date: date || null,
+            owner_id: ownerId || null,
+          });
+          if (!r.ok) setError(r.error);
+          else router.refresh();
+        });
+      }}
+      className="grid gap-4 sm:grid-cols-3"
+    >
+      <Field label="القيمة المتوقعة (ر.س)" hint="السعر المتوقع للصفقة">
+        <TextInput
+          name="expected_value"
+          type="number"
+          inputMode="decimal"
+          step="0.01"
+          min="0"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="0.00"
+        />
+      </Field>
+      <Field label="تاريخ الإغلاق المتوقع">
+        <TextInput
+          name="expected_close_date"
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+      </Field>
+      <Field label="المسؤول">
+        <Select name="owner_id" value={ownerId} onChange={(e) => setOwnerId(e.target.value)}>
+          <option value="">— غير مُسنَد —</option>
+          {owners.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.full_name || o.email}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <div className="sm:col-span-3 flex items-center justify-between gap-3">
+        {error && <span className="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">{error}</span>}
+        <div className="flex-1" />
+        <Button type="submit" size="sm" disabled={isPending || !dirty}>
+          <Save className="size-4" />
+          {isPending ? 'جاري الحفظ…' : 'حفظ خط الأنابيب'}
+        </Button>
+      </div>
+    </form>
   );
 }
 

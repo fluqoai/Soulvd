@@ -28,6 +28,7 @@ import {
   Activity,
   Settings,
   HelpCircle,
+  ListChecks,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -53,6 +54,7 @@ export const ADMIN_ICON_MAP: Record<string, LucideIcon> = {
   activity_log: Activity,
   settings: Settings,
   help: HelpCircle,
+  tasks: ListChecks,
 };
 
 /** Resolve a string name to a Lucide icon, with a safe fallback. */
