@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { Save, FileDown, Loader2, AlertCircle, CheckCircle2, Plus, Trash2, Download, ExternalLink } from 'lucide-react';
-import { Field, TextInput, Textarea, Select } from '@/components/admin/Field';
+import { Save, FileDown, Loader2, AlertCircle, CheckCircle2, Plus, Trash2, Download, Mail, MessageCircle } from 'lucide-react';
+import { Field, TextInput, Textarea } from '@/components/admin/Field';
 import { Button } from '@/components/ui/Button';
 import { generateAndSaveDocument } from '@/lib/pdf/actions';
+import { sendDocumentEmail } from '@/lib/pdf/email';
+import { buildWhatsAppLink, normalizePhoneForWaMe } from '@/lib/pdf/whatsapp';
 import type { DocumentKind } from '@/lib/pdf/types';
 
 type LineItem = { description: string; quantity: number; unit_price: number };
@@ -57,7 +59,27 @@ export function DocumentForm({
 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ publicUrl: string; savedId?: string } | null>(null);
+  const [result, setResult] = useState<{ publicUrl: string; savedId?: string; total: number } | null>(null);
+
+  // Email send state
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  // Pre-build the wa.me link when result + phone are both present
+  const whatsAppLink = useMemo(() => {
+    if (!result) return null;
+    return buildWhatsAppLink({
+      clientName: clientName.trim(),
+      clientPhone: clientPhone.trim(),
+      documentKind: kind,
+      documentNumber: number.trim(),
+      total: result.total,
+      currency: 'SAR',
+      publicUrl: result.publicUrl,
+      notes,
+    });
+  }, [result, clientName, clientPhone, kind, number, notes]);
 
   // Auto-computed totals (display only — server recomputes)
   const subtotal = items.reduce((s, it) => s + (Number(it.quantity) || 0) * (Number(it.unit_price) || 0), 0);
@@ -81,6 +103,8 @@ export function DocumentForm({
   const handleSubmit = (save: boolean) => {
     setError(null);
     setResult(null);
+    setEmailStatus('idle');
+    setEmailError(null);
     startTransition(async () => {
       const r = await generateAndSaveDocument({
         kind,
@@ -110,13 +134,38 @@ export function DocumentForm({
         setError(r.error);
         return;
       }
-      setResult({ publicUrl: r.publicUrl, savedId: r.savedId });
+      setResult({ publicUrl: r.publicUrl, savedId: r.savedId, total });
       // If saved, navigate to the detail page; otherwise just stay on this page
       // so the user can download the PDF.
       if (save && r.savedId) {
         // small delay so the user sees the success state before redirect
         setTimeout(() => router.push(kind === 'invoice' ? `/admin/invoices/${r.savedId}` : `/admin/invoices`), 1500);
       }
+    });
+  };
+
+  const handleEmail = () => {
+    if (!result || !clientEmail.trim()) return;
+    setEmailStatus('sending');
+    setEmailError(null);
+    setEmailSending(true);
+    startTransition(async () => {
+      const r = await sendDocumentEmail({
+        to: clientEmail.trim(),
+        documentKind: kind,
+        documentNumber: number.trim(),
+        clientName: clientName.trim(),
+        publicUrl: result.publicUrl,
+        total: result.total,
+        currency: 'SAR',
+      });
+      setEmailSending(false);
+      if (!r.ok) {
+        setEmailStatus('error');
+        setEmailError(r.error);
+        return;
+      }
+      setEmailStatus('sent');
     });
   };
 
@@ -181,15 +230,15 @@ export function DocumentForm({
               dir="ltr"
             />
           </Field>
-          <Field label="رقم الجوال">
+          <Field label="رقم الجوال" hint="يُفعّل زر 'إرسال عبر واتساب' بعد التوليد">
             <TextInput
               value={clientPhone}
               onChange={(e) => setClientPhone(e.target.value)}
-              placeholder="05xxxxxxxx"
+              placeholder="05xxxxxxxx أو +9665xxxxxxxx"
               dir="ltr"
             />
           </Field>
-          <Field label="البريد الإلكتروني">
+          <Field label="البريد الإلكتروني" hint="يُفعّل زر 'إرسال بالبريد' بعد التوليد (مرفق مع PDF)">
             <TextInput
               type="email"
               value={clientEmail}
@@ -382,7 +431,7 @@ export function DocumentForm({
       )}
 
       {result && (
-        <div className="rounded-xl border border-sage-200 bg-sage-50 p-4 space-y-3">
+        <div className="rounded-xl border border-sage-200 bg-sage-50 p-4 space-y-4">
           <div className="flex items-center gap-2 text-sm text-sage-900">
             <CheckCircle2 className="size-5" />
             <p className="font-semibold">تم توليد {kind === 'invoice' ? 'الفاتورة' : 'عرض السعر'} بنجاح</p>
@@ -396,10 +445,45 @@ export function DocumentForm({
             >
               <Download className="size-4" /> فتح / تنزيل PDF
             </a>
+            {clientEmail.trim() && (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={handleEmail}
+                disabled={emailSending}
+              >
+                {emailSending ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
+                {emailStatus === 'sent' ? 'تم الإرسال' : emailSending ? 'جاري الإرسال…' : `إرسال إلى ${clientEmail.trim()}`}
+              </Button>
+            )}
+            {whatsAppLink && (
+              <a
+                href={whatsAppLink}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] text-paper text-sm font-semibold px-4 py-2 hover:bg-[#1FAD52]"
+              >
+                <MessageCircle className="size-4" /> إرسال عبر واتساب
+              </a>
+            )}
             {result.savedId && (
               <span className="text-xs text-sage-800">تم الحفظ في جدول {kind === 'invoice' ? 'الفواتير' : 'الفواتير'} (سيتم تحويلك تلقائياً)…</span>
             )}
           </div>
+
+          {/* Email status feedback */}
+          {emailStatus === 'sent' && (
+            <p className="text-xs text-sage-800 flex items-center gap-1.5">
+              <CheckCircle2 className="size-3.5" /> تم إرسال البريد إلى {clientEmail.trim()} مع نسخة PDF مرفقة.
+            </p>
+          )}
+          {emailStatus === 'error' && emailError && (
+            <p className="text-xs text-red-800 bg-red-50 border border-red-200 rounded-md px-2 py-1.5 flex items-start gap-1.5">
+              <AlertCircle className="size-3.5 shrink-0 mt-0.5" />
+              <span>فشل إرسال البريد: {emailError}</span>
+            </p>
+          )}
         </div>
       )}
 
@@ -427,16 +511,6 @@ export function DocumentForm({
           {isPending ? <Loader2 className="size-4 animate-spin" /> : <FileDown className="size-4" />}
           توليد PDF فقط (بدون حفظ)
         </Button>
-        {result && (
-          <a
-            href={result.publicUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-sage-700 hover:text-sage-800 hover:underline"
-          >
-            <ExternalLink className="size-3.5" /> فتح الملف في تبويب جديد
-          </a>
-        )}
       </div>
     </form>
   );
