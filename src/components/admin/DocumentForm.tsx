@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useTransition, useMemo } from 'react';
+import { useState, useTransition, useMemo, useEffect, useRef } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { Save, FileDown, Loader2, AlertCircle, CheckCircle2, Plus, Trash2, Download, Mail, MessageCircle } from 'lucide-react';
+import { Save, FileDown, Loader2, AlertCircle, CheckCircle2, Plus, Trash2, Download, Mail, MessageCircle, History, X } from 'lucide-react';
 import { Field, TextInput, Textarea } from '@/components/admin/Field';
 import { Button } from '@/components/ui/Button';
 import { generateAndSaveDocument } from '@/lib/pdf/actions';
 import { sendDocumentEmail } from '@/lib/pdf/email';
 import { buildWhatsAppLink, normalizePhoneForWaMe } from '@/lib/pdf/whatsapp';
+import { searchRecentClients, type ClientSuggestion } from '@/lib/clients/actions';
 import type { DocumentKind } from '@/lib/pdf/types';
 
 type LineItem = { description: string; quantity: number; unit_price: number };
@@ -66,6 +67,16 @@ export function DocumentForm({
   const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [emailError, setEmailError] = useState<string | null>(null);
 
+  // Draft autosave state
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
+  const draftSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Recent clients state
+  const [recentClients, setRecentClients] = useState<ClientSuggestion[]>([]);
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
+  const [searchingClients, setSearchingClients] = useState(false);
+  const clientSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Pre-build the wa.me link when result + phone are both present
   const whatsAppLink = useMemo(() => {
     if (!result) return null;
@@ -80,6 +91,126 @@ export function DocumentForm({
       notes,
     });
   }, [result, clientName, clientPhone, kind, number, notes]);
+
+  // ===== Draft autosave =====
+  const DRAFT_KEY = `soulvd:draft:document:new:${kind}`;
+
+  // Restore from localStorage on mount (and when kind changes)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw) as {
+        number?: string;
+        issue_date?: string;
+        valid_until?: string;
+        clientName?: string;
+        clientCompany?: string;
+        clientVat?: string;
+        clientAddress?: string;
+        clientEmail?: string;
+        clientPhone?: string;
+        vatRate?: string;
+        notes?: string;
+        items?: LineItem[];
+        savedAt?: number;
+      };
+      if (d.number) setNumber(d.number);
+      if (d.issue_date) setIssueDate(d.issue_date);
+      if (d.valid_until) setValidUntil(d.valid_until);
+      if (d.clientName != null) setClientName(d.clientName);
+      if (d.clientCompany != null) setClientCompany(d.clientCompany);
+      if (d.clientVat != null) setClientVat(d.clientVat);
+      if (d.clientAddress != null) setClientAddress(d.clientAddress);
+      if (d.clientEmail != null) setClientEmail(d.clientEmail);
+      if (d.clientPhone != null) setClientPhone(d.clientPhone);
+      if (d.vatRate) setVatRate(d.vatRate);
+      if (d.notes != null) setNotes(d.notes);
+      if (Array.isArray(d.items) && d.items.length > 0) setItems(d.items);
+      if (d.savedAt) setDraftSavedAt(d.savedAt);
+    } catch {
+      // ignore corrupt draft
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kind]);
+
+  // Debounced save on any field change
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (draftSaveTimerRef.current) clearTimeout(draftSaveTimerRef.current);
+    draftSaveTimerRef.current = setTimeout(() => {
+      const payload = {
+        number, issue_date: issueDate, valid_until: validUntil,
+        clientName, clientCompany, clientVat, clientAddress, clientEmail, clientPhone,
+        vatRate, notes, items,
+        savedAt: Date.now(),
+      };
+      try {
+        window.localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+        setDraftSavedAt(payload.savedAt);
+      } catch {
+        // ignore quota errors
+      }
+    }, 500);
+    return () => {
+      if (draftSaveTimerRef.current) clearTimeout(draftSaveTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [number, issueDate, validUntil, clientName, clientCompany, clientVat, clientAddress, clientEmail, clientPhone, vatRate, notes, items, kind]);
+
+  // ===== Recent clients =====
+  // Debounced search when name field changes or dropdown opens
+  useEffect(() => {
+    if (!showClientDropdown) return;
+    if (clientSearchTimerRef.current) clearTimeout(clientSearchTimerRef.current);
+    setSearchingClients(true);
+    clientSearchTimerRef.current = setTimeout(async () => {
+      const r = await searchRecentClients(clientName, 5);
+      setRecentClients(r);
+      setSearchingClients(false);
+    }, 200);
+    return () => {
+      if (clientSearchTimerRef.current) clearTimeout(clientSearchTimerRef.current);
+    };
+  }, [clientName, showClientDropdown]);
+
+  const pickClient = (c: ClientSuggestion) => {
+    setClientName(c.name);
+    setClientCompany(c.company ?? '');
+    setClientVat(c.vat_number ?? '');
+    setClientAddress(c.address ?? '');
+    setClientEmail(c.email ?? '');
+    setClientPhone(c.phone ?? '');
+    setShowClientDropdown(false);
+  };
+
+  const clearDraft = () => {
+    if (typeof window === 'undefined') return;
+    if (typeof window !== 'undefined' && !window.confirm('حذف المسودة المحفوظة؟')) return;
+    try {
+      window.localStorage.removeItem(DRAFT_KEY);
+      setDraftSavedAt(null);
+    } catch {}
+  };
+
+  // Format "saved X seconds ago" text
+  const savedAgoText = useMemo(() => {
+    if (!draftSavedAt) return null;
+    const sec = Math.floor((Date.now() - draftSavedAt) / 1000);
+    if (sec < 5) return 'تم الحفظ للتو';
+    if (sec < 60) return `منذ ${sec} ثانية`;
+    if (sec < 3600) return `منذ ${Math.floor(sec / 60)} دقيقة`;
+    return `منذ ${Math.floor(sec / 3600)} ساعة`;
+  }, [draftSavedAt]);
+
+  // Refresh "saved ago" every 10s
+  const [, force] = useState(0);
+  useEffect(() => {
+    if (!draftSavedAt) return;
+    const t = setInterval(() => force((n) => n + 1), 10_000);
+    return () => clearInterval(t);
+  }, [draftSavedAt]);
 
   // Auto-computed totals (display only — server recomputes)
   const subtotal = items.reduce((s, it) => s + (Number(it.quantity) || 0) * (Number(it.unit_price) || 0), 0);
@@ -176,7 +307,23 @@ export function DocumentForm({
     >
       {/* Document type toggle */}
       <section className="rounded-2xl border border-ink-900/10 bg-paper p-5">
-        <p className="text-sm font-semibold text-ink-700 mb-3">نوع المستند</p>
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <p className="text-sm font-semibold text-ink-700">نوع المستند</p>
+          {draftSavedAt && savedAgoText && (
+            <div className="flex items-center gap-2 text-xs text-ink-500">
+              <History className="size-3" />
+              <span>مسودة محفوظة · {savedAgoText}</span>
+              <button
+                type="button"
+                onClick={clearDraft}
+                className="text-ink-400 hover:text-red-600 p-0.5 rounded transition-colors"
+                title="حذف المسودة المحفوظة"
+              >
+                <X className="size-3" />
+              </button>
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -207,14 +354,56 @@ export function DocumentForm({
       <section className="rounded-2xl border border-ink-900/10 bg-paper p-5 space-y-4">
         <p className="text-sm font-semibold uppercase tracking-wider text-ink-700">بيانات العميل</p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="اسم العميل" required>
-            <TextInput
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              placeholder="أحمد القحطاني"
-              required
-            />
-          </Field>
+          <div className="relative">
+            <Field label="اسم العميل" required>
+              <TextInput
+                value={clientName}
+                onChange={(e) => {
+                  setClientName(e.target.value);
+                  setShowClientDropdown(true);
+                }}
+                onFocus={() => setShowClientDropdown(true)}
+                onBlur={() => setTimeout(() => setShowClientDropdown(false), 200)}
+                placeholder="أحمد القحطاني"
+                required
+                autoComplete="off"
+              />
+            </Field>
+            {showClientDropdown && (recentClients.length > 0 || searchingClients) && (
+              <div className="absolute z-20 top-full inset-x-0 mt-1 max-h-64 overflow-y-auto rounded-lg border border-ink-900/10 bg-paper shadow-lg">
+                <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-ink-500 border-b border-ink-900/5 flex items-center gap-1">
+                  <History className="size-3" /> {clientName ? 'عملاء يطابقون' : 'آخر العملاء'}
+                </p>
+                {searchingClients && recentClients.length === 0 ? (
+                  <p className="px-3 py-3 text-xs text-ink-500">جاري البحث…</p>
+                ) : recentClients.length === 0 ? (
+                  <p className="px-3 py-3 text-xs text-ink-500">لا توجد نتائج</p>
+                ) : (
+                  <ul>
+                    {recentClients.map((c) => (
+                      <li key={c.id}>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => { e.preventDefault(); pickClient(c); }}
+                          className="w-full text-start px-3 py-2 hover:bg-sage-50 flex items-center gap-2"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-ink-900 truncate">{c.name}</p>
+                            {c.company && (
+                              <p className="text-xs text-ink-500 truncate">{c.company}</p>
+                            )}
+                          </div>
+                          {c.vat_number && (
+                            <span className="text-[10px] text-ink-500 font-mono" dir="ltr">{c.vat_number}</span>
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
           <Field label="الشركة">
             <TextInput
               value={clientCompany}
