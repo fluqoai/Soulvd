@@ -97,9 +97,9 @@ export async function deleteQuote(id: string) {
  *  - Rebuilds client_snapshot from the current client row (if any), so it
  *    stays in sync with the latest client data. Falls back to the snapshot
  *    in the form input when the client_id is empty.
- *  - Preserves data.kind and data.valid_until in the JSONB blob (the
- *    .docx/PDF template engine reads data.valid_until, and the kind tag
- *    distinguishes the document type at read time).
+ *  - Preserves data.valid_until in the JSONB blob (the .docx/PDF template
+ *    engine reads it). The row's table (`quotes`) already encodes the
+ *    kind, so the blob no longer needs to repeat it.
  *  - Never touches `number` or `created_by` — those are immutable after
  *    creation.
  */
@@ -156,7 +156,6 @@ export async function updateQuote(id: string, input: z.infer<typeof quoteSchema>
   const dataBlob = {
     ...existingData,
     line_items: items,
-    kind: 'quote',
     valid_until: parsed.data.valid_until || null,
     subtotal,
     vat_rate: vatRate,

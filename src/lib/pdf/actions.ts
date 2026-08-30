@@ -158,7 +158,6 @@ export async function generateAndSaveDocument(input: GenerateInput) {
     };
     const dataBlob = {
       line_items: data.line_items,
-      kind: data.kind,
       valid_until: data.valid_until ?? null,
     };
     // Common columns for both tables.
