@@ -51,6 +51,8 @@ function buildDocumentData(input: GenerateInput): DocumentData {
     brand: {
       nameAr: BRAND.nameAr,
       nameEn: BRAND.nameEn,
+      taglineAr: BRAND.taglineAr,
+      taglineEn: BRAND.taglineEn,
       cr: BRAND.cr,
       vat: BRAND.vat,
       address: BRAND.addressAr,

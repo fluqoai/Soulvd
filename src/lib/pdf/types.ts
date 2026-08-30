@@ -17,6 +17,8 @@ export type DocumentData = {
   brand: {
     nameAr: string;
     nameEn: string;
+    taglineAr?: string;
+    taglineEn?: string;
     cr: string;
     vat: string;
     address: string;

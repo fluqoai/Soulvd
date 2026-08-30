@@ -30,71 +30,121 @@ export const pdfStyles = StyleSheet.create({
   },
 
   // ============== Header (top of every page) ==============
+  // Two-column layout: brand on the left, doc-info card on the right.
+  // The card is sage-tinted with a left accent bar so the document number
+  // and dates read as a clear "letterhead block" rather than a list of
+  // metadata strings crammed next to the title.
   headerBand: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'stretch',
     justifyContent: 'space-between',
-    paddingBottom: 12,
-    marginBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: PDF_COLORS.linen200,
+    paddingBottom: 14,
+    marginBottom: 18,
+    borderBottomWidth: 2,
+    borderBottomColor: PDF_COLORS.sage700,
   },
   brandBlock: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   brandMark: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
+    width: 52,
+    height: 52,
+    marginRight: 14,
   },
   brandNameAr: {
     fontFamily: FONT_BOLD,
-    fontSize: 15,
+    fontSize: 20,
     color: PDF_COLORS.ink,
     textAlign: 'left',
+    letterSpacing: 0.2,
   },
   brandNameEn: {
-    fontSize: 10,
+    fontSize: 10.5,
     color: PDF_COLORS.ink600,
     marginTop: 2,
     textAlign: 'left',
+    letterSpacing: 1.5,
+  },
+  brandTagline: {
+    fontSize: 8.5,
+    color: PDF_COLORS.ink600,
+    marginTop: 4,
+    textAlign: 'left',
+    fontFamily: FONT_REG,
   },
 
-  // Right side of the header band: doc type + number + dates.
+  // Right side: a structured doc-info block. English micro-label on top
+  // (sage, uppercase, letter-spaced), Arabic title below, then a tinted
+  // sage "pill" for the document number, then a clean row for the date.
+  // Visual hierarchy: number > title > date > label.
   headerRight: {
     alignItems: 'flex-end',
-    maxWidth: '60%',
+    minWidth: 240,
   },
-  docTypeRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'flex-end',
+  docTypeLabel: {
+    fontSize: 9,
+    fontFamily: FONT_BOLD,
+    color: PDF_COLORS.sage700,
+    letterSpacing: 2.5,
+    textAlign: 'right',
   },
   docTypeAr: {
     fontFamily: FONT_BOLD,
-    fontSize: 18,
-    color: PDF_COLORS.sage700,
-    textAlign: 'right',
-  },
-  docTypeEn: {
-    fontSize: 9,
-    color: PDF_COLORS.sage700,
-    fontFamily: FONT_BOLD,
-    letterSpacing: 0.5,
-    textAlign: 'right',
-    marginLeft: 8,
-  },
-  docMeta: {
-    fontSize: 8.5,
-    color: PDF_COLORS.ink700,
-    textAlign: 'right',
-    marginTop: 2,
-  },
-  docMetaStrong: {
-    fontFamily: FONT_BOLD,
-    fontSize: 11,
+    fontSize: 17,
     color: PDF_COLORS.ink,
+    marginTop: 2,
+    textAlign: 'right',
+  },
+  docNumberPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: PDF_COLORS.sage50,
+    borderLeftWidth: 3,
+    borderLeftColor: PDF_COLORS.sage700,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginTop: 8,
+  },
+  docNumberLabel: {
+    fontSize: 7.5,
+    fontFamily: FONT_BOLD,
+    color: PDF_COLORS.ink600,
+    letterSpacing: 1.5,
+    marginRight: 8,
+  },
+  docNumberValue: {
+    fontFamily: FONT_BOLD,
+    fontSize: 13,
+    color: PDF_COLORS.ink,
+    letterSpacing: 0.3,
+  },
+  docDateRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginTop: 6,
+  },
+  docDateLabel: {
+    fontSize: 7.5,
+    fontFamily: FONT_BOLD,
+    color: PDF_COLORS.ink600,
+    letterSpacing: 1.5,
+    marginRight: 8,
+  },
+  docDateValueAr: {
+    fontSize: 9,
+    color: PDF_COLORS.ink,
+    marginRight: 6,
+  },
+  docDateSep: {
+    fontSize: 9,
+    color: PDF_COLORS.ink300,
+    marginRight: 6,
+  },
+  docDateValueEn: {
+    fontSize: 9,
+    color: PDF_COLORS.ink600,
   },
 
   // ============== Section heading ==============

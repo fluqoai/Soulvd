@@ -153,31 +153,41 @@ function PdfDocument({ data, stampDataUri }: { data: DocumentData; stampDataUri:
       <Page size="A4" style={pdfStyles.page}>
         {/* ============== Header band ============== */}
         <View style={pdfStyles.headerBand} fixed>
-          {/* Brand (left) */}
+          {/* Brand (left) — logo + Arabic name + English name + tagline */}
           <View style={pdfStyles.brandBlock}>
             <Image src="/brand/soulvd-mark.png" style={pdfStyles.brandMark} />
             <View>
               <Text style={pdfStyles.brandNameAr}>{brand.nameAr}</Text>
               <Text style={pdfStyles.brandNameEn}>{brand.nameEn}</Text>
+              <Text style={pdfStyles.brandTagline}>{brand.taglineEn}</Text>
             </View>
           </View>
 
-          {/* Doc type + number + dates (right) */}
+          {/* Doc-info card (right) — label, Arabic title, number pill, date */}
           <View style={pdfStyles.headerRight}>
-            <View style={pdfStyles.docTypeRow}>
-              <Text style={pdfStyles.docTypeAr}>{isInvoice ? t.invoiceTitleAr : t.quoteTitleAr}</Text>
-              <Text style={pdfStyles.docTypeEn}>{isInvoice ? t.invoiceTitleEn : t.quoteTitleEn}</Text>
+            <Text style={pdfStyles.docTypeLabel}>
+              {isInvoice ? t.invoiceTitleEn : t.quoteTitleEn}
+            </Text>
+            <Text style={pdfStyles.docTypeAr}>
+              {isInvoice ? t.invoiceTitleAr : t.quoteTitleAr}
+            </Text>
+            <View style={pdfStyles.docNumberPill}>
+              <Text style={pdfStyles.docNumberLabel}>NO.</Text>
+              <Text style={pdfStyles.docNumberValue}>{data.number}</Text>
             </View>
-            <Text style={pdfStyles.docMeta}>
-              <Text style={pdfStyles.docMetaStrong}>{data.number}</Text>
-            </Text>
-            <Text style={pdfStyles.docMeta}>
-              {t.issueDateAr} · {fmtDate(data.issue_date, 'ar-SA')}{'  /  '}{t.issueDateEn} · {fmtDate(data.issue_date, 'en-GB')}
-            </Text>
+            <View style={pdfStyles.docDateRow}>
+              <Text style={pdfStyles.docDateLabel}>{t.issueDateEn}</Text>
+              <Text style={pdfStyles.docDateValueEn}>{fmtDate(data.issue_date, 'en-GB')}</Text>
+              <Text style={pdfStyles.docDateSep}>·</Text>
+              <Text style={pdfStyles.docDateValueAr}>{fmtDate(data.issue_date, 'ar-SA')}</Text>
+            </View>
             {!isInvoice && data.valid_until && (
-              <Text style={pdfStyles.docMeta}>
-                {t.validUntilAr} · {fmtDate(data.valid_until, 'ar-SA')}{'  /  '}{t.validUntilEn} · {fmtDate(data.valid_until, 'en-GB')}
-              </Text>
+              <View style={pdfStyles.docDateRow}>
+                <Text style={pdfStyles.docDateLabel}>{t.validUntilEn}</Text>
+                <Text style={pdfStyles.docDateValueEn}>{fmtDate(data.valid_until, 'en-GB')}</Text>
+                <Text style={pdfStyles.docDateSep}>·</Text>
+                <Text style={pdfStyles.docDateValueAr}>{fmtDate(data.valid_until, 'ar-SA')}</Text>
+              </View>
             )}
           </View>
         </View>
