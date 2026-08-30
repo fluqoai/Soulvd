@@ -17,7 +17,7 @@ type Initial = {
   vat_number?: string | null;
   address?: string | null;
   notes?: string | null;
-  status?: 'active' | 'inactive' | 'archived' | null;
+  status?: 'prospect' | 'active' | 'paused' | null;
 };
 const init: CrudResult = { ok: false, error: '' };
 
@@ -43,11 +43,11 @@ export function ClientForm({ initial: row }: { initial: Initial }) {
         <Field label="VAT number" hint="للعملاء السعوديين: 15 رقماً من الرقم الضريبي">
           <TextInput name="vat_number" defaultValue={row.vat_number ?? ''} placeholder="300000000000003" />
         </Field>
-        <Field label="الحالة" hint="نشط = عميل حالي، متوقف = لم يجدد، مؤرشف = خرج نهائياً">
+        <Field label="الحالة" hint="محتمل = لم يبدأ بعد، نشط = عميل حالي، متوقف = لم يجدد">
           <Select name="status" defaultValue={row.status ?? 'active'}>
+            <option value="prospect">محتمل</option>
             <option value="active">نشط</option>
-            <option value="inactive">متوقف</option>
-            <option value="archived">مؤرشف</option>
+            <option value="paused">متوقف</option>
           </Select>
         </Field>
       </div>

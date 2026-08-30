@@ -14,7 +14,7 @@ export default async function NewProjectPage({
   const admin = createAdminClient();
 
   const [{ data: clientsData }, { data: ownersData }] = await Promise.all([
-    admin.from('clients').select('id, name, company, status').neq('status', 'archived').order('name', { ascending: true }),
+    admin.from('clients').select('id, name, company, status').neq('status', 'paused').order('name', { ascending: true }),
     admin.from('users').select('id, full_name, email').order('full_name', { ascending: true }),
   ]);
   const clients = (clientsData ?? []) as Array<{ id: string; name: string; company: string | null; status: string }>;

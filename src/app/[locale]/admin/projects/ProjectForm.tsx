@@ -85,7 +85,7 @@ export function ProjectForm({
             <option value="">— اختر عميلاً —</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name}{c.company ? ` (${c.company})` : ''}{c.status === 'archived' ? ' · مؤرشف' : ''}
+                {c.name}{c.company ? ` (${c.company})` : ''}{c.status === 'paused' ? ' · متوقف' : ''}
               </option>
             ))}
           </Select>

@@ -90,7 +90,6 @@ export default async function AdminLayout({
   const adminItems = [
     build('/admin/leads', 'leads', 'leads', true),
     build('/admin/clients', 'clients', 'clients', true),
-    build('/admin/templates', 'templates', 'templates', true),
     build('/admin/invoices', 'invoices', 'invoices', true),
     build('/admin/quotes', 'quotes', 'quotes', true),
   ].filter(Boolean) as NavItem[];

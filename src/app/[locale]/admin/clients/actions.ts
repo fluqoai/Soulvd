@@ -5,7 +5,11 @@ import { revalidatePath } from 'next/cache';
 import { createRowWith, updateRowWith, deleteRowWith } from '@/lib/admin/actions';
 import { createClient } from '@/lib/supabase/server';
 
-const STATUSES = ['active', 'inactive', 'archived'] as const;
+// Client lifecycle: prospect (could come back) → active (current) →
+// paused (stopped / didn't renew). The previous enum was
+// (active, inactive, archived); see migration 0008 for the data
+// mapping (archived → prospect, inactive → paused).
+const STATUSES = ['prospect', 'active', 'paused'] as const;
 const statusSchema = z.enum(STATUSES);
 
 const schema = z.object({

@@ -15,7 +15,7 @@ type C = {
   email: string | null;
   phone: string | null;
   vat_number: string | null;
-  status: 'active' | 'inactive' | 'archived';
+  status: 'prospect' | 'active' | 'paused';
   created_at: string;
 };
 
@@ -51,9 +51,9 @@ export default async function Page({
 
   const filterTabs = [
     { value: 'all',      label: 'الكل' },
+    { value: 'prospect', label: 'محتمل' },
     { value: 'active',   label: 'نشط' },
-    { value: 'inactive', label: 'متوقف' },
-    { value: 'archived', label: 'مؤرشف' },
+    { value: 'paused',   label: 'متوقف' },
   ];
 
   return (

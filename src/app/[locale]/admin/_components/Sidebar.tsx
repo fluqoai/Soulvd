@@ -34,7 +34,6 @@ const ICON: Record<string, string> = {
   clients: 'clients',
   projects: 'projects',
   tasks: 'tasks',
-  templates: 'templates',
   invoices: 'invoices',
   quotes: 'quotes',
   users: 'users',
@@ -74,7 +73,6 @@ export async function Sidebar({
     { href: '/admin/clients', labelKey: 'clients', iconName: ICON.clients, ownerOnly: true },
     { href: '/admin/projects', labelKey: 'projects', iconName: ICON.projects, ownerOnly: true },
     { href: '/admin/tasks', labelKey: 'tasks', iconName: ICON.tasks, ownerOnly: true },
-    { href: '/admin/templates', labelKey: 'templates', iconName: ICON.templates, ownerOnly: true },
     { href: '/admin/invoices', labelKey: 'invoices', iconName: ICON.invoices, ownerOnly: true },
     { href: '/admin/quotes', labelKey: 'quotes', iconName: ICON.quotes, ownerOnly: true },
   ];

@@ -31,7 +31,7 @@ export default async function NewTaskPage({
     ...((clientsData ?? []) as Array<{ id: string; name: string; company: string | null; status: string }>).map((c) => ({
       value: c.id,
       link_type: 'client' as TaskLinkType,
-      label: `عميل · ${c.name}${c.company ? ` (${c.company})` : ''}${c.status === 'archived' ? ' · مؤرشف' : ''}`,
+      label: `عميل · ${c.name}${c.company ? ` (${c.company})` : ''}${c.status === 'paused' ? ' · متوقف' : ''}`,
     })),
     ...((leadsData ?? []) as Array<{ id: string; name: string; company: string | null; status: string }>).map((l) => ({
       value: l.id,
