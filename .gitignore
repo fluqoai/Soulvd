@@ -57,6 +57,7 @@ Userskhayrat*
 public/brand/extracted/
 public/brand/pages/
 public/brand/concepts/
+__pdf-preview/
 
 # tmp scratch (verification scripts, scraped HTML, etc.)
 /tmp/

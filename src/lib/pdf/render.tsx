@@ -151,19 +151,21 @@ function PdfDocument({ data, stampDataUri }: { data: DocumentData; stampDataUri:
       author={brand.nameEn}
     >
       <Page size="A4" style={pdfStyles.page}>
-        {/* ============== Header band ============== */}
+        {/* ============== Header band — 3-column editorial layout ============== */}
         <View style={pdfStyles.headerBand} fixed>
-          {/* Brand (left) — logo + Arabic name + English name + tagline */}
+          {/* Left column: SOULVD wordmark + Arabic name + tagline */}
           <View style={pdfStyles.brandBlock}>
-            <Image src="/brand/soulvd-mark.png" style={pdfStyles.brandMark} />
-            <View>
-              <Text style={pdfStyles.brandNameAr}>{brand.nameAr}</Text>
-              <Text style={pdfStyles.brandNameEn}>{brand.nameEn}</Text>
-              <Text style={pdfStyles.brandTagline}>{brand.taglineEn}</Text>
-            </View>
+            <Text style={pdfStyles.brandNameEnBig}>SOULVD</Text>
+            <Text style={pdfStyles.brandNameArBig}>{brand.nameAr}</Text>
+            <Text style={pdfStyles.brandTaglineBig}>{brand.taglineEn}</Text>
           </View>
 
-          {/* Doc-info card (right) — label, Arabic title, number pill, date */}
+          {/* Center column: the brand mark (logo) */}
+          <View style={pdfStyles.logoBlock}>
+            <Image src="/brand/soulvd-mark.png" style={pdfStyles.brandMarkBig} />
+          </View>
+
+          {/* Right column: minimized doc info */}
           <View style={pdfStyles.headerRight}>
             <Text style={pdfStyles.docTypeLabel}>
               {isInvoice ? t.invoiceTitleEn : t.quoteTitleEn}
@@ -175,18 +177,21 @@ function PdfDocument({ data, stampDataUri }: { data: DocumentData; stampDataUri:
               <Text style={pdfStyles.docNumberLabel}>NO.</Text>
               <Text style={pdfStyles.docNumberValue}>{data.number}</Text>
             </View>
+            {/* Fix #6: stacked bilingual date — En on top, Ar below */}
             <View style={pdfStyles.docDateRow}>
               <Text style={pdfStyles.docDateLabel}>{t.issueDateEn}</Text>
-              <Text style={pdfStyles.docDateValueEn}>{fmtDate(data.issue_date, 'en-GB')}</Text>
-              <Text style={pdfStyles.docDateSep}>·</Text>
-              <Text style={pdfStyles.docDateValueAr}>{fmtDate(data.issue_date, 'ar-SA')}</Text>
+              <View style={pdfStyles.docDateStack}>
+                <Text style={pdfStyles.docDateValueEn}>{fmtDate(data.issue_date, 'en-GB')}</Text>
+                <Text style={pdfStyles.docDateValueAr}>{fmtDate(data.issue_date, 'ar-SA')}</Text>
+              </View>
             </View>
             {!isInvoice && data.valid_until && (
               <View style={pdfStyles.docDateRow}>
                 <Text style={pdfStyles.docDateLabel}>{t.validUntilEn}</Text>
-                <Text style={pdfStyles.docDateValueEn}>{fmtDate(data.valid_until, 'en-GB')}</Text>
-                <Text style={pdfStyles.docDateSep}>·</Text>
-                <Text style={pdfStyles.docDateValueAr}>{fmtDate(data.valid_until, 'ar-SA')}</Text>
+                <View style={pdfStyles.docDateStack}>
+                  <Text style={pdfStyles.docDateValueEn}>{fmtDate(data.valid_until, 'en-GB')}</Text>
+                  <Text style={pdfStyles.docDateValueAr}>{fmtDate(data.valid_until, 'ar-SA')}</Text>
+                </View>
               </View>
             )}
           </View>
@@ -253,44 +258,46 @@ function PdfDocument({ data, stampDataUri }: { data: DocumentData; stampDataUri:
         </View>
 
         {/* ============== Totals (bilingual) ============== */}
-        <View style={pdfStyles.totalsWrap}>
-          <View style={pdfStyles.totalsBox}>
-            <View style={pdfStyles.totalsRow}>
-              <View style={pdfStyles.totalsLabels}>
-                <Text style={pdfStyles.totalsLabelAr}>{t.subtotalAr}</Text>
-                <Text style={pdfStyles.totalsLabelEn}>{t.subtotalEn}</Text>
-              </View>
-              <Text style={pdfStyles.totalsValue}>{fmt(subtotal, currency)}</Text>
-            </View>
-            {isInvoice && (
+        <View>
+          <View style={pdfStyles.totalsWrap}>
+            <View style={pdfStyles.totalsBox}>
               <View style={pdfStyles.totalsRow}>
                 <View style={pdfStyles.totalsLabels}>
-                  <Text style={pdfStyles.totalsLabelAr}>{t.vatAr(vat_rate)}</Text>
-                  <Text style={pdfStyles.totalsLabelEn}>{t.vatEn(vat_rate)}</Text>
+                  <Text style={pdfStyles.totalsLabelAr}>{t.subtotalAr}</Text>
+                  <Text style={pdfStyles.totalsLabelEn}>{t.subtotalEn}</Text>
                 </View>
-                <Text style={pdfStyles.totalsValue}>{fmt(vat_amount, currency)}</Text>
+                <Text style={pdfStyles.totalsValue}>{fmt(subtotal, currency)}</Text>
               </View>
-            )}
-            <View style={pdfStyles.totalsRowGrand}>
-              <View style={pdfStyles.totalsLabelsGrand}>
-                <Text style={pdfStyles.totalsLabelArGrand}>{t.grandTotalAr}</Text>
-                <Text style={pdfStyles.totalsLabelEnGrand}>{t.grandTotalEn}</Text>
+              {isInvoice && (
+                <View style={pdfStyles.totalsRow}>
+                  <View style={pdfStyles.totalsLabels}>
+                    <Text style={pdfStyles.totalsLabelAr}>{t.vatAr(vat_rate)}</Text>
+                    <Text style={pdfStyles.totalsLabelEn}>{t.vatEn(vat_rate)}</Text>
+                  </View>
+                  <Text style={pdfStyles.totalsValue}>{fmt(vat_amount, currency)}</Text>
+                </View>
+              )}
+              <View style={pdfStyles.totalsRowGrand}>
+                <View style={pdfStyles.totalsLabelsGrand}>
+                  <Text style={pdfStyles.totalsLabelArGrand}>{t.grandTotalAr}</Text>
+                  <Text style={pdfStyles.totalsLabelEnGrand}>{t.grandTotalEn}</Text>
+                </View>
+                <Text style={pdfStyles.totalsValueGrand}>{fmt(total, currency)}</Text>
               </View>
-              <Text style={pdfStyles.totalsValueGrand}>{fmt(total, currency)}</Text>
             </View>
           </View>
-        </View>
 
-        {/* ============== Notes (bilingual) ============== */}
-        {data.notes && (
-          <View style={pdfStyles.notesBox}>
-            <View style={pdfStyles.notesLabelRow}>
-              <Text style={pdfStyles.notesLabelEn}>{t.notesBlockEn}</Text>
-              <Text style={pdfStyles.notesLabelAr}>{t.notesBlockAr}</Text>
+          {/* ============== Notes (bilingual) ============== */}
+          {data.notes && (
+            <View style={pdfStyles.notesBox} wrap={false}>
+              <View style={pdfStyles.notesLabelRow}>
+                <Text style={pdfStyles.notesLabelEn}>{t.notesBlockEn}</Text>
+                <Text style={pdfStyles.notesLabelAr}>{t.notesBlockAr}</Text>
+              </View>
+              <Text style={pdfStyles.notesText}>{data.notes}</Text>
             </View>
-            <Text style={pdfStyles.notesText}>{data.notes}</Text>
-          </View>
-        )}
+          )}
+        </View>
 
         {/* ============== Footer (fixed; appears on every page) ============== */}
         <View style={pdfStyles.footer} fixed>

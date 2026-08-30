@@ -23,128 +23,137 @@ export const pdfStyles = StyleSheet.create({
     fontSize: 10,
     color: PDF_COLORS.ink,
     backgroundColor: PDF_COLORS.paper,
-    paddingTop: 36,
-    paddingBottom: 80,   // leave room for the fixed footer
+    paddingTop: 22,
+    paddingBottom: 75,      // enough room for the fixed footer
     paddingHorizontal: 40,
-    lineHeight: 1.4,
+    lineHeight: 1.3,
   },
 
   // ============== Header (top of every page) ==============
-  // Two-column layout: brand on the left, doc-info card on the right.
-  // The card is sage-tinted with a left accent bar so the document number
-  // and dates read as a clear "letterhead block" rather than a list of
-  // metadata strings crammed next to the title.
+  // Editorial 3-column layout:
+  //   [SOULVD / سولڤد / tagline]  [LOGO]  [doc info — minimized]
+  // The brand text on the left establishes identity, the logo in the
+  // middle is the visual focal point, the doc info on the right is
+  // compact so the document looks "letterhead-y" rather than cluttered.
   headerBand: {
     flexDirection: 'row',
-    alignItems: 'stretch',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingBottom: 14,
-    marginBottom: 18,
-    borderBottomWidth: 2,
+    paddingBottom: 10,
+    marginBottom: 12,
+    borderBottomWidth: 1,
     borderBottomColor: PDF_COLORS.sage700,
   },
   brandBlock: {
-    flexDirection: 'row',
-    alignItems: 'center',
     flex: 1,
+    alignItems: 'flex-start',
   },
-  brandMark: {
-    width: 52,
-    height: 52,
-    marginRight: 14,
-  },
-  brandNameAr: {
+  brandNameEnBig: {
     fontFamily: FONT_BOLD,
-    fontSize: 20,
+    fontSize: 26,
     color: PDF_COLORS.ink,
-    textAlign: 'left',
-    letterSpacing: 0.2,
+    letterSpacing: 4,
+    lineHeight: 1,
   },
-  brandNameEn: {
-    fontSize: 10.5,
-    color: PDF_COLORS.ink600,
-    marginTop: 2,
-    textAlign: 'left',
-    letterSpacing: 1.5,
-  },
-  brandTagline: {
-    fontSize: 8.5,
-    color: PDF_COLORS.ink600,
+  brandNameArBig: {
+    fontFamily: FONT_BOLD,
+    fontSize: 15,
+    color: PDF_COLORS.ink,
     marginTop: 4,
-    textAlign: 'left',
+  },
+  brandTaglineBig: {
+    fontSize: 7.5,
+    color: PDF_COLORS.ink600,
+    marginTop: 6,
     fontFamily: FONT_REG,
   },
-
-  // Right side: a structured doc-info block. English micro-label on top
-  // (sage, uppercase, letter-spaced), Arabic title below, then a tinted
-  // sage "pill" for the document number, then a clean row for the date.
-  // Visual hierarchy: number > title > date > label.
-  headerRight: {
-    alignItems: 'flex-end',
-    minWidth: 240,
+  // Center column: the logo
+  logoBlock: {
+    flex: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
   },
+  brandMarkBig: {
+    width: 68,
+    height: 68,
+  },
+  // Right column: the document info, kept compact
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+
+  // Right side: minimized doc info. English micro-label on top
+  // (sage, uppercase, letter-spaced), Arabic title below, then a
+  // compact number/date row.
   docTypeLabel: {
-    fontSize: 9,
+    fontSize: 7.5,
     fontFamily: FONT_BOLD,
     color: PDF_COLORS.sage700,
-    letterSpacing: 2.5,
+    letterSpacing: 2,
     textAlign: 'right',
   },
   docTypeAr: {
     fontFamily: FONT_BOLD,
-    fontSize: 17,
+    fontSize: 12,        // minimized so it doesn't dominate the header
     color: PDF_COLORS.ink,
-    marginTop: 2,
+    marginTop: 1,
     textAlign: 'right',
   },
   docNumberPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: PDF_COLORS.sage50,
-    borderLeftWidth: 3,
-    borderLeftColor: PDF_COLORS.sage700,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    marginTop: 8,
+    marginTop: 6,
   },
   docNumberLabel: {
-    fontSize: 7.5,
+    fontSize: 7,
     fontFamily: FONT_BOLD,
     color: PDF_COLORS.ink600,
-    letterSpacing: 1.5,
-    marginRight: 8,
+    letterSpacing: 1.2,
+    marginRight: 6,
   },
   docNumberValue: {
     fontFamily: FONT_BOLD,
-    fontSize: 13,
+    fontSize: 11,
     color: PDF_COLORS.ink,
     letterSpacing: 0.3,
   },
+  // Stacked bilingual date (Fix #6): En on top, Ar below.
   docDateRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    marginTop: 6,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
+    marginTop: 4,
   },
   docDateLabel: {
-    fontSize: 7.5,
+    fontSize: 7,
     fontFamily: FONT_BOLD,
     color: PDF_COLORS.ink600,
-    letterSpacing: 1.5,
-    marginRight: 8,
-  },
-  docDateValueAr: {
-    fontSize: 9,
-    color: PDF_COLORS.ink,
+    letterSpacing: 1.2,
     marginRight: 6,
+    marginTop: 1,
+    width: 32,
+    textAlign: 'left',
   },
-  docDateSep: {
-    fontSize: 9,
-    color: PDF_COLORS.ink300,
-    marginRight: 6,
+  docDateStack: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
   },
   docDateValueEn: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: PDF_COLORS.ink600,
+  },
+  docDateValueAr: {
+    fontSize: 8.5,
+    color: PDF_COLORS.ink,
+    marginTop: 1,
+    textAlign: 'right',
+  },
+  // Legacy alias kept so render.tsx still compiles.
+  docDateSep: {
+    fontSize: 8.5,
+    color: PDF_COLORS.ink300,
   },
 
   // ============== Section heading ==============
@@ -156,9 +165,9 @@ export const pdfStyles = StyleSheet.create({
     fontSize: 9,
     color: PDF_COLORS.sage700,
     letterSpacing: 0.8,
-    marginBottom: 4,
-    marginTop: 12,
-    paddingBottom: 3,
+    marginBottom: 2,        // tighter — Fix #2 (second pass)
+    marginTop: 6,           // tighter — Fix #2 (second pass)
+    paddingBottom: 2,
     borderBottomWidth: 0.5,
     borderBottomColor: PDF_COLORS.linen200,
   },
@@ -172,13 +181,13 @@ export const pdfStyles = StyleSheet.create({
   fieldRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 4,
-    paddingVertical: 2,
+    marginBottom: 2,        // tighter — Fix #2 (second pass)
+    paddingVertical: 1,
   },
   fieldRowWide: {
     flexDirection: 'column',
-    marginBottom: 6,
-    paddingVertical: 3,
+    marginBottom: 4,        // tighter — Fix #2 (second pass)
+    paddingVertical: 2,
     borderBottomWidth: 0.5,
     borderBottomColor: PDF_COLORS.linen200,
   },
@@ -214,13 +223,13 @@ export const pdfStyles = StyleSheet.create({
 
   // ============== Line items table ==============
   itemsTable: {
-    marginTop: 4,
-    marginBottom: 6,
+    marginTop: 3,           // tighter — Fix #2
+    marginBottom: 4,        // tighter — Fix #2
   },
   itemsHeader: {
     flexDirection: 'row',
     backgroundColor: PDF_COLORS.sage700,
-    paddingVertical: 5,
+    paddingVertical: 4,     // tighter — Fix #2
     paddingHorizontal: 8,
   },
   itemsHeaderCellAr: {
@@ -251,7 +260,7 @@ export const pdfStyles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 0.5,
     borderBottomColor: PDF_COLORS.linen200,
-    paddingVertical: 5,
+    paddingVertical: 1,     // very tight — single-page layout
     paddingHorizontal: 8,
   },
   itemRowAlt: {
@@ -259,7 +268,7 @@ export const pdfStyles = StyleSheet.create({
     backgroundColor: PDF_COLORS.linen,
     borderBottomWidth: 0.5,
     borderBottomColor: PDF_COLORS.linen200,
-    paddingVertical: 5,
+    paddingVertical: 1,     // very tight — single-page layout
     paddingHorizontal: 8,
   },
   itemDescCell: {
@@ -267,15 +276,17 @@ export const pdfStyles = StyleSheet.create({
     flexDirection: 'column',
   },
   itemDescAr: {
-    fontSize: 10,
+    fontSize: 9.5,
     color: PDF_COLORS.ink,
     textAlign: 'right',
+    lineHeight: 1.1,
   },
   itemDescEn: {
-    fontSize: 8.5,
+    fontSize: 6.5,         // very small — single-page layout
     color: PDF_COLORS.ink600,
     textAlign: 'left',
-    marginTop: 1,
+    marginTop: -1,         // negative margin to tighten
+    lineHeight: 1.1,
   },
   itemNum: {
     fontSize: 10,
@@ -290,13 +301,15 @@ export const pdfStyles = StyleSheet.create({
   },
 
   // ============== Totals box (bilingual) ==============
+  // Simple right-aligned block. The totals box is 280pt wide and
+  // pushed to the right edge of the page.
   totalsWrap: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: 6,
   },
   totalsBox: {
-    width: 300,
+    width: 280,
     borderWidth: 0.5,
     borderColor: PDF_COLORS.linen200,
     borderRadius: 4,
@@ -306,7 +319,7 @@ export const pdfStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 2,     // tighter — single-page layout
     paddingHorizontal: 10,
     borderBottomWidth: 0.5,
     borderBottomColor: PDF_COLORS.linen200,
@@ -315,7 +328,7 @@ export const pdfStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 2,     // tighter — single-page layout
     paddingHorizontal: 10,
   },
   totalsLabels: {
@@ -377,7 +390,7 @@ export const pdfStyles = StyleSheet.create({
 
   // ============== Notes (bilingual) ==============
   notesBox: {
-    marginTop: 10,
+    marginTop: 8,         // tighter — Fix #2
     padding: 8,
     backgroundColor: PDF_COLORS.linen,
     borderRadius: 4,
