@@ -1,28 +1,41 @@
 // src/lib/pdf/styles.ts
-// StyleSheet for @react-pdf/renderer. Uses brand-aligned colors (sage/linen/wood).
+// StyleSheet for the bilingual (Arabic + English) tax-invoice PDF.
+// Built on @react-pdf/renderer. Uses Noto Sans Arabic (registered in
+// ./fonts.ts) as the base font; it ships with both Arabic and Latin
+// glyphs so a single font family covers the whole document.
+//
+// Layout: each client/seller field is a 3-column row
+//   [English label] [value] [Arabic label]
+// so the value (which is the same Latin/numeric text in both languages)
+// appears only once. The two labels flank it.
 
 import { StyleSheet } from '@react-pdf/renderer';
 import { PDF_COLORS } from './branding';
+import { ARABIC_FONT, ARABIC_BOLD_FONT } from './fonts';
+
+const FONT_REG = ARABIC_FONT;
+const FONT_BOLD = ARABIC_BOLD_FONT;
 
 export const pdfStyles = StyleSheet.create({
-  // Page-level
+  // ============== Page ==============
   page: {
-    fontFamily: 'Helvetica',  // built-in; switch to a CJK font if needed
+    fontFamily: FONT_REG,
     fontSize: 10,
     color: PDF_COLORS.ink,
     backgroundColor: PDF_COLORS.paper,
     paddingTop: 36,
-    paddingBottom: 56,
+    paddingBottom: 80,   // leave room for the fixed footer
     paddingHorizontal: 40,
+    lineHeight: 1.4,
   },
 
-  // Header band (top of every page)
-  headerRow: {
+  // ============== Header (top of every page) ==============
+  headerBand: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: 18,
-    paddingBottom: 14,
+    paddingBottom: 12,
+    marginBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: PDF_COLORS.linen200,
   },
@@ -31,94 +44,164 @@ export const pdfStyles = StyleSheet.create({
     alignItems: 'center',
   },
   brandMark: {
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
     marginRight: 10,
   },
   brandNameAr: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: FONT_BOLD,
+    fontSize: 15,
     color: PDF_COLORS.ink,
+    textAlign: 'left',
   },
   brandNameEn: {
-    fontSize: 9,
+    fontSize: 10,
     color: PDF_COLORS.ink600,
-    marginTop: 1,
+    marginTop: 2,
+    textAlign: 'left',
+  },
+
+  // Right side of the header band: doc type + number + dates.
+  headerRight: {
+    alignItems: 'flex-end',
+    maxWidth: '60%',
+  },
+  docTypeRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'flex-end',
   },
   docTypeAr: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontFamily: FONT_BOLD,
+    fontSize: 18,
     color: PDF_COLORS.sage700,
     textAlign: 'right',
   },
-  docMeta: {
+  docTypeEn: {
     fontSize: 9,
+    color: PDF_COLORS.sage700,
+    fontFamily: FONT_BOLD,
+    letterSpacing: 0.5,
+    textAlign: 'right',
+    marginLeft: 8,
+  },
+  docMeta: {
+    fontSize: 8.5,
     color: PDF_COLORS.ink700,
     textAlign: 'right',
-    marginTop: 4,
+    marginTop: 2,
   },
   docMetaStrong: {
+    fontFamily: FONT_BOLD,
     fontSize: 11,
-    fontWeight: 'bold',
     color: PDF_COLORS.ink,
   },
 
-  // Section heading
+  // ============== Section heading ==============
   sectionHeading: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    fontFamily: FONT_BOLD,
     fontSize: 9,
-    fontWeight: 'bold',
     color: PDF_COLORS.sage700,
-    textTransform: 'uppercase',
     letterSpacing: 0.8,
-    marginBottom: 6,
-    marginTop: 16,
-    paddingBottom: 4,
+    marginBottom: 4,
+    marginTop: 12,
+    paddingBottom: 3,
     borderBottomWidth: 0.5,
     borderBottomColor: PDF_COLORS.linen200,
   },
+  sectionHeadingAr: { textAlign: 'right' },
+  sectionHeadingEn: { textAlign: 'left' },
 
-  // Client block
-  clientGrid: {
+  // ============== 3-column field row (En label | value | Ar label) ==============
+  // The value is in the middle so it appears only once (not duplicated
+  // in both languages). For long values (address, notes) the value
+  // takes a full-width row with both labels stacked above.
+  fieldRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 6,
+    alignItems: 'flex-start',
+    marginBottom: 4,
+    paddingVertical: 2,
   },
-  clientCell: {
-    width: '50%',
-    paddingRight: 8,
+  fieldRowWide: {
+    flexDirection: 'column',
     marginBottom: 6,
+    paddingVertical: 3,
+    borderBottomWidth: 0.5,
+    borderBottomColor: PDF_COLORS.linen200,
   },
-  clientLabel: {
+  fieldLabelEn: {
+    width: '30%',
     fontSize: 8,
     color: PDF_COLORS.ink600,
+    textAlign: 'left',
+  },
+  fieldValue: {
+    width: '40%',
+    fontSize: 9.5,
+    color: PDF_COLORS.ink,
+    textAlign: 'center',
+  },
+  fieldLabelAr: {
+    width: '30%',
+    fontSize: 8,
+    color: PDF_COLORS.ink600,
+    textAlign: 'right',
+  },
+  // For wide rows: labels on top, value below (bilingual)
+  fieldLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 1,
   },
-  clientValue: {
-    fontSize: 10,
+  fieldValueWide: {
+    fontSize: 9.5,
     color: PDF_COLORS.ink,
+    textAlign: 'right',
   },
 
-  // Line items table
+  // ============== Line items table ==============
   itemsTable: {
     marginTop: 4,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   itemsHeader: {
     flexDirection: 'row',
     backgroundColor: PDF_COLORS.sage700,
-    color: PDF_COLORS.paper,
-    paddingVertical: 6,
+    paddingVertical: 5,
     paddingHorizontal: 8,
   },
-  itemsHeaderCell: {
+  itemsHeaderCellAr: {
+    color: PDF_COLORS.paper,
+    fontFamily: FONT_BOLD,
     fontSize: 9,
-    fontWeight: 'bold',
+    textAlign: 'right',
   },
+  itemsHeaderCellEn: {
+    color: PDF_COLORS.paper,
+    fontFamily: FONT_BOLD,
+    fontSize: 9,
+    textAlign: 'left',
+  },
+  itemsHeaderCellNum: {
+    color: PDF_COLORS.paper,
+    fontFamily: FONT_BOLD,
+    fontSize: 9,
+    textAlign: 'right',
+  },
+
+  colDesc:  { width: '58%' },
+  colQty:   { width: '10%' },
+  colPrice: { width: '14%' },
+  colTotal: { width: '18%' },
+
   itemRow: {
     flexDirection: 'row',
     borderBottomWidth: 0.5,
     borderBottomColor: PDF_COLORS.linen200,
-    paddingVertical: 7,
+    paddingVertical: 5,
     paddingHorizontal: 8,
   },
   itemRowAlt: {
@@ -126,154 +209,207 @@ export const pdfStyles = StyleSheet.create({
     backgroundColor: PDF_COLORS.linen,
     borderBottomWidth: 0.5,
     borderBottomColor: PDF_COLORS.linen200,
-    paddingVertical: 7,
+    paddingVertical: 5,
     paddingHorizontal: 8,
   },
-  itemDesc: {
-    width: '52%',
-    fontSize: 10,
+  itemDescCell: {
+    width: '58%',
+    flexDirection: 'column',
   },
-  itemQty: {
-    width: '12%',
+  itemDescAr: {
     fontSize: 10,
+    color: PDF_COLORS.ink,
     textAlign: 'right',
   },
-  itemPrice: {
-    width: '18%',
+  itemDescEn: {
+    fontSize: 8.5,
+    color: PDF_COLORS.ink600,
+    textAlign: 'left',
+    marginTop: 1,
+  },
+  itemNum: {
     fontSize: 10,
+    color: PDF_COLORS.ink,
     textAlign: 'right',
   },
   itemTotal: {
-    width: '18%',
+    fontFamily: FONT_BOLD,
     fontSize: 10,
-    fontWeight: 'bold',
+    color: PDF_COLORS.ink,
     textAlign: 'right',
-  },
-  itemDescAr: {
-    width: '52%',
-    fontSize: 10,
-    textAlign: 'right',
-  },
-  itemQtyAr: {
-    width: '12%',
-    fontSize: 10,
-    textAlign: 'left',
-  },
-  itemPriceAr: {
-    width: '18%',
-    fontSize: 10,
-    textAlign: 'left',
-  },
-  itemTotalAr: {
-    width: '18%',
-    fontSize: 10,
-    fontWeight: 'bold',
-    textAlign: 'left',
   },
 
-  // Totals
+  // ============== Totals box (bilingual) ==============
   totalsWrap: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 8,
+    marginTop: 6,
   },
   totalsBox: {
-    width: 220,
+    width: 300,
+    borderWidth: 0.5,
+    borderColor: PDF_COLORS.linen200,
+    borderRadius: 4,
+    overflow: 'hidden',
   },
   totalsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: PDF_COLORS.linen200,
   },
-  totalsLabel: {
-    fontSize: 10,
+  totalsRowLast: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  totalsLabels: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    flexGrow: 1,
+  },
+  totalsLabelAr: {
+    fontSize: 9,
     color: PDF_COLORS.ink700,
+    textAlign: 'right',
+  },
+  totalsLabelEn: {
+    fontSize: 7.5,
+    color: PDF_COLORS.ink600,
+    textAlign: 'right',
+    marginTop: 1,
   },
   totalsValue: {
-    fontSize: 10,
+    fontSize: 9.5,
     color: PDF_COLORS.ink,
+    marginLeft: 14,
+    minWidth: 80,
+    textAlign: 'right',
   },
   totalsRowGrand: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: PDF_COLORS.sage700,
-    color: PDF_COLORS.paper,
     paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-    marginTop: 4,
+    paddingHorizontal: 10,
   },
-  totalsLabelGrand: {
-    fontSize: 12,
-    fontWeight: 'bold',
+  totalsLabelsGrand: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    flexGrow: 1,
+  },
+  totalsLabelArGrand: {
+    fontFamily: FONT_BOLD,
+    fontSize: 11,
     color: PDF_COLORS.paper,
+    textAlign: 'right',
+  },
+  totalsLabelEnGrand: {
+    fontSize: 8.5,
+    color: PDF_COLORS.paper,
+    textAlign: 'right',
+    marginTop: 1,
   },
   totalsValueGrand: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: FONT_BOLD,
+    fontSize: 13,
     color: PDF_COLORS.paper,
+    marginLeft: 14,
+    minWidth: 90,
+    textAlign: 'right',
   },
 
-  // Notes
+  // ============== Notes (bilingual) ==============
   notesBox: {
-    marginTop: 18,
-    padding: 10,
+    marginTop: 10,
+    padding: 8,
     backgroundColor: PDF_COLORS.linen,
     borderRadius: 4,
     borderLeftWidth: 3,
     borderLeftColor: PDF_COLORS.sage500,
   },
-  notesLabel: {
-    fontSize: 8,
-    color: PDF_COLORS.ink600,
-    fontWeight: 'bold',
-    marginBottom: 3,
-  },
-  notesText: {
-    fontSize: 10,
-    color: PDF_COLORS.ink,
-    lineHeight: 1.5,
-  },
-
-  // Footer
-  footer: {
-    position: 'absolute',
-    bottom: 24,
-    left: 40,
-    right: 40,
+  notesLabelRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    marginBottom: 3,
+  },
+  notesLabelAr: {
+    fontFamily: FONT_BOLD,
+    fontSize: 8.5,
+    color: PDF_COLORS.sage700,
+    textAlign: 'right',
+  },
+  notesLabelEn: {
+    fontFamily: FONT_BOLD,
+    fontSize: 8.5,
+    color: PDF_COLORS.sage700,
+    textAlign: 'left',
+  },
+  notesText: {
+    fontSize: 9,
+    color: PDF_COLORS.ink,
+    lineHeight: 1.4,
+    textAlign: 'right',
+  },
+
+  // ============== Footer (full-width, bilingual) ==============
+  footer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 40,
+    right: 40,
     paddingTop: 8,
     borderTopWidth: 0.5,
     borderTopColor: PDF_COLORS.linen200,
   },
-  footerLeft: {
-    fontSize: 8,
-    color: PDF_COLORS.ink600,
-    lineHeight: 1.4,
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
   },
-  footerRight: {
+  footerCol: {
+    flexDirection: 'column',
+    flex: 1,
+  },
+  footerColAr: { alignItems: 'flex-end' },
+  footerColEn: { alignItems: 'flex-start' },
+  footerLine: {
     fontSize: 8,
     color: PDF_COLORS.ink600,
-    textAlign: 'right',
-    lineHeight: 1.4,
+    lineHeight: 1.5,
+  },
+  footerLineAr: { textAlign: 'right' },
+  footerLineEn: { textAlign: 'left' },
+  thanks: {
+    fontSize: 9,
+    color: PDF_COLORS.sage700,
+    fontFamily: FONT_BOLD,
+    marginTop: 4,
+    textAlign: 'center',
   },
   stamp: {
-    width: 84,
-    height: 84,
-    marginLeft: 12,
+    width: 72,
+    height: 72,
+    marginHorizontal: 10,
   },
 
-  // Page number
+  // ============== Page number ==============
   pageNumber: {
     position: 'absolute',
-    bottom: 8,
+    bottom: 6,
     left: 0,
     right: 0,
     textAlign: 'center',
-    fontSize: 8,
+    fontSize: 7.5,
     color: PDF_COLORS.ink600,
   },
+
+  // ============== Muted / placeholder ==============
+  muted: { color: PDF_COLORS.ink600 },
 });

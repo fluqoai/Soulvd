@@ -1,58 +1,107 @@
 // src/lib/pdf/render.tsx
 // Render a DocumentData shape to a PDF buffer using @react-pdf/renderer.
+//
+// Layout: ZATCA-style bilingual tax-invoice. Each client/seller field
+// is a 3-column row [English label | value | Arabic label] so the
+// value (which is the same Latin/numeric text in both languages)
+// appears only once. Header and footer are full-width with both
+// languages stacked.
+//
+// Fonts: Noto Sans Arabic is registered in ./fonts.ts. `ensureFontsRegistered`
+// is called at the top of `renderDocumentPdf` so a cold start works
+// without callers having to import it.
 
-import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, View, Text, Image } from '@react-pdf/renderer';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { pdfStyles } from './styles';
 import { BRAND } from './branding';
+import { ensureFontsRegistered } from './fonts';
 import type { DocumentData, LineItem } from './types';
 
 const fmt = (n: number, currency: string) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
-const fmtDate = (iso: string): string => {
+const fmtDate = (iso: string, locale: 'ar-SA' | 'en-GB' = 'en-GB'): string => {
   try {
-    return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  } catch { return iso; }
+    return new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch {
+    return iso;
+  }
 };
 
+// All strings the PDF renders. Bilingual pairs: every Arabic label has
+// an English counterpart.
 const t = {
   invoiceTitleAr: 'فاتورة ضريبية',
-  quoteTitleAr:  'عرض سعر',
   invoiceTitleEn: 'TAX INVOICE',
+  quoteTitleAr:  'عرض سعر',
   quoteTitleEn:  'QUOTATION',
-  clientBlock:   'بيانات العميل',
-  itemsBlock:    'البنود',
-  totalsBlock:   'الإجماليات',
-  notesBlock:    'ملاحظات',
-  desc:          'الوصف',
-  qty:           'الكمية',
-  price:         'السعر',
-  total:         'الإجمالي',
-  subtotal:      'الإجمالي قبل الضريبة',
-  vat:           (rate: number) => `ضريبة القيمة المضافة (${rate}%)`,
-  grandTotal:    'الإجمالي شامل الضريبة',
-  validUntil:    'صالح حتى',
-  thanks:        'شكراً لتعاملكم معنا.',
-  cr:            'السجل التجاري',
-  vatNo:         'الرقم الضريبي',
-  address:       'العنوان',
-  contact:       'للتواصل',
-  page:          (n: number, total: number) => `صفحة ${n} من ${total}`,
-  // These were missing — added now
-  issue_date_label: 'تاريخ الإصدار',
-  client_name_label: 'اسم العميل',
-  company_label:     'الشركة',
-  vat_number_label:  'الرقم الضريبي',
-  address_label:     'العنوان',
-};
 
-const colHeader = StyleSheet.create({
-  desc:  { width: '52%', textAlign: 'right' },
-  qty:   { width: '12%', textAlign: 'left'  },
-  price: { width: '18%', textAlign: 'left'  },
-  total: { width: '18%', textAlign: 'left'  },
-});
+  issueDateAr: 'تاريخ الإصدار',
+  issueDateEn: 'Issue date',
+  validUntilAr: 'صالح حتى',
+  validUntilEn: 'Valid until',
+
+  clientBlockAr: 'بيانات العميل',
+  clientBlockEn: 'Client Details',
+  sellerBlockAr: 'بيانات البائع',
+  sellerBlockEn: 'Seller Details',
+  itemsBlockAr:  'البنود',
+  itemsBlockEn:  'Items',
+  totalsBlockAr: 'الإجماليات',
+  totalsBlockEn: 'Totals',
+  notesBlockAr:  'ملاحظات',
+  notesBlockEn:  'Notes',
+
+  // Client field labels (En | Ar pairs)
+  clientNameAr:  'الاسم',
+  clientNameEn:  'Name',
+  companyAr:     'الشركة',
+  companyEn:     'Company',
+  vatNumberAr:   'الرقم الضريبي',
+  vatNumberEn:   'VAT Number',
+  phoneAr:       'الجوال',
+  phoneEn:       'Phone',
+  emailAr:       'البريد الإلكتروني',
+  emailEn:       'Email',
+  addressAr:     'العنوان',
+  addressEn:     'Address',
+
+  // Line items headers
+  descAr:  'الوصف',
+  descEn:  'Description',
+  qtyAr:   'الكمية',
+  qtyEn:   'Qty',
+  priceAr: 'السعر',
+  priceEn: 'Unit Price',
+  totalAr: 'الإجمالي',
+  totalEn: 'Total',
+
+  // Totals
+  subtotalAr:    'الإجمالي قبل الضريبة',
+  subtotalEn:    'Subtotal',
+  vatAr:         (rate: number) => `ضريبة القيمة المضافة (${rate}%)`,
+  vatEn:         (rate: number) => `VAT (${rate}%)`,
+  grandTotalAr:  'الإجمالي شامل الضريبة',
+  grandTotalEn:  'Grand Total',
+
+  crAr:         'السجل التجاري',
+  crEn:         'CR',
+  vatNoAr:      'الرقم الضريبي',
+  vatNoEn:      'VAT No.',
+  addressLabelAr:'العنوان',
+  addressLabelEn:'Address',
+  contactAr:    'للتواصل',
+  contactEn:    'Contact',
+  thanksAr:     'شكراً لتعاملكم معنا.',
+  thanksEn:     'Thank you for your business.',
+  pageAr:       (n: number, total: number) => `صفحة ${n} من ${total}`,
+  pageEn:       (n: number, total: number) => `Page ${n} of ${total}`,
+
+  dash: '—',
+  noItemsAr: 'لا توجد بنود',
+  noItemsEn: 'No items',
+};
 
 /** Compute subtotal/VAT/total from a list of line items. */
 export function computeTotals(items: LineItem[], vatRate: number, currency: string) {
@@ -72,16 +121,29 @@ export function computeTotals(items: LineItem[], vatRate: number, currency: stri
 //  Document component
 // ============================================================
 
-// @react-pdf/renderer's <Text> doesn't accept arbitrary HTML attrs like `dir`.
-// We use plain <Text> everywhere and rely on the natural LTR for numbers
-// (because the surrounding font is Latin-script friendly for digits).
-
 function PdfDocument({ data, stampDataUri }: { data: DocumentData; stampDataUri: string | null }) {
   const { kind, client, line_items, brand, subtotal, vat_rate, vat_amount, total, currency } = data;
   const isInvoice = kind === 'invoice';
 
-  // Split items into pages if very long (basic: keep all on one page for now)
-  // We just render the items as one table; @react-pdf handles overflow with the page break.
+  // Build field rows for the client block. Each row has the English
+  // label, the value (centered), and the Arabic label. For the address
+  // (long text) we use a wide row instead.
+  const clientFields: Array<{ en: string; ar: string; value: string; wide?: boolean }> = [
+    { en: t.clientNameEn, ar: t.clientNameAr, value: client.name ?? '' },
+    ...(client.company ? [{ en: t.companyEn, ar: t.companyAr, value: client.company, wide: true }] : []),
+    ...(client.vat_number ? [{ en: t.vatNumberEn, ar: t.vatNumberAr, value: client.vat_number }] : []),
+    ...(client.phone ? [{ en: t.phoneEn, ar: t.phoneAr, value: client.phone }] : []),
+    ...(client.email ? [{ en: t.emailEn, ar: t.emailAr, value: client.email }] : []),
+    ...(client.address ? [{ en: t.addressEn, ar: t.addressAr, value: client.address, wide: true }] : []),
+  ];
+
+  // Seller block: brand info
+  const sellerFields: Array<{ en: string; ar: string; value: string; wide?: boolean }> = [
+    { en: t.clientNameEn, ar: t.clientNameAr, value: brand.nameEn, wide: true },
+    { en: t.crEn, ar: t.crAr, value: brand.cr },
+    { en: t.vatNoEn, ar: t.vatNoAr, value: brand.vat },
+    { en: t.addressEn, ar: t.addressAr, value: brand.address, wide: true },
+  ];
 
   return (
     <Document
@@ -89,134 +151,175 @@ function PdfDocument({ data, stampDataUri }: { data: DocumentData; stampDataUri:
       author={brand.nameEn}
     >
       <Page size="A4" style={pdfStyles.page}>
-        {/* Header band */}
-        <View style={pdfStyles.headerRow} fixed>
+        {/* ============== Header band ============== */}
+        <View style={pdfStyles.headerBand} fixed>
+          {/* Brand (left) */}
           <View style={pdfStyles.brandBlock}>
             <Image src="/brand/soulvd-mark.png" style={pdfStyles.brandMark} />
             <View>
-              <Text style={pdfStyles.brandNameAr}>{BRAND.nameAr}</Text>
-              <Text style={pdfStyles.brandNameEn}>{BRAND.nameEn}</Text>
+              <Text style={pdfStyles.brandNameAr}>{brand.nameAr}</Text>
+              <Text style={pdfStyles.brandNameEn}>{brand.nameEn}</Text>
             </View>
           </View>
-          <View>
-            <Text style={pdfStyles.docTypeAr}>
-              {isInvoice ? t.invoiceTitleAr : t.quoteTitleAr}
-            </Text>
+
+          {/* Doc type + number + dates (right) */}
+          <View style={pdfStyles.headerRight}>
+            <View style={pdfStyles.docTypeRow}>
+              <Text style={pdfStyles.docTypeAr}>{isInvoice ? t.invoiceTitleAr : t.quoteTitleAr}</Text>
+              <Text style={pdfStyles.docTypeEn}>{isInvoice ? t.invoiceTitleEn : t.quoteTitleEn}</Text>
+            </View>
             <Text style={pdfStyles.docMeta}>
               <Text style={pdfStyles.docMetaStrong}>{data.number}</Text>
             </Text>
             <Text style={pdfStyles.docMeta}>
-              {t.issue_date_label}: {fmtDate(data.issue_date)}
+              {t.issueDateAr} · {fmtDate(data.issue_date, 'ar-SA')}{'  /  '}{t.issueDateEn} · {fmtDate(data.issue_date, 'en-GB')}
             </Text>
             {!isInvoice && data.valid_until && (
               <Text style={pdfStyles.docMeta}>
-                {t.validUntil}: {fmtDate(data.valid_until)}
+                {t.validUntilAr} · {fmtDate(data.valid_until, 'ar-SA')}{'  /  '}{t.validUntilEn} · {fmtDate(data.valid_until, 'en-GB')}
               </Text>
             )}
           </View>
         </View>
 
-        {/* Client block */}
-        <Text style={pdfStyles.sectionHeading}>{t.clientBlock}</Text>
-        <View style={pdfStyles.clientGrid}>
-          <View style={pdfStyles.clientCell}>
-            <Text style={pdfStyles.clientLabel}>{t.client_name_label}</Text>
-            <Text style={pdfStyles.clientValue}>{client.name || '—'}</Text>
-          </View>
-          {client.company && (
-            <View style={pdfStyles.clientCell}>
-              <Text style={pdfStyles.clientLabel}>{t.company_label}</Text>
-              <Text style={pdfStyles.clientValue}>{client.company}</Text>
-            </View>
-          )}
-          {client.vat_number && (
-            <View style={pdfStyles.clientCell}>
-              <Text style={pdfStyles.clientLabel}>{t.vat_number_label}</Text>
-              <Text style={pdfStyles.clientValue}>{client.vat_number}</Text>
-            </View>
-          )}
-          {client.address && (
-            <View style={pdfStyles.clientCell}>
-              <Text style={pdfStyles.clientLabel}>{t.address_label}</Text>
-              <Text style={pdfStyles.clientValue}>{client.address}</Text>
-            </View>
-          )}
-        </View>
+        {/* ============== Client section (bilingual) ============== */}
+        <SectionHeading ar={t.clientBlockAr} en={t.clientBlockEn} />
+        <FieldsBlock fields={clientFields} />
 
-        {/* Line items */}
-        <Text style={pdfStyles.sectionHeading}>{t.itemsBlock}</Text>
+        {/* ============== Seller section (us) ============== */}
+        <SectionHeading ar={t.sellerBlockAr} en={t.sellerBlockEn} />
+        <FieldsBlock fields={sellerFields} />
+
+        {/* ============== Line items ============== */}
+        <SectionHeading ar={t.itemsBlockAr} en={t.itemsBlockEn} />
         <View style={pdfStyles.itemsTable}>
           {/* Header row */}
           <View style={pdfStyles.itemsHeader}>
-            <Text style={[pdfStyles.itemsHeaderCell, colHeader.desc]}>{t.desc}</Text>
-            <Text style={[pdfStyles.itemsHeaderCell, colHeader.qty]}>{t.qty}</Text>
-            <Text style={[pdfStyles.itemsHeaderCell, colHeader.price]}>{t.price}</Text>
-            <Text style={[pdfStyles.itemsHeaderCell, colHeader.total]}>{t.total}</Text>
+            <View style={pdfStyles.colDesc}>
+              <Text style={pdfStyles.itemsHeaderCellAr}>{t.descAr}</Text>
+              <Text style={pdfStyles.itemsHeaderCellEn}>{t.descEn}</Text>
+            </View>
+            <View style={pdfStyles.colQty}>
+              <Text style={pdfStyles.itemsHeaderCellNum}>{t.qtyEn}</Text>
+            </View>
+            <View style={pdfStyles.colPrice}>
+              <Text style={pdfStyles.itemsHeaderCellNum}>{t.priceEn}</Text>
+            </View>
+            <View style={pdfStyles.colTotal}>
+              <Text style={pdfStyles.itemsHeaderCellNum}>{t.totalEn}</Text>
+            </View>
           </View>
 
           {/* Body rows */}
           {line_items.length === 0 ? (
             <View style={pdfStyles.itemRow}>
-              <Text style={[pdfStyles.itemDesc, { color: '#888' }]}>— لا توجد بنود —</Text>
+              <View style={pdfStyles.itemDescCell}>
+                <Text style={[pdfStyles.itemDescAr, pdfStyles.muted]}>{t.noItemsAr}</Text>
+                <Text style={[pdfStyles.itemDescEn, pdfStyles.muted]}>{t.noItemsEn}</Text>
+              </View>
+              <View style={pdfStyles.colQty}><Text style={pdfStyles.itemNum}>—</Text></View>
+              <View style={pdfStyles.colPrice}><Text style={pdfStyles.itemNum}>—</Text></View>
+              <View style={pdfStyles.colTotal}><Text style={pdfStyles.itemTotal}>—</Text></View>
             </View>
           ) : (
             line_items.map((it, i) => (
               <View key={i} style={i % 2 === 0 ? pdfStyles.itemRow : pdfStyles.itemRowAlt}>
-                <Text style={pdfStyles.itemDescAr}>{it.description || '—'}</Text>
-                <Text style={pdfStyles.itemQtyAr}>{fmt(it.quantity, currency)}</Text>
-                <Text style={pdfStyles.itemPriceAr}>{fmt(it.unit_price, currency)}</Text>
-                <Text style={pdfStyles.itemTotalAr}>{fmt(it.quantity * it.unit_price, currency)}</Text>
+                <View style={pdfStyles.itemDescCell}>
+                  <Text style={pdfStyles.itemDescAr}>{it.description || t.dash}</Text>
+                  <Text style={pdfStyles.itemDescEn}>{it.description || ''}</Text>
+                </View>
+                <View style={pdfStyles.colQty}>
+                  <Text style={pdfStyles.itemNum}>{it.quantity}</Text>
+                </View>
+                <View style={pdfStyles.colPrice}>
+                  <Text style={pdfStyles.itemNum}>{fmt(it.unit_price, currency)}</Text>
+                </View>
+                <View style={pdfStyles.colTotal}>
+                  <Text style={pdfStyles.itemTotal}>{fmt(it.quantity * it.unit_price, currency)}</Text>
+                </View>
               </View>
             ))
           )}
         </View>
 
-        {/* Totals */}
+        {/* ============== Totals (bilingual) ============== */}
         <View style={pdfStyles.totalsWrap}>
           <View style={pdfStyles.totalsBox}>
             <View style={pdfStyles.totalsRow}>
-              <Text style={pdfStyles.totalsLabel}>{t.subtotal}</Text>
+              <View style={pdfStyles.totalsLabels}>
+                <Text style={pdfStyles.totalsLabelAr}>{t.subtotalAr}</Text>
+                <Text style={pdfStyles.totalsLabelEn}>{t.subtotalEn}</Text>
+              </View>
               <Text style={pdfStyles.totalsValue}>{fmt(subtotal, currency)}</Text>
             </View>
             {isInvoice && (
               <View style={pdfStyles.totalsRow}>
-                <Text style={pdfStyles.totalsLabel}>{t.vat(vat_rate)}</Text>
+                <View style={pdfStyles.totalsLabels}>
+                  <Text style={pdfStyles.totalsLabelAr}>{t.vatAr(vat_rate)}</Text>
+                  <Text style={pdfStyles.totalsLabelEn}>{t.vatEn(vat_rate)}</Text>
+                </View>
                 <Text style={pdfStyles.totalsValue}>{fmt(vat_amount, currency)}</Text>
               </View>
             )}
             <View style={pdfStyles.totalsRowGrand}>
-              <Text style={pdfStyles.totalsLabelGrand}>{t.grandTotal}</Text>
+              <View style={pdfStyles.totalsLabelsGrand}>
+                <Text style={pdfStyles.totalsLabelArGrand}>{t.grandTotalAr}</Text>
+                <Text style={pdfStyles.totalsLabelEnGrand}>{t.grandTotalEn}</Text>
+              </View>
               <Text style={pdfStyles.totalsValueGrand}>{fmt(total, currency)}</Text>
             </View>
           </View>
         </View>
 
-        {/* Notes */}
+        {/* ============== Notes (bilingual) ============== */}
         {data.notes && (
           <View style={pdfStyles.notesBox}>
-            <Text style={pdfStyles.notesLabel}>{t.notesBlock}</Text>
+            <View style={pdfStyles.notesLabelRow}>
+              <Text style={pdfStyles.notesLabelEn}>{t.notesBlockEn}</Text>
+              <Text style={pdfStyles.notesLabelAr}>{t.notesBlockAr}</Text>
+            </View>
             <Text style={pdfStyles.notesText}>{data.notes}</Text>
           </View>
         )}
 
-        {/* Footer */}
+        {/* ============== Footer (fixed; appears on every page) ============== */}
         <View style={pdfStyles.footer} fixed>
-          <View style={pdfStyles.footerLeft}>
-            <Text>{brand.nameAr} · {brand.nameEn}</Text>
-            <Text>{t.cr}: {brand.cr}  ·  {t.vatNo}: {brand.vat}</Text>
-            <Text>{t.address}: {brand.address}</Text>
-            <Text>{t.contact}: {brand.email}  ·  {brand.phone}  ·  {brand.website}</Text>
-            <Text style={{ marginTop: 4 }}>{t.thanks}</Text>
+          <View style={pdfStyles.footerRow}>
+            <View style={[pdfStyles.footerCol, pdfStyles.footerColEn]}>
+              <Text style={[pdfStyles.footerLine, pdfStyles.footerLineEn]}>
+                {t.crEn}: {brand.cr}  ·  {t.vatNoEn}: {brand.vat}
+              </Text>
+              <Text style={[pdfStyles.footerLine, pdfStyles.footerLineEn]}>
+                {t.addressLabelEn}: {brand.address}
+              </Text>
+              <Text style={[pdfStyles.footerLine, pdfStyles.footerLineEn]}>
+                {t.contactEn}: {brand.email}  ·  {brand.phone}  ·  {brand.website}
+              </Text>
+            </View>
+            {stampDataUri && (
+              <Image src={stampDataUri} style={pdfStyles.stamp} />
+            )}
+            <View style={[pdfStyles.footerCol, pdfStyles.footerColAr]}>
+              <Text style={[pdfStyles.footerLine, pdfStyles.footerLineAr]}>
+                {t.crAr}: {brand.cr}  ·  {t.vatNoAr}: {brand.vat}
+              </Text>
+              <Text style={[pdfStyles.footerLine, pdfStyles.footerLineAr]}>
+                {t.addressLabelAr}: {brand.address}
+              </Text>
+              <Text style={[pdfStyles.footerLine, pdfStyles.footerLineAr]}>
+                {t.contactAr}: {brand.email}  ·  {brand.phone}  ·  {brand.website}
+              </Text>
+            </View>
           </View>
-          {stampDataUri && (
-            <Image src={stampDataUri} style={pdfStyles.stamp} />
-          )}
+          <Text style={pdfStyles.thanks}>
+            {t.thanksAr}  ·  {t.thanksEn}
+          </Text>
         </View>
 
         {/* Page number */}
         <Text
           style={pdfStyles.pageNumber}
-          render={({ pageNumber, totalPages }) => t.page(pageNumber, totalPages)}
+          render={({ pageNumber, totalPages }) => `${t.pageAr(pageNumber, totalPages)}  ·  ${t.pageEn(pageNumber, totalPages)}`}
           fixed
         />
       </Page>
@@ -225,18 +328,59 @@ function PdfDocument({ data, stampDataUri }: { data: DocumentData; stampDataUri:
 }
 
 // ============================================================
+//  Subcomponents
+// ============================================================
+
+function SectionHeading({ ar, en }: { ar: string; en: string }) {
+  return (
+    <View style={pdfStyles.sectionHeading}>
+      <Text style={pdfStyles.sectionHeadingEn}>{en}</Text>
+      <Text style={pdfStyles.sectionHeadingAr}>{ar}</Text>
+    </View>
+  );
+}
+
+/** Render a stack of fields. Short fields use the 3-column [En | value | Ar]
+ * layout; long fields (wide: true) use a stacked layout with both labels
+ * on top and the value below. */
+function FieldsBlock({
+  fields,
+}: {
+  fields: Array<{ en: string; ar: string; value: string; wide?: boolean }>;
+}) {
+  return (
+    <View>
+      {fields.map((f, i) =>
+        f.wide ? (
+          <View key={i} style={pdfStyles.fieldRowWide}>
+            <View style={pdfStyles.fieldLabelRow}>
+              <Text style={pdfStyles.fieldLabelEn}>{f.en}</Text>
+              <Text style={pdfStyles.fieldLabelAr}>{f.ar}</Text>
+            </View>
+            <Text style={pdfStyles.fieldValueWide}>{f.value || t.dash}</Text>
+          </View>
+        ) : (
+          <View key={i} style={pdfStyles.fieldRow}>
+            <Text style={pdfStyles.fieldLabelEn}>{f.en}</Text>
+            <Text style={pdfStyles.fieldValue}>{f.value || t.dash}</Text>
+            <Text style={pdfStyles.fieldLabelAr}>{f.ar}</Text>
+          </View>
+        )
+      )}
+    </View>
+  );
+}
+
+// ============================================================
 //  Public API
 // ============================================================
 
-/** Render the document to a PDF buffer. */
 export async function renderDocumentPdf(data: DocumentData): Promise<Buffer> {
-  // Load the stamp as a data URI (so @react-pdf doesn't need a public URL)
-  // We only need to do this for documents that should display the stamp.
+  await ensureFontsRegistered();
   const stampDataUri = await loadBrandStamp();
   return await renderToBuffer(<PdfDocument data={data} stampDataUri={stampDataUri} />);
 }
 
-/** Render and upload to the documents bucket, return the public URL. */
 export async function renderAndUploadDocumentPdf(
   data: DocumentData,
   upload: (path: string, bytes: Buffer, contentType: string) => Promise<{ publicUrl: string } | { error: string }>
@@ -260,15 +404,9 @@ export async function renderAndUploadDocumentPdf(
 let _stampCache: string | null = null;
 async function loadBrandStamp(): Promise<string | null> {
   if (_stampCache) return _stampCache;
-  // Read the public asset. In a Node runtime this works because
-  // `public/` is part of the Next.js static asset tree, but at runtime
-  // we need to read the file from disk via `fs` since /public is not
-  // served to server-side code.
   try {
     const fs = await import('node:fs/promises');
     const path = await import('node:path');
-    // __dirname won't work in the Next.js compiled bundle; resolve from
-    // process.cwd() which is the project root.
     const filePath = path.join(process.cwd(), 'public', 'brand', 'soulvd-stamp.png');
     const buf = await fs.readFile(filePath);
     _stampCache = `data:image/png;base64,${buf.toString('base64')}`;
