@@ -9,9 +9,10 @@ import { updateQuote, type LineItem } from '@/lib/quotes/actions';
 import { QUOTE_STATUSES, QUOTE_STATUS_LABELS, type QuoteStatus } from '@/lib/quotes/constants';
 
 type Client = { id: string; name: string; company: string | null; status: string };
+type Project = { id: string; name: string; client_id: string; status: string };
 
-// Quote statuses (no template_id, no project_id for now — see comments in
-// lib/quotes/actions.ts and quoteSchema for the missing `project_id` column).
+// Quote statuses (no template_id here; project_id is optional via the
+// selector below — column added in migration 0007).
 const STATUS_OPTIONS: Array<{ value: QuoteStatus; label: string }> = QUOTE_STATUSES.map((v) => ({
   value: v,
   label: QUOTE_STATUS_LABELS[v],
@@ -22,10 +23,12 @@ const newItem = (): LineItem => ({ description: '', quantity: 1, unit_price: 0, 
 export function QuoteForm({
   quote,
   clients,
+  projects,
 }: {
   quote: {
     id: string;
     client_id: string | null;
+    project_id: string | null;
     currency: string;
     vat_rate: number | null;
     status: QuoteStatus;
@@ -35,6 +38,7 @@ export function QuoteForm({
     data: { line_items?: LineItem[] };
   };
   clients: Client[];
+  projects: Project[];
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -44,6 +48,7 @@ export function QuoteForm({
     quote.data?.line_items?.length ? quote.data.line_items : [newItem()];
 
   const [clientId, setClientId] = useState<string>(quote.client_id ?? '');
+  const [projectId, setProjectId] = useState<string>(quote.project_id ?? '');
   const [issueDate, setIssueDate] = useState<string>(
     quote.issue_date ?? new Date().toISOString().slice(0, 10)
   );
@@ -53,6 +58,11 @@ export function QuoteForm({
   const [status, setStatus] = useState<QuoteStatus>(quote.status ?? 'draft');
   const [notes, setNotes] = useState<string>(quote.notes ?? '');
   const [items, setItems] = useState<LineItem[]>(initialItems);
+
+  const filteredProjects = useMemo(
+    () => projects.filter((p) => !clientId || p.client_id === clientId),
+    [projects, clientId]
+  );
 
   const computed = useMemo(() => {
     const subtotal = items.reduce(
@@ -96,6 +106,7 @@ export function QuoteForm({
     startTransition(async () => {
       const r = await updateQuote(quote.id, {
         client_id: clientId,
+        project_id: projectId,
         issue_date: issueDate,
         valid_until: validUntil,
         currency,
@@ -127,11 +138,14 @@ export function QuoteForm({
       )}
 
       {/* Header info */}
-      <div className="grid gap-4 sm:grid-cols-1">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field label="العميل" required>
           <Select
             value={clientId}
-            onChange={(e) => setClientId(e.target.value)}
+            onChange={(e) => {
+              setClientId(e.target.value);
+              setProjectId('');
+            }}
             required
           >
             <option value="">— اختر عميلاً —</option>
@@ -139,6 +153,20 @@ export function QuoteForm({
               <option key={c.id} value={c.id}>
                 {c.name}
                 {c.company ? ` (${c.company})` : ''}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="المشروع" hint="اختياري — لربط عرض السعر بمشروع">
+          <Select
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
+            disabled={!clientId}
+          >
+            <option value="">— لا يوجد —</option>
+            {filteredProjects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
               </option>
             ))}
           </Select>

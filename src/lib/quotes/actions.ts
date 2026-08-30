@@ -21,12 +21,12 @@ const lineItemSchema = z.object({
   taxable: z.boolean().default(true),
 });
 
-// Note: the `quotes` table in the live DB does NOT have a `project_id`
-// column (only `invoices` got it in migration 0003). When/if you add
-// `project_id` to quotes, drop the `project_id` exclusion below and
-// re-add the field to the schema, QuoteForm, and the list/detail pages.
+// Note: `quotes.project_id` was added in migration 0007 (mirroring what
+// 0003 did for `invoices`). The form sends an empty string when no
+// project is selected; the action normalizes that to NULL on write.
 const quoteSchema = z.object({
   client_id: z.string().uuid('معرّف العميل غير صالح'),
+  project_id: z.string().uuid().optional().or(z.literal('')),
   issue_date: z.string().min(1, 'تاريخ الإصدار مطلوب'),
   valid_until: z.string().optional().default(''),
   currency: z.string().max(8).default('SAR'),
@@ -168,6 +168,7 @@ export async function updateQuote(id: string, input: z.infer<typeof quoteSchema>
     .from('quotes')
     .update({
       client_id: parsed.data.client_id,
+      project_id: parsed.data.project_id || null,
       client_snapshot: snapshot,
       data: dataBlob,
       subtotal,
