@@ -1,9 +1,11 @@
 // src/app/[locale]/admin/quotes/page.tsx
 // Quotes list — server component, mirrors /admin/invoices.
-// Reads from the `quotes` table; client + project joins use admin client.
+// Reads from the `quotes` table; client join via admin client.
+// Project linkage is omitted because `quotes.project_id` does not yet
+// exist in the live DB (see lib/quotes/actions.ts for the TODO).
 
 import Link from 'next/link';
-import { Plus, FileText, Calendar, ExternalLink, ScrollText } from 'lucide-react';
+import { Plus, Calendar, ExternalLink, ScrollText } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { ButtonLink } from '@/components/ui/Button';
@@ -28,9 +30,12 @@ export default async function QuotesPage({
   const { status: statusFilter, client_id: clientFilter } = await searchParams;
   const admin = createAdminClient();
 
+  // Note: `quotes.project_id` does not exist in the live DB (only `invoices`
+  // got it in migration 0003). Project linkage for quotes is omitted from
+  // this page until a follow-up migration adds the column.
   let query = admin
     .from('quotes')
-    .select('id, number, client_id, project_id, status, total, currency, issue_date, valid_until, created_at')
+    .select('id, number, client_id, status, total, currency, issue_date, valid_until, created_at')
     .order('created_at', { ascending: false });
 
   if (statusFilter && statusFilter !== 'all') query = query.eq('status', statusFilter as QuoteStatus);
@@ -41,7 +46,6 @@ export default async function QuotesPage({
     id: string;
     number: string;
     client_id: string | null;
-    project_id: string | null;
     status: QuoteStatus;
     total: number | null;
     currency: string;
@@ -50,24 +54,18 @@ export default async function QuotesPage({
     created_at: string;
   }>;
 
-  // Join clients + projects (admin client bypasses RLS — safe for server pages).
+  // Join clients (admin client bypasses RLS — safe for server pages).
   const clientIds = Array.from(new Set(items.map((r) => r.client_id).filter((x): x is string => !!x)));
-  const projectIds = Array.from(new Set(items.map((r) => r.project_id).filter((x): x is string => !!x)));
-  const [{ data: clientsData }, { data: projectsData }] = await Promise.all([
-    clientIds.length ? admin.from('clients').select('id, name, company').in('id', clientIds) : { data: [] },
-    projectIds.length ? admin.from('projects').select('id, name').in('id', projectIds) : { data: [] },
-  ]);
+  const { data: clientsData } = clientIds.length
+    ? await admin.from('clients').select('id, name, company').in('id', clientIds)
+    : { data: [] };
   const clientById = new Map<string, { name: string; company: string | null }>(
     ((clientsData ?? []) as Array<{ id: string; name: string; company: string | null }>).map((c) => [c.id, c]),
-  );
-  const projectById = new Map<string, { name: string }>(
-    ((projectsData ?? []) as Array<{ id: string; name: string }>).map((p) => [p.id, p]),
   );
 
   const enriched = items.map((r) => ({
     ...r,
     client_name: r.client_id ? clientById.get(r.client_id)?.name ?? null : null,
-    project_name: r.project_id ? projectById.get(r.project_id)?.name ?? null : null,
   }));
 
   // Counts per status.
@@ -201,17 +199,6 @@ export default async function QuotesPage({
                             className="text-ink-900 hover:text-sage-700 font-medium"
                           >
                             {q.client_name}
-                          </Link>
-                        </span>
-                      )}
-                      {q.project_name && (
-                        <span className="inline-flex items-center gap-1">
-                          <FileText className="size-3" />
-                          <Link
-                            href={`/admin/projects/${q.project_id}`}
-                            className="text-ink-900 hover:text-sage-700 font-medium"
-                          >
-                            {q.project_name}
                           </Link>
                         </span>
                       )}

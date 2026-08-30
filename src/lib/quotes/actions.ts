@@ -13,10 +13,62 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { QUOTE_STATUSES } from './constants';
 
-const quoteStatusSchema = z.enum(QUOTE_STATUSES);
+// line_items: array of {description, quantity, unit_price, taxable}
+const lineItemSchema = z.object({
+  description: z.string().min(1, 'الوصف مطلوب').max(500),
+  quantity: z.number().positive('الكمية يجب أن تكون أكبر من صفر'),
+  unit_price: z.number().nonnegative('السعر لا يمكن أن يكون سالباً'),
+  taxable: z.boolean().default(true),
+});
+
+// Note: the `quotes` table in the live DB does NOT have a `project_id`
+// column (only `invoices` got it in migration 0003). When/if you add
+// `project_id` to quotes, drop the `project_id` exclusion below and
+// re-add the field to the schema, QuoteForm, and the list/detail pages.
+const quoteSchema = z.object({
+  client_id: z.string().uuid('معرّف العميل غير صالح'),
+  issue_date: z.string().min(1, 'تاريخ الإصدار مطلوب'),
+  valid_until: z.string().optional().default(''),
+  currency: z.string().max(8).default('SAR'),
+  vat_rate: z.string().default('15'),   // percent as string
+  status: z.enum(QUOTE_STATUSES).default('draft'),
+  notes: z.string().max(2000).optional().default(''),
+  data: z.string().default('{}'),
+  client_snapshot: z.string().default('{}'),
+  line_items_json: z.string().default('[]'),
+});
+
+export type LineItem = z.infer<typeof lineItemSchema>;
+
+function safeParseItems(json: string): LineItem[] {
+  try {
+    const arr = JSON.parse(json);
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .filter((x): x is LineItem =>
+        typeof x === 'object' && x !== null && typeof x.description === 'string'
+      )
+      .map((x) => ({
+        description: String(x.description),
+        quantity: Number(x.quantity) || 0,
+        unit_price: Number(x.unit_price) || 0,
+        taxable: x.taxable !== false,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function computeTotals(items: LineItem[], vatRate: number) {
+  const subtotal = items.reduce((s, it) => s + it.quantity * it.unit_price, 0);
+  const taxableBase = items.filter((it) => it.taxable).reduce((s, it) => s + it.quantity * it.unit_price, 0);
+  const vatAmount = Math.round(taxableBase * (vatRate / 100) * 100) / 100;
+  const total = Math.round((subtotal + vatAmount) * 100) / 100;
+  return { subtotal: Math.round(subtotal * 100) / 100, vatAmount, total };
+}
 
 export async function setQuoteStatus(id: string, status: string) {
-  const parsed = quoteStatusSchema.safeParse(status);
+  const parsed = z.enum(QUOTE_STATUSES).safeParse(status);
   if (!parsed.success) return { ok: false as const, error: 'invalid_status' };
   const supabase = await createClient();
   if (!supabase) return { ok: false as const, error: 'unauthorized' };
@@ -34,6 +86,111 @@ export async function deleteQuote(id: string) {
   if (!supabase) return { ok: false as const, error: 'unauthorized' };
   const { error } = await supabase.from('quotes').delete().eq('id', id);
   if (error) return { ok: false as const, error: error.message };
+  revalidatePath('/admin', 'layout');
+  return { ok: true as const };
+}
+
+/**
+ * Update an existing quote.
+ *
+ *  - Recomputes subtotal/VAT/total from the submitted line items.
+ *  - Rebuilds client_snapshot from the current client row (if any), so it
+ *    stays in sync with the latest client data. Falls back to the snapshot
+ *    in the form input when the client_id is empty.
+ *  - Preserves data.kind and data.valid_until in the JSONB blob (the
+ *    .docx/PDF template engine reads data.valid_until, and the kind tag
+ *    distinguishes the document type at read time).
+ *  - Never touches `number` or `created_by` — those are immutable after
+ *    creation.
+ */
+export async function updateQuote(id: string, input: z.infer<typeof quoteSchema>) {
+  const parsed = quoteSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'invalid' };
+  }
+  const supabase = await createClient();
+  if (!supabase) return { ok: false as const, error: 'unauthorized' };
+
+  const items = safeParseItems(parsed.data.line_items_json);
+  const vatRate = Number(parsed.data.vat_rate) || 0;
+  const { subtotal, vatAmount, total } = computeTotals(items, vatRate);
+
+  // Rebuild client_snapshot from the current client row. If the client was
+  // removed or the form sends an empty client_id, fall back to whatever the
+  // caller passed in (so we don't wipe the snapshot to {}).
+  let snapshot: Record<string, unknown> = {};
+  if (parsed.data.client_id) {
+    const { data: client } = await supabase
+      .from('clients')
+      .select('id, name, email, phone, company, vat_number, address')
+      .eq('id', parsed.data.client_id)
+      .maybeSingle();
+    const row = client as
+      | {
+          name: string;
+          email: string | null;
+          phone: string | null;
+          company: string | null;
+          vat_number: string | null;
+          address: string | null;
+        }
+      | null;
+    if (row) {
+      snapshot = {
+        name: row.name,
+        email: row.email ?? undefined,
+        phone: row.phone ?? undefined,
+        company: row.company ?? undefined,
+        vat_number: row.vat_number ?? undefined,
+        address: row.address ?? undefined,
+      };
+    } else {
+      snapshot = JSON.parse(parsed.data.client_snapshot || '{}');
+    }
+  } else {
+    snapshot = JSON.parse(parsed.data.client_snapshot || '{}');
+  }
+
+  // Preserve the metadata fields the template engine relies on.
+  const existingData = JSON.parse(parsed.data.data || '{}') as Record<string, unknown>;
+  const dataBlob = {
+    ...existingData,
+    line_items: items,
+    kind: 'quote',
+    valid_until: parsed.data.valid_until || null,
+    subtotal,
+    vat_rate: vatRate,
+    vat_amount: vatAmount,
+    total,
+  };
+
+  const { data: updated, error } = await supabase
+    .from('quotes')
+    .update({
+      client_id: parsed.data.client_id,
+      client_snapshot: snapshot,
+      data: dataBlob,
+      subtotal,
+      vat_rate: vatRate,
+      vat_amount: vatAmount,
+      total,
+      currency: parsed.data.currency,
+      status: parsed.data.status,
+      issue_date: parsed.data.issue_date,
+      valid_until: parsed.data.valid_until || null,
+      notes: parsed.data.notes || null,
+    })
+    .eq('id', id)
+    .select('id')
+    .single();
+  if (error) return { ok: false as const, error: error.message };
+  // No row matched the id — most likely the quote was deleted between page
+  // load and submit. Surface it as an error so the form doesn't silently
+  // claim success.
+  if (!updated) {
+    return { ok: false as const, error: 'quote_not_found' };
+  }
+
   revalidatePath('/admin', 'layout');
   return { ok: true as const };
 }

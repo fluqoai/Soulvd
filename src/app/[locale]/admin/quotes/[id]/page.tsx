@@ -1,7 +1,7 @@
 // src/app/[locale]/admin/quotes/[id]/page.tsx
-// Quote detail page (view-only). Mirrors /admin/invoices/[id] but for the
-// `quotes` table. Edit flow is not built yet — quotes are created and
-// viewed from here; status changes go through the header buttons.
+// Quote detail page (view-only). Status changes go through the header
+// buttons; "Edit" links to /admin/quotes/[id]/edit. Mirrors
+// /admin/invoices/[id] but for the `quotes` table.
 
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -11,14 +11,15 @@ import {
   Trash2,
   Download,
   User as UserIcon,
-  Briefcase,
   CheckCircle2,
   XCircle,
   Send,
   Hourglass,
+  Pencil,
 } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { PageHeader } from '@/components/admin/PageHeader';
+import { ButtonLink } from '@/components/ui/Button';
 import {
   setQuoteStatus,
   deleteQuote,
@@ -46,7 +47,7 @@ export default async function QuoteDetailPage({
     id: string;
     number: string;
     client_id: string | null;
-    project_id: string | null;
+    // project_id intentionally absent — column doesn't exist on quotes yet
     currency: string;
     vat_rate: number | null;
     vat_amount: number | null;
@@ -61,26 +62,17 @@ export default async function QuoteDetailPage({
     generated_pdf_path: string | null;
   };
 
-  // Fetch client + project for sidebar links.
-  const [{ data: clientRow }, { data: projectRow }] = await Promise.all([
-    q.client_id
-      ? admin
-          .from('clients')
-          .select('id, name, company')
-          .eq('id', q.client_id)
-          .maybeSingle()
-      : Promise.resolve({ data: null }),
-    q.project_id
-      ? admin
-          .from('projects')
-          .select('id, name')
-          .eq('id', q.project_id)
-          .maybeSingle()
-      : Promise.resolve({ data: null }),
-  ]);
+  // Fetch client for sidebar link. (No project lookup — `quotes.project_id`
+  // doesn't exist in the live DB; add it in a follow-up migration.)
+  const { data: clientRow } = q.client_id
+    ? await admin
+        .from('clients')
+        .select('id, name, company')
+        .eq('id', q.client_id)
+        .maybeSingle()
+    : { data: null };
 
   const client = clientRow as { id: string; name: string; company: string | null } | null;
-  const project = projectRow as { id: string; name: string } | null;
 
   const today = new Date().toISOString().slice(0, 10);
   const isExpired =
@@ -139,12 +131,15 @@ export default async function QuoteDetailPage({
           q.valid_until ? ` · صالح حتى: ${new Date(q.valid_until).toLocaleDateString('ar-SA')}` : ''
         }`}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span
               className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${QUOTE_STATUS_STYLES[q.status]}`}
             >
               {QUOTE_STATUS_LABELS[q.status]}
             </span>
+            <ButtonLink href={`/admin/quotes/${q.id}/edit`} size="sm" variant="secondary">
+              <Pencil className="size-3.5" /> تعديل
+            </ButtonLink>
             {transitions.map((t) => (
               <form
                 key={t.to}
@@ -320,16 +315,7 @@ export default async function QuoteDetailPage({
                 <ExternalLink className="size-3 text-ink-400" />
               </Link>
             )}
-            {project && (
-              <Link
-                href={`/admin/projects/${project.id}`}
-                className="flex items-center gap-2 text-ink-700 hover:text-sage-700"
-              >
-                <Briefcase className="size-4 text-ink-500" />
-                <span>{project.name}</span>
-                <ExternalLink className="size-3 text-ink-400" />
-              </Link>
-            )}
+            {/* Project link omitted — `quotes.project_id` doesn't exist yet. */}
           </section>
 
           {/* Generated documents */}
