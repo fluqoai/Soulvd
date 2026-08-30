@@ -234,6 +234,34 @@ export async function setInvoiceStatus(id: string, status: string) {
   return { ok: true as const };
 }
 
+/**
+ * Form-action wrapper for the status transitions on the invoice detail
+ * page. Mirrors the rationale on the quotes side: a top-level exported
+ * function has a stable identity across renders, so the form `action`
+ * attribute can point at it without recreating a new closure on every
+ * render (which is what throws inside the route's error boundary in
+ * production).
+ *
+ * Returns `void` because the form `action` prop's type signature is
+ * `(formData) => void | Promise<void>`.
+ */
+export async function setInvoiceStatusFormAction(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '');
+  const status = String(formData.get('status') ?? '');
+  if (!id) return;
+  await setInvoiceStatus(id, status);
+}
+
+/**
+ * Form-action wrapper for the invoice detail page's delete button. Same
+ * rationale as `setInvoiceStatusFormAction`.
+ */
+export async function deleteInvoiceFormAction(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '');
+  if (!id) return;
+  await deleteInvoice(id);
+}
+
 export async function deleteInvoice(id: string) {
   const supabase = await createClient();
   if (!supabase) return { ok: false as const, error: 'unauthorized' };

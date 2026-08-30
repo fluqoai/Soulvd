@@ -81,6 +81,43 @@ export async function setQuoteStatus(id: string, status: string) {
   return { ok: true as const };
 }
 
+/**
+ * Form-action wrapper for the status transitions on the quote detail page.
+ *
+ * Why a separate exported action: the page renders multiple transition
+ * buttons (one per next-state) inside a `.map()`. An inline `action={async
+ * () => { 'use server'; ... }}` inside a loop creates an unstable function
+ * reference on every render, and Next.js 15/16 can't register a stable
+ * action ID for it — the server-component render then throws, which the
+ * route-level error boundary turns into the "حدث خطأ غير متوقع" page.
+ *
+ * Pulling the action out to this `use server` module gives every form a
+ * stable function reference; the per-button parameter (the next status) is
+ * passed via a hidden input. Same pattern is used for the delete form.
+ *
+ * Returns `void` because the form `action` prop's type signature is
+ * `(formData) => void | Promise<void>`. Errors are swallowed here and
+ * surfaced via the standard `revalidatePath('/admin', 'layout')` on
+ * success / no-op on failure; the page is revalidated either way.
+ */
+export async function setQuoteStatusFormAction(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '');
+  const status = String(formData.get('status') ?? '');
+  if (!id) return;
+  await setQuoteStatus(id, status);
+}
+
+/**
+ * Form-action wrapper for the delete button on the quote detail page. Same
+ * rationale as `setQuoteStatusFormAction` above — keeps the action reference
+ * stable across renders.
+ */
+export async function deleteQuoteFormAction(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '');
+  if (!id) return;
+  await deleteQuote(id);
+}
+
 export async function deleteQuote(id: string) {
   const supabase = await createClient();
   if (!supabase) return { ok: false as const, error: 'unauthorized' };

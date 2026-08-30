@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { InvoiceForm } from '../InvoiceForm';
 import { GenerateDocxButton } from '@/components/admin/GenerateDocxButton';
-import { setInvoiceStatus, deleteInvoice, type InvoiceStatus, type LineItem } from '@/lib/invoices/actions';
+import { setInvoiceStatusFormAction, deleteInvoiceFormAction, type InvoiceStatus, type LineItem } from '@/lib/invoices/actions';
 
 const STATUS_LABELS: Record<InvoiceStatus, string> = {
   draft:     'مسودة',
@@ -84,7 +84,9 @@ export default async function InvoiceDetailPage({
               {STATUS_LABELS[inv.status]}
             </span>
             {inv.status === 'draft' && (
-              <form action={async () => { 'use server'; await setInvoiceStatus(inv.id, 'sent'); }}>
+              <form action={setInvoiceStatusFormAction}>
+                <input type="hidden" name="id" value={inv.id} />
+                <input type="hidden" name="status" value="sent" />
                 <button
                   type="submit"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-paper text-sm font-medium hover:bg-blue-700"
@@ -94,7 +96,9 @@ export default async function InvoiceDetailPage({
               </form>
             )}
             {inv.status === 'sent' && (
-              <form action={async () => { 'use server'; await setInvoiceStatus(inv.id, 'paid'); }}>
+              <form action={setInvoiceStatusFormAction}>
+                <input type="hidden" name="id" value={inv.id} />
+                <input type="hidden" name="status" value="paid" />
                 <button
                   type="submit"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sage-600 text-paper text-sm font-medium hover:bg-sage-700"
@@ -198,9 +202,8 @@ export default async function InvoiceDetailPage({
 
           {/* Danger zone */}
           <section className="rounded-2xl border border-red-200/60 bg-red-50/40 p-4">
-            <form
-              action={async () => { 'use server'; await deleteInvoice(inv.id); }}
-            >
+            <form action={deleteInvoiceFormAction}>
+              <input type="hidden" name="id" value={inv.id} />
               <button
                 type="submit"
                 className="w-full inline-flex items-center justify-center gap-1.5 text-xs text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg py-2 transition-colors"

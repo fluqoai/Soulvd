@@ -22,8 +22,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { ButtonLink } from '@/components/ui/Button';
 import {
-  setQuoteStatus,
-  deleteQuote,
+  setQuoteStatusFormAction,
+  deleteQuoteFormAction,
 } from '@/lib/quotes/actions';
 import {
   type QuoteStatus,
@@ -151,13 +151,9 @@ export default async function QuoteDetailPage({
               <Pencil className="size-3.5" /> تعديل
             </ButtonLink>
             {transitions.map((t) => (
-              <form
-                key={t.to}
-                action={async () => {
-                  'use server';
-                  await setQuoteStatus(q.id, t.to);
-                }}
-              >
+              <form key={t.to} action={setQuoteStatusFormAction}>
+                <input type="hidden" name="id" value={q.id} />
+                <input type="hidden" name="status" value={t.to} />
                 <button
                   type="submit"
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium ${t.className}`}
@@ -361,12 +357,8 @@ export default async function QuoteDetailPage({
 
           {/* Danger zone */}
           <section className="rounded-2xl border border-red-200/60 bg-red-50/40 p-4">
-            <form
-              action={async () => {
-                'use server';
-                await deleteQuote(q.id);
-              }}
-            >
+            <form action={deleteQuoteFormAction}>
+              <input type="hidden" name="id" value={q.id} />
               <button
                 type="submit"
                 className="w-full inline-flex items-center justify-center gap-1.5 text-xs text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg py-2 transition-colors"
