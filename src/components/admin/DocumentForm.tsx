@@ -59,7 +59,7 @@ export function DocumentForm({
   const [notes, setNotes] = useState('');
 
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message: string; pdfUrl?: string } | null>(null);
   const [result, setResult] = useState<{ publicUrl: string; savedId?: string; total: number } | null>(null);
 
   // Email send state
@@ -262,15 +262,37 @@ export function DocumentForm({
       });
 
       if (!r.ok) {
-        setError(r.error);
+        // Action explicitly failed. The PDF may still be in storage (the
+        // server uploads before the DB insert) — surface the URL so the
+        // user can download it instead of losing the generated document.
+        setError({
+          message: r.error,
+          pdfUrl: 'publicUrl' in r ? r.publicUrl : undefined,
+        });
         return;
       }
+
+      // r.ok is true. savedId is only present when save === true AND the DB
+      // row was created. If save === true but savedId is missing here, that
+      // means the server contract changed without us updating this branch —
+      // surface it loudly so the user doesn't think the row was saved.
+      if (save && !r.savedId) {
+        setError({
+          message: 'تم توليد الـ PDF لكن لم يصلنا رقم سجل من الخادم. أعد المحاولة أو اتصل بالدعم.',
+          pdfUrl: r.publicUrl,
+        });
+        return;
+      }
+
       setResult({ publicUrl: r.publicUrl, savedId: r.savedId, total });
       // If saved, navigate to the detail page; otherwise just stay on this page
-      // so the user can download the PDF.
+      // so the user can download the PDF. Quote saves now go to /admin/quotes/[id]
+      // (the list page used to be the fallback before that route existed).
       if (save && r.savedId) {
+        const target =
+          kind === 'invoice' ? `/admin/invoices/${r.savedId}` : `/admin/quotes/${r.savedId}`;
         // small delay so the user sees the success state before redirect
-        setTimeout(() => router.push(kind === 'invoice' ? `/admin/invoices/${r.savedId}` : `/admin/invoices`), 1500);
+        setTimeout(() => router.push(target), 1500);
       }
     });
   };
@@ -610,12 +632,33 @@ export function DocumentForm({
 
       {/* Error / success */}
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-start gap-2 text-sm text-red-900">
-          <AlertCircle className="size-5 shrink-0 mt-0.5" />
-          <div>
-            <p className="font-semibold">تعذّر توليد المستند</p>
-            <p className="text-red-800 mt-0.5">{error}</p>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 space-y-3 text-sm text-red-900">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="size-5 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">
+                {error.pdfUrl
+                  ? `تم توليد الـ PDF لكن تعذّر حفظ ${kind === 'invoice' ? 'الفاتورة' : 'عرض السعر'} في الجدول`
+                  : 'تعذّر توليد المستند'}
+              </p>
+              <p className="text-red-800 mt-0.5">{error.message}</p>
+            </div>
           </div>
+          {error.pdfUrl && (
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-red-200/70">
+              <a
+                href={error.pdfUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-red-700 text-paper text-xs font-semibold px-3 py-1.5 hover:bg-red-800"
+              >
+                <Download className="size-3.5" /> تنزيل الـ PDF المُولّد
+              </a>
+              <span className="text-xs text-red-800">
+                الملف في التخزين لكنه لم يُسجَّل — غيّر رقم المستند (إن كان متكرراً) أو عدّل البيانات وأعد المحاولة.
+              </span>
+            </div>
+          )}
         </div>
       )}
 

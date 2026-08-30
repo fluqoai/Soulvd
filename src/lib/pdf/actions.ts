@@ -139,7 +139,12 @@ export async function generateAndSaveDocument(input: GenerateInput) {
   const { data: pub } = supabase.storage.from('documents').getPublicUrl(path);
   const publicUrl = pub.publicUrl;
 
-  // 3. Optionally save to DB
+  // 3. Optionally save to DB.
+  // Invoices go to `invoices`, quotes go to `quotes`. They have nearly identical
+  // schemas but `quotes.valid_until` replaces `invoices.due_date`, so we build
+  // the row per kind. (Bug fix: previously everything was written to `invoices`,
+  // which made the `number` unique index collide between the two and silently
+  // swallowed the failure as `ok: true` with a warning.)
   let savedId: string | undefined;
   if (input.save) {
     const { data: { user } } = await supabase.auth.getUser();
@@ -151,11 +156,17 @@ export async function generateAndSaveDocument(input: GenerateInput) {
       email: data.client.email ?? undefined,
       phone: data.client.phone ?? undefined,
     };
-    const payload = {
+    const dataBlob = {
+      line_items: data.line_items,
+      kind: data.kind,
+      valid_until: data.valid_until ?? null,
+    };
+    // Common columns for both tables.
+    const baseRow = {
       number: data.number,
       client_id: clientId,
       client_snapshot: snapshot,
-      data: { line_items: data.line_items, kind: data.kind, valid_until: data.valid_until ?? null },
+      data: dataBlob,
       subtotal: data.subtotal,
       vat_rate: data.vat_rate,
       vat_amount: data.vat_amount,
@@ -163,32 +174,73 @@ export async function generateAndSaveDocument(input: GenerateInput) {
       currency: data.currency,
       status: 'draft' as const,
       issue_date: data.issue_date,
-      due_date: data.valid_until ?? null,  // for quotes, valid_until IS the due date
       notes: data.notes,
       created_by: user?.id ?? null,
       generated_pdf_path: publicUrl,
     };
+    // invoices has `due_date`; quotes has `valid_until`. `data.valid_until`
+    // is what the PDF generator and the .docx template engine read, so we
+    // write it to the right column per kind. The two branches are kept
+    // separate (instead of a `from(table).insert(row)` union) so the
+    // generated Supabase types narrow correctly and we don't get
+    // "Property 'valid_until' is missing in type '{ due_date: ... }'".
+    let inserted: { id: string } | null = null;
+    let insErr: { message: string } | null = null;
+    const tableLabel =
+      data.kind === 'quote' ? 'جدول عروض الأسعار' : 'جدول الفواتير';
+    const failureMessage = (rawMessage: string) =>
+      `تم توليد ملف الـ PDF وحفظه في التخزين، لكن تعذّر حفظ السجل في ${tableLabel}: ${rawMessage}`;
 
-    const { data: inserted, error: insErr } = await supabase
-      .from('invoices')
-      .insert(payload)
-      .select('id')
-      .single();
-    if (insErr) {
-      // PDF was generated and uploaded, but DB save failed — still return the URL
-      // but include a soft warning.
-      revalidatePath('/admin', 'layout');
-      return { ok: true as const, publicUrl, savedId: undefined, warning: `تم توليد الـ PDF وحفظه في التخزين، لكن فشل حفظه في جدول الفواتير: ${insErr.message}` };
+    if (data.kind === 'quote') {
+      const quoteRow = { ...baseRow, valid_until: data.valid_until ?? null };
+      const r = await supabase
+        .from('quotes')
+        .insert(quoteRow)
+        .select('id')
+        .single();
+      inserted = r.data as { id: string } | null;
+      insErr = r.error;
+    } else {
+      const invoiceRow = { ...baseRow, due_date: data.valid_until ?? null };
+      const r = await supabase
+        .from('invoices')
+        .insert(invoiceRow)
+        .select('id')
+        .single();
+      inserted = r.data as { id: string } | null;
+      insErr = r.error;
     }
-    savedId = (inserted as { id: string }).id;
 
-    await supabase.from('activity_log').insert({
-      user_id: user?.id ?? null,
-      action: data.kind === 'invoice' ? 'invoice_generated' : 'quote_generated',
-      entity_type: data.kind,
-      entity_id: savedId,
-      details: { number: data.number, total: data.total, source: 'document_form' },
-    });
+    if (insErr || !inserted) {
+      // The PDF is already uploaded, so we surface the URL to the caller so
+      // the user can still download it — but we explicitly fail the action.
+      // The form must show this as an error, not a success.
+      const message = insErr?.message ?? 'unknown_db_error';
+      const tableName = data.kind === 'quote' ? 'quotes' : 'invoices';
+      console.error(`[generateAndSaveDocument] ${tableName} insert failed:`, message);
+      return {
+        ok: false as const,
+        error: failureMessage(message),
+        publicUrl,
+      };
+    }
+    savedId = inserted.id;
+
+    // Best-effort audit log. The activity_log table currently only has a
+    // SELECT policy, so this insert may be dropped by RLS — that's fine, we
+    // don't want a logging gap to break the whole save flow. Once the
+    // INSERT policy is added (see migration 0006), these events will persist.
+    try {
+      await supabase.from('activity_log').insert({
+        user_id: user?.id ?? null,
+        action: data.kind === 'invoice' ? 'invoice_generated' : 'quote_generated',
+        entity_type: data.kind,
+        entity_id: savedId,
+        details: { number: data.number, total: data.total, source: 'document_form' },
+      });
+    } catch (logErr) {
+      console.warn('[generateAndSaveDocument] activity_log insert failed:', logErr);
+    }
   }
 
   revalidatePath('/admin', 'layout');
