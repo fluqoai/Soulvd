@@ -1,6 +1,6 @@
 # Soulvd — موقع سولڤد
 
-Public website + admin panel for **Soulvd** (سولڤد), a Saudi AI automation platform — official Meta WhatsApp Business partner.
+Public website + admin panel for **Soulvd** (سولڤد), a Saudi AI automation and WhatsApp Business integration platform.
 
 ## Stack
 

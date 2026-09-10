@@ -18,7 +18,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://soulvd.sa';
   const now = new Date();
 
-  const staticPaths = ['/', '/about', '/services', '/sectors', '/contact'];
+  const staticPaths = [
+    '/',
+    '/about',
+    '/services',
+    '/sectors',
+    '/contact',
+    '/privacy',
+    '/data-deletion',
+  ];
 
   const entries: MetadataRoute.Sitemap = [];
 

@@ -13,19 +13,19 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Official Meta WhatsApp Business Partner · 2026",
+      "eyebrow": "WhatsApp Business solutions for companies · 2026",
       "title": "Turn WhatsApp conversations into real revenue",
       "subtitle": "Soulvd is the platform Saudi businesses use to reply to customers in Arabic within seconds, qualify leads automatically, and close deals — right inside WhatsApp, with zero code to write.",
       "cta_primary": "Book a free demo",
       "cta_secondary": "See real results",
       "trust_line_1": "Live now",
       "trust_line_2": "No credit card · Cancel anytime",
-      "trust_meta": "Meta-certified partner",
-      "trust_meta_sub": "Officially licensed since 2026",
+      "trust_meta": "WhatsApp Business technology",
+      "trust_meta_sub": "Built with official Meta APIs",
       "trust_ai": "AI that speaks Saudi",
       "trust_ai_sub": "Trained on local Saudi dialects",
-      "trust_local": "Data stays in KSA",
-      "trust_local_sub": "Full PDPL compliance",
+      "trust_local": "Privacy and transparency",
+      "trust_local_sub": "Clear data protection practices",
       "trust_247": "24/7 human support",
       "trust_247_sub": "Saudi team, replies in Arabic"
     },
@@ -61,8 +61,8 @@
       },
       {
         "key": "licensed",
-        "title": "Officially licensed",
-        "description": "Official WhatsApp Business partner — secure and trusted, fully certified by Meta."
+        "title": "Registered Saudi establishment",
+        "description": "Business solutions built on the official WhatsApp Business Platform APIs."
       },
       {
         "key": "integrations",
@@ -141,8 +141,8 @@
       "subtitle": "The questions our clients ask most before signing.",
       "list": [
         {
-          "q": "Is Soulvd officially licensed by Meta?",
-          "a": "Yes. Soulvd is an officially certified WhatsApp Business partner of Meta since 2026. Your accounts run on the official WhatsApp Business API infrastructure, with full compliance to Meta's security and privacy standards."
+          "q": "Does Soulvd use the official WhatsApp API?",
+          "a": "Yes. Soulvd integrations use the WhatsApp Business Platform and official Meta APIs. Connections and messaging remain subject to customer authorization and platform policies."
         },
         {
           "q": "How long until we're actually live?",
@@ -150,7 +150,7 @@
         },
         {
           "q": "Where is customer data stored?",
-          "a": "All data is stored in data centers within the Kingdom of Saudi Arabia, encrypted at rest and in transit. Full compliance with the Personal Data Protection Law (PDPL)."
+          "a": "We use trusted infrastructure providers to protect data. Some processing may occur outside Saudi Arabia with the procedures and safeguards required by applicable law."
         },
         {
           "q": "Can I try before I commit?",
@@ -231,10 +231,10 @@
     "cta": {
       "eyebrow": "Let's start",
       "title": "Ready to transform your customer experience?",
-      "subtitle": "Launch in two weeks with Meta's officially certified partner in Saudi Arabia. The first conversation is on us — no commitment.",
+      "subtitle": "Launch in two weeks with a Saudi team specializing in WhatsApp Business automation. The first conversation is on us — no commitment.",
       "primary": "Contact us",
       "secondary": "Explore services",
-      "point_meta": "Official Meta partner — data stays in the Kingdom",
+      "point_meta": "Integration through WhatsApp Business Platform",
       "point_reply": "We reply within 24 hours on business days"
     },
     "partners": {
@@ -261,7 +261,7 @@
   "about": {
     "title": "About Soulvd",
     "subtitle": "Your technical partner in digital transformation",
-    "intro": "Soulvd is a Saudi company specializing in AI automation solutions for businesses in the Kingdom of Saudi Arabia. Officially licensed by Meta as a WhatsApp Business partner since 2026, we serve organizations of all sizes across more than 8 sectors.",
+    "intro": "Soulvd is a Saudi establishment specializing in AI automation solutions for businesses in the Kingdom of Saudi Arabia, serving organizations of different sizes across multiple sectors.",
     "vision": {
       "title": "Our vision",
       "text": "To be the #1 technical partner for every Saudi company seeking customer experience automation and full digital transformation — through innovative AI solutions that meet local market needs with high accuracy and competitive cost."
@@ -273,7 +273,7 @@
     "licenses": {
       "title": "Certifications & partnerships",
       "items": [
-        { "label": "Official WhatsApp Business partner", "value": "Meta 2026" },
+        { "label": "WhatsApp Business integration", "value": "Cloud API" },
         { "label": "Time to launch", "value": "2 weeks" },
         { "label": "Ready integrations", "value": "100+ platforms" },
         { "label": "Support", "value": "24/7" }
@@ -284,7 +284,7 @@
       "subtitle": "The principles behind everything we build",
       "items": [
         { "key": "local", "title": "Local market first", "description": "We design for the Saudi market specifically — its dialects, consumption patterns, and business culture." },
-        { "key": "trust", "title": "Trust over features", "description": "Official Meta certification, secure infrastructure, and full transparency in everything we do." },
+        { "key": "trust", "title": "Trust over features", "description": "Secure infrastructure, clear access controls, and full transparency in everything we do." },
         { "key": "outcomes", "title": "Measurable outcomes", "description": "We don't ship a feature without a clear impact on conversion, customer satisfaction, or operational efficiency." },
         { "key": "partnership", "title": "Long-term partnership", "description": "We improve weekly with our clients. Every deployment is the start of a relationship, not the end of a project." }
       ]
@@ -611,7 +611,9 @@
     }
   },
   "footer": {
-    "description": "Soulvd is a Saudi company specializing in AI automation solutions for businesses in the Kingdom of Saudi Arabia. Officially licensed by Meta, 2026.",
+    "privacy": "Privacy Policy",
+    "data_deletion": "Data Deletion",
+    "description": "Soulvd is a Saudi establishment specializing in AI automation and WhatsApp Business integrations for companies.",
     "rights": "© 2026 Soulvd. All rights reserved.",
     "built_in_sa": "Made in Saudi Arabia",
     "cr_label": "Commercial Registration",

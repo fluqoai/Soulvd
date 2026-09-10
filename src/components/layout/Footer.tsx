@@ -231,8 +231,16 @@ export async function Footer() {
         </div>
 
         {/* ==== Copyright ==== */}
-        <div className="mt-10 text-center text-xs text-linen-400">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 text-center text-xs text-linen-400 sm:flex-row sm:text-start">
           <p>{t('rights')}</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <Link href="/privacy" className="transition-colors hover:text-paper">
+              {t('privacy')}
+            </Link>
+            <Link href="/data-deletion" className="transition-colors hover:text-paper">
+              {t('data_deletion')}
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     template: '%s · Soulvd',
   },
   description:
-    'Soulvd is the official Meta WhatsApp Business Partner for Saudi Arabia. Turn WhatsApp conversations into revenue with an AI bot that speaks Saudi Arabic, qualifies leads, and closes deals — live in 2 weeks.',
+    'Soulvd builds WhatsApp Business automation for Saudi companies. Turn conversations into revenue with an AI assistant that speaks Saudi Arabic, qualifies leads, and supports sales workflows.',
   applicationName: 'Soulvd',
   authors: [{ name: 'Soulvd', url: SITE_URL }],
   generator: 'Next.js',
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     siteName: 'Soulvd · سولڤد',
     title: 'Soulvd — Turn WhatsApp conversations into revenue',
     description:
-      'The official Meta WhatsApp Business Partner for Saudi Arabia. AI bot that speaks Saudi Arabic, 24/7, live in 2 weeks.',
+      'WhatsApp Business automation for Saudi companies, with AI experiences designed for Arabic customer journeys.',
     url: SITE_URL,
     locale: 'ar_SA',
     alternateLocale: ['en_US'],
@@ -94,7 +94,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Soulvd — Turn WhatsApp conversations into revenue',
     description:
-      'The official Meta WhatsApp Business Partner for Saudi Arabia.',
+      'WhatsApp Business automation for Saudi companies.',
     images: ['/og'],
   },
   robots: {
@@ -137,7 +137,7 @@ export default async function RootLayout({
             url: SITE_URL,
             logo: `${SITE_URL}/brand/soulvd-logo.png`,
             description:
-              'Official Meta WhatsApp Business Partner for Saudi Arabia. AI WhatsApp automation for businesses.',
+              'Saudi establishment providing AI automation and WhatsApp Business integrations.',
             sameAs: [
               // User to fill in once real socials exist
             ],

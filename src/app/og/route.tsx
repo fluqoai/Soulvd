@@ -104,7 +104,7 @@ export async function GET() {
                 background: '#5F7565',
               }}
             />
-            <span>Official Meta WhatsApp Business Partner · 2026</span>
+            <span>WhatsApp Business Automation · Saudi Arabia</span>
           </div>
           <div style={{ fontWeight: 500 }}>soulvd.sa</div>
         </div>

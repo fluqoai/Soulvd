@@ -36,7 +36,7 @@ export async function Hero() {
         <div className="grid gap-10 md:gap-12 lg:gap-16 md:grid-cols-12 md:items-center">
           {/* Copy — 7 cols on desktop */}
           <FadeIn className="md:col-span-7">
-            {/* Meta partner pill — this is the primary trust signal */}
+            {/* WhatsApp platform pill — primary product context */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sage-50 border border-sage-200/80 text-sage-800 text-xs font-medium">
               <ShieldCheck className="size-3.5" aria-hidden />
               <span>{t('eyebrow')}</span>
