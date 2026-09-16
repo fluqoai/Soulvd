@@ -53,7 +53,7 @@ when testing locally. Do not paste tokens into source files or commit them.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Existing public client key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Private database worker key |
 | `NEXT_PUBLIC_META_APP_ID` | Public Soulvd Meta app ID `1594503802133031` |
-| `NEXT_PUBLIC_META_CONFIG_ID` | Public Facebook Login for Business configuration ID |
+| `NEXT_PUBLIC_META_CONFIG_ID` | Existing Embedded Signup configuration `5495918983965804` |
 | `META_GRAPH_VERSION` | Supported, explicitly pinned Graph version, e.g. the version selected in the app dashboard |
 | `META_APP_SECRET` | Private Soulvd Meta app secret |
 | `META_TOKEN_ENCRYPTION_KEY` | Random 32-byte key, base64 encoded |
@@ -161,8 +161,11 @@ privately and does not appear as a merchant inbox message.
 Meta's current production setup panel explicitly states that unpublished apps
 receive dashboard test webhooks only; production data, including from app roles,
 requires publishing. Soulvd's Meta app remains unpublished. Live merchant inbox
-testing, encrypted test-number binding, Embedded Signup configuration ID,
-review/publishing, and the production worker schedule still need completion.
+testing, encrypted test-number binding, review/publishing, and the production
+worker schedule still need completion. The existing Embedded Signup configuration
+ID was added to production; deployment `dpl_9LqRokg9GkQqEb1HoGqrReMK8Ta9`
+finished Ready. See `meta-app-review-checklist.md` for the remaining real-flow
+recordings and review preparation.
 
 On 2026-09-16 the equivalent compact migration SQL was applied through the
 verified Soulvd production SQL Editor (`lyvoiipsmcbffvpkrxhy`). A service-role
