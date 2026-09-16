@@ -161,10 +161,14 @@ privately and does not appear as a merchant inbox message.
 Meta's current production setup panel explicitly states that unpublished apps
 receive dashboard test webhooks only; production data, including from app roles,
 requires publishing. Soulvd's Meta app remains unpublished. Live merchant inbox
-testing, encrypted test-number binding, review/publishing, and the production
+testing, review/publishing, and the production
 worker schedule still need completion. The existing Embedded Signup configuration
 ID was added to production; deployment `dpl_9LqRokg9GkQqEb1HoGqrReMK8Ta9`
-finished Ready. See `meta-app-review-checklist.md` for the remaining real-flow
+finished Ready. The isolated review workspace and encrypted test-number binding
+were subsequently created. Template refresh from Soulvd succeeded and Meta
+accepted its first outbound template request. The test WABA app subscription
+returned success; actual delivery and inbound reply are not yet verified.
+See `meta-app-review-checklist.md` for the remaining real-flow
 recordings and review preparation.
 
 On 2026-09-16 the equivalent compact migration SQL was applied through the
@@ -174,7 +178,8 @@ single claim and receipt-before-send-response reconciliation, then rolled back.
 Permissions confirmed eight invoker RPCs, zero authenticated mutation grants
 and eight service-role execution grants. CLI migration history is not yet
 reconciled; do not rerun the migration. No Meta credential or connection has
-been saved by this implementation session.
+been saved during that migration smoke transaction. An encrypted test connection
+was subsequently saved in the isolated review workspace.
 The final live query confirmed RLS enabled on all seven new tables and zero
 persisted connections, events or messages after rollback.
 

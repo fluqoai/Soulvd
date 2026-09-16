@@ -14,6 +14,13 @@ Prepared 2026-09-16. This is a preparation checklist, not evidence of approval.
   prove an authenticated merchant send/receive flow or real-number onboarding.
 - Permission business descriptions have been entered into the App Review draft.
   No compliance certification or review submission has been completed.
+- The operator's isolated review workspace has now been created and its Meta
+  test number `1305801685956899` bound with an encrypted test token. Soulvd
+  refreshed an approved `jaspers_market_plain_text_v1` template and Meta accepted
+  a template message sent from the Soulvd dashboard to the operator's verified
+  recipient. Delivery and inbound reply are still awaiting verification.
+- `POST 1045211661610334/subscribed_apps` returned `success: true` for Soulvd.
+  This account subscription does not override Meta app publishing restrictions.
 
 ## Messaging screencast
 
