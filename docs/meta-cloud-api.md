@@ -81,7 +81,7 @@ must use the appropriate Meta business integration credentials and handle revoca
    30-day sandbox, and saves its encrypted test authorization. It does not send
    a message, register a real number, or activate an existing merchant's paid plan.
    Staff should select this sandbox in the workspace selector before testing.
-5. Configure Meta's callback to `https://soulvd.sa/api/meta/whatsapp/webhook`
+5. Configure Meta's callback to `https://www.soulvd.sa/api/meta/whatsapp/webhook`
    and enter the matching verify token. Subscribe to `messages` and
    `message_template_status_update`; subscribe the app to the test WABA too.
    Neither webhook URL verification alone nor opening Postman proves subscription.
@@ -128,6 +128,21 @@ behavior. Current persistence has no automatic deletion policy. App Review
 answers must accurately reflect this; do not claim automated deletion exists.
 
 ## Validation
+
+The authenticated Meta dashboard test on 2026-09-16 generated a test token
+scoped to the current test WABA only. A Graph API Explorer GET to
+`1045211661610334/phone_numbers` succeeded and returned phone-number ID
+`1305801685956899`. A dashboard test template sent to the operator's verified
+recipient produced a `delivered` status webhook in Meta's test panel. These
+tests did not send through Soulvd or prove delivery into its database.
+
+The public Soulvd webhook route responds on the canonical `www.soulvd.sa`
+host; the apex host redirects there. Use the canonical URL for Meta callbacks.
+The correct Vercel project environment is still pending access. A private,
+Git-ignored `.env.local` contains public test asset IDs and generated server
+secrets, but still requires database credentials, the app secret and test token.
+Preserve the generated encryption key when completing configuration; do not
+overwrite this file with an environment pull without first merging its values.
 
 On 2026-09-16 the equivalent compact migration SQL was applied through the
 verified Soulvd production SQL Editor (`lyvoiipsmcbffvpkrxhy`). A service-role
