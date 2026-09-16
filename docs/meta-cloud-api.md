@@ -138,11 +138,31 @@ tests did not send through Soulvd or prove delivery into its database.
 
 The public Soulvd webhook route responds on the canonical `www.soulvd.sa`
 host; the apex host redirects there. Use the canonical URL for Meta callbacks.
-The correct Vercel project environment is still pending access. A private,
-Git-ignored `.env.local` contains public test asset IDs and generated server
-secrets, but still requires database credentials, the app secret and test token.
+The verified production Vercel project is `soulvd/soulvd`, linked to
+`fluqoai/Soulvd` and `www.soulvd.sa`. Production now has `NEXT_PUBLIC_META_APP_ID`
+and `META_GRAPH_VERSION` as Config, and `META_APP_SECRET`,
+`META_TOKEN_ENCRYPTION_KEY`, `META_WEBHOOK_VERIFY_TOKEN`, and
+`META_WORKER_SECRET` as Secret. Existing Supabase variables were retained.
+Deployment `dpl_BFLBpe9wKFJ3yAKBCpj2wfbPXJvr` finished Ready with these settings.
+A private, Git-ignored `.env.local` contains public test asset IDs and generated
+server secrets, but still requires database credentials, the app secret and test token.
 Preserve the generated encryption key when completing configuration; do not
 overwrite this file with an environment pull without first merging its values.
+
+Meta verified and saved the canonical callback. Its automatic field subscription
+includes `messages` and `message_template_status_update` at v26.0. The dashboard
+`messages` test reported success at 17:40 on 2026-09-16; a read-only query in
+Soulvd Supabase confirmed one persisted event at 14:40:19 UTC. The independent
+verification challenge returned HTTP 200 with the expected body. This verifies
+Meta dashboard → production webhook → database persistence, including signature
+validation. The sample uses an unbound demonstration number, so it is retained
+privately and does not appear as a merchant inbox message.
+
+Meta's current production setup panel explicitly states that unpublished apps
+receive dashboard test webhooks only; production data, including from app roles,
+requires publishing. Soulvd's Meta app remains unpublished. Live merchant inbox
+testing, encrypted test-number binding, Embedded Signup configuration ID,
+review/publishing, and the production worker schedule still need completion.
 
 On 2026-09-16 the equivalent compact migration SQL was applied through the
 verified Soulvd production SQL Editor (`lyvoiipsmcbffvpkrxhy`). A service-role
