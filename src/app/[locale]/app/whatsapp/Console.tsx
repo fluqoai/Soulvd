@@ -9,7 +9,7 @@ type Facebook = { init(options: object): void; login(callback: (response: { auth
 declare global { interface Window { FB?: Facebook } }
 type Template = { id: string; name: string; status: string; language: string };
 const field = 'w-full rounded-lg border border-sage-200 bg-white p-3';
-const button = 'rounded-lg bg-wood-900 px-5 py-3 text-white disabled:opacity-50';
+const button = 'rounded-lg bg-sage-900 px-5 py-3 text-white hover:bg-sage-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-700 disabled:cursor-not-allowed disabled:opacity-50';
 
 export default function WhatsAppConsole({ templates, canManage, canConnect, appId, configId, version }: { templates: Template[]; canManage: boolean; canConnect: boolean; appId?: string; configId?: string; version?: string }) {
   const router = useRouter();
