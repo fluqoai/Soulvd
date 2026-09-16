@@ -16,7 +16,8 @@ export function GET(request: Request) {
     requestUrl.searchParams.get('status') === 'failed';
 
   const destination = new URL('/whatsapp/connected', requestUrl.origin);
-  destination.searchParams.set('status', hasError ? 'error' : 'success');
+  // A browser redirect is not proof of a completed token exchange or binding.
+  destination.searchParams.set('status', hasError ? 'error' : 'pending');
 
   return NextResponse.redirect(destination, {
     status: 303,

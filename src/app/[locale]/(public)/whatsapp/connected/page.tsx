@@ -34,10 +34,10 @@ export default async function WhatsAppConnectedPage({
         action: isArabic ? 'العودة إلى سولڤد' : 'Return to Soulvd',
       }
     : {
-        title: isArabic ? 'اكتمل ربط واتساب' : 'WhatsApp is connected',
+        title: isArabic ? 'التحقق من ربط واتساب' : 'Verify your WhatsApp connection',
         description: isArabic
-          ? 'تم استلام نتيجة التسجيل بنجاح. يمكنك إغلاق هذه الصفحة، وسيتابع فريق سولڤد إعداد التكامل.'
-          : 'Your signup result was received successfully. You can close this page while the Soulvd team completes the integration.',
+          ? 'العودة من Meta لا تؤكد اكتمال الربط. افتح مساحة العمل للتحقق من حفظ التفويض واختبار إرسال الرسائل واستقبالها.'
+          : 'Returning from Meta does not confirm a connection. Open your workspace to verify authorization and test sending and receiving messages.',
         action: isArabic ? 'العودة إلى سولڤد' : 'Return to Soulvd',
       };
 

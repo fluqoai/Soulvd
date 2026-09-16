@@ -1,9 +1,10 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import type { PlanCode } from '@/lib/billing/plans';
 
-export type TenantContext = { userId: string; tenantId: string; name: string; role: 'owner' | 'admin' | 'agent' };
+export type TenantContext = { userId: string; tenantId: string; name: string; isTest?: boolean; role: 'owner' | 'admin' | 'agent' };
 export type Subscription = {
   plan_id: string; status: 'pending' | 'active' | 'past_due' | 'cancelled';
   period_start: string; period_end: string;
@@ -24,12 +25,19 @@ export async function currentMerchant() {
 export async function tenantContext(): Promise<TenantContext | null> {
   const { db, user } = await currentMerchant();
   // RLS only returns the caller's tenants. Mutations never trust a submitted tenant ID.
-  const { data, error } = await db.from('tenant_members').select('tenant_id, role').eq('user_id', user.id).order('tenant_id').limit(1).maybeSingle();
+  const selected = (await cookies()).get('soulvd_tenant')?.value;
+  let membership = db.from('tenant_members').select('tenant_id, role').eq('user_id', user.id);
+  if (selected && /^[a-f0-9-]{36}$/i.test(selected)) membership = membership.eq('tenant_id', selected);
+  let { data, error } = await membership.order('tenant_id').limit(1).maybeSingle();
+  if (!data && !error && selected) {
+    const fallback = await db.from('tenant_members').select('tenant_id, role').eq('user_id', user.id).order('tenant_id').limit(1).maybeSingle();
+    data = fallback.data; error = fallback.error;
+  }
   if (error) throw new Error('تعذر تحميل مساحة العمل.');
   if (!data) return null;
-  const { data: tenant, error: tenantError } = await db.from('tenants').select('name').eq('id', data.tenant_id).single();
+  const { data: tenant, error: tenantError } = await db.from('tenants').select('*').eq('id', data.tenant_id).single();
   if (tenantError) throw new Error('تعذر تحميل مساحة العمل.');
-  return { userId: user.id, tenantId: data.tenant_id, name: tenant.name, role: data.role };
+  return { userId: user.id, tenantId: data.tenant_id, name: tenant.name, isTest: tenant.is_test === true, role: data.role };
 }
 
 export async function requireTenant() {
@@ -57,6 +65,7 @@ export async function tenantUsage() {
   if ([plan, usage, seats, invitations, templates, flows, numbers, dismissals].some(result => result.error)) throw new Error('تعذر تحميل الاستهلاك.');
   return {
     context, subscription: s, plan: plan.data as PlanVersion,
+    isActive: s.status === 'active' && Date.now() >= Date.parse(s.period_start) && Date.now() < Date.parse(s.period_end),
     dismissedResources: dismissals.data?.map(row => row.resource as string) ?? [],
     usage: { conversations: usage.data?.conversations_used ?? 0, seats: (seats.count ?? 0) + (invitations.count ?? 0), templates: templates.count ?? 0, flows: flows.count ?? 0, numbers: numbers.count ?? 0 },
   };

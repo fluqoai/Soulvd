@@ -81,6 +81,11 @@ The credential is not stored in source files or Git.
 
 ## Remaining integration work
 
+Direct Meta Cloud API is now the selected implementation path. See
+`docs/meta-cloud-api.md` for delivered inbox/outbox/template code, sandbox setup
+and the exact remaining activation gates. Earlier YCloud partner assumptions
+below are historical and are not the current commercial basis.
+
 1. Configure the verified YCloud Tech Partner account, provider API key and
    webhook signing secret through server-side deployment environment settings.
    Confirm multi-merchant WABA onboarding and actual Meta consent branding.
