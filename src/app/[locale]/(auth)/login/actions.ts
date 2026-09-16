@@ -51,10 +51,13 @@ export async function login(
     .eq('id', data.user.id)
     .single();
 
-  const profile = profileData as { role: 'owner' | 'editor' } | null;
+  const profile = profileData as { role: 'owner' | 'editor' | 'merchant' } | null;
   if (profileErr || !profile) {
     await supabase.auth.signOut();
     return { status: 'error', error: 'no_role' };
+  }
+  if (profile.role === 'merchant') {
+    redirect('/app');
   }
   if (!['owner', 'editor'].includes(profile.role)) {
     await supabase.auth.signOut();

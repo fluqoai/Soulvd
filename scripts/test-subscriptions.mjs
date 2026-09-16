@@ -1,0 +1,104 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+import ts from 'typescript';
+
+const source = await readFile(new URL('../src/lib/billing/plans.ts', import.meta.url), 'utf8');
+const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext } }).outputText;
+const { PLANS, usageState } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
+assert.equal(PLANS.starter.priceSar, 299);
+assert.equal(PLANS.pro_growth.priceSar, 399);
+assert.equal(PLANS.pro_growth.recommended, true);
+assert.equal(usageState(1599, 2000).level, 'normal');
+assert.equal(usageState(1600, 2000).level, 'warning');
+assert.equal(usageState(2000, 2000).level, 'blocked');
+assert.equal(usageState(500, null).percentage, null);
+
+const db = new PGlite();
+const owner = '00000000-0000-4000-8000-000000000001';
+const other = '00000000-0000-4000-8000-000000000002';
+const agent = '00000000-0000-4000-8000-000000000003';
+const one = '10000000-0000-4000-8000-000000000001';
+const two = '10000000-0000-4000-8000-000000000002';
+const rpc = async (sql, params = []) => (await db.query(sql, params)).rows[0].result;
+
+try {
+  // Minimal faithful baseline for the existing users mirror and staff roles.
+  await db.exec(`
+    create role anon; create role authenticated; create role service_role bypassrls;
+    create schema auth;
+    create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+    grant usage on schema auth to authenticated, service_role;
+    create table auth.users(id uuid primary key, email text not null, raw_user_meta_data jsonb default '{}');
+    create table public.users(id uuid primary key references auth.users, email text unique not null, full_name text, role text not null default 'editor' constraint users_role_check check(role in ('owner','editor')));
+    create function public.tg_handle_new_user() returns trigger language plpgsql as $$ begin return new; end; $$;
+    create trigger on_auth_user_created after insert on auth.users for each row execute function public.tg_handle_new_user();
+    insert into auth.users(id,email) values('${owner}','owner@test.invalid'),('${other}','other@test.invalid'),('${agent}','agent@test.invalid');
+    insert into public.users(id,email,role) values('${owner}','owner@test.invalid','owner'),('${other}','other@test.invalid','editor');
+  `);
+  await db.exec(await readFile(new URL('../supabase/migrations/20260916084850_merchant_subscriptions.sql', import.meta.url), 'utf8'));
+  await db.exec(`insert into auth.users values('00000000-0000-4000-8000-000000000004','new@test.invalid','{}');`);
+  assert.equal(await rpc(`select role as result from public.users where email='new@test.invalid'`), 'merchant');
+  assert.equal(await rpc(`select role as result from public.users where id=$1`, [owner]), 'owner');
+  await db.exec(`
+    insert into public.users values('${agent}','agent@test.invalid','Agent','merchant');
+    insert into public.tenants(id,name) values('${one}','First'),('${two}','Second');
+    insert into public.tenant_members values('${one}','${owner}','owner'),('${two}','${other}','owner');
+    insert into public.subscriptions values('${one}','starter_v1','active',now()-interval '1 day',now()+interval '29 days'),('${two}','starter_v1','active',now()-interval '1 day',now()+interval '29 days');
+    grant all on public.users to service_role;
+    set role service_role;
+  `);
+  const onboarded = await rpc('select public.soulvd_create_tenant($1,$2,$3) as result', ['00000000-0000-4000-8000-000000000004', 'New merchant', 'starter_v1']);
+  assert.equal(await rpc('select public.soulvd_create_tenant($1,$2,$3) as result', ['00000000-0000-4000-8000-000000000004', 'Duplicate request', 'pro_growth_v1']), onboarded);
+  assert.equal(await rpc('select status as result from public.subscriptions where tenant_id=$1', [onboarded]), 'pending');
+  await assert.rejects(rpc('select public.soulvd_create_tenant($1,$2,$3) as result', [owner, 'Staff must not self-enroll', 'starter_v1']), /FORBIDDEN/);
+  const consume = (customer) => rpc('select public.soulvd_consume_conversation($1,$2) as result', [one, customer]);
+  assert.equal((await consume('wa:customer-1')).newConversation, true);
+  assert.equal((await consume('wa:customer-1')).newConversation, false);
+  await db.exec(`do $$ begin for n in 2..2000 loop perform public.soulvd_consume_conversation('${one}', 'wa:customer-' || n); end loop; end $$;`);
+  assert.equal((await consume('wa:customer-2001')).allowed, false);
+  assert.equal((await consume('wa:customer-1')).allowed, true);
+  assert.equal(await rpc('select conversations_used as result from public.usage_counters where tenant_id=$1', [one]), 2000);
+  // Queued concurrent admissions must not admit a new customer at the cap.
+  const attempts = await Promise.all(Array.from({ length: 12 }, (_, n) => consume(`wa:parallel-${n}`)));
+  assert.ok(attempts.every(result => !result.allowed));
+  const invite = await rpc('select public.soulvd_invite_member($1,$2,$3,$4) as result', [one, owner, 'agent@test.invalid', 'agent']);
+  assert.equal(invite.allowed, true);
+  assert.equal((await rpc('select public.soulvd_invite_member($1,$2,$3,$4) as result', [one, owner, 'extra@test.invalid', 'agent'])).allowed, false);
+  assert.equal(await rpc('select public.soulvd_accept_invitation($1,$2) as result', [agent, invite.invitationId]), true);
+  assert.equal(await rpc('select public.soulvd_accept_invitation($1,$2) as result', [agent, invite.invitationId]), true);
+  await assert.rejects(rpc('select public.soulvd_invite_member($1,$2,$3,$4) as result', [one, other, 'bad@test.invalid', 'agent']), /FORBIDDEN/);
+  for (let n = 0; n < 10; n++) assert.equal((await rpc('select public.soulvd_create_resource($1,$2,$3,$4) as result', [one, owner, 'templates', `template_${n}`])).allowed, true);
+  assert.equal((await rpc('select public.soulvd_create_resource($1,$2,$3,$4) as result', [one, owner, 'templates', 'too_many'])).allowed, false);
+  assert.equal((await rpc('select public.soulvd_create_resource($1,$2,$3,$4) as result', [one, owner, 'flows', 'First flow'])).allowed, true);
+  assert.equal((await rpc('select public.soulvd_create_resource($1,$2,$3,$4) as result', [one, owner, 'flows', 'Extra flow'])).allowed, false);
+  assert.equal((await rpc('select public.soulvd_create_resource($1,$2,$3,$4) as result', [one, owner, 'numbers', '+966500000000'])).allowed, true);
+  assert.equal((await rpc('select public.soulvd_create_resource($1,$2,$3,$4) as result', [one, owner, 'numbers', '+966500000001'])).allowed, false);
+  const cycle = await rpc('select period_start as result from public.subscriptions where tenant_id=$1', [one]);
+  assert.equal(await rpc('select public.soulvd_apply_paid_upgrade($1,$2) as result', [one, 'verified-test-payment']), true);
+  assert.equal(await rpc('select public.soulvd_apply_paid_upgrade($1,$2) as result', [one, 'verified-test-payment']), true);
+  assert.deepEqual(await rpc('select period_start as result from public.subscriptions where tenant_id=$1', [one]), cycle);
+  const upgraded = await consume('wa:customer-2001');
+  assert.equal(upgraded.limit, 10000);
+  assert.equal(upgraded.used, 2001);
+  assert.equal((await rpc('select public.soulvd_create_resource($1,$2,$3,$4) as result', [one, owner, 'templates', 'after_upgrade'])).allowed, true);
+  await db.exec(`update public.subscriptions set period_start=now(),period_end=now()+interval '1 month' where tenant_id='${one}';`);
+  assert.equal((await consume('wa:customer-1')).used, 1);
+  assert.equal(await rpc('select count(*)::integer as result from public.usage_counters where tenant_id=$1', [one]), 2);
+  await db.exec(`update public.subscriptions set status='past_due' where tenant_id='${one}';`);
+  assert.equal((await consume('wa:customer-1')).code, 'SUBSCRIPTION_INACTIVE');
+  await db.exec(`reset role; set role authenticated; select set_config('request.jwt.claim.sub','${owner}',false);`);
+  assert.equal(await rpc('select count(*)::integer as result from public.tenants'), 1);
+  assert.equal(await rpc('select count(*)::integer as result from public.subscriptions'), 1);
+  await assert.rejects(db.query('update public.subscriptions set plan_id=$1 where tenant_id=$2', ['pro_growth_v1', one]), /permission denied/);
+  await assert.rejects(consume('wa:browser-spoof'), /permission denied/);
+  await assert.rejects(db.query('select public.soulvd_apply_paid_upgrade($1,$2)', [one, 'fake']), /permission denied/);
+  await assert.rejects(db.query('select * from soulvd_private.provider_number_bindings'), /permission denied/);
+  await db.exec('reset role; set role anon;');
+  assert.equal(await rpc('select count(*)::integer as result from public.subscription_plans'), 2);
+  await assert.rejects(db.query('select * from public.tenants'), /permission denied/);
+  console.log('PASS: prices, warnings, staff isolation, tenant RLS, unique customers, quota cap, invitations, templates, paid upgrade, renewal, RPC permissions.');
+  console.log('Note: PGlite queues queries; production multi-connection lock behavior still requires a PostgreSQL integration check.');
+} finally {
+  await db.close();
+}

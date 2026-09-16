@@ -2,6 +2,7 @@ import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { routing } from './i18n/routing';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 const intl = createMiddleware(routing);
 
@@ -23,10 +24,47 @@ function adminLocaleRedirect(req: NextRequest) {
   return null;
 }
 
-export default function middleware(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
   const adminRedirect = adminLocaleRedirect(req);
   if (adminRedirect) return adminRedirect;
-  return intl(req);
+  // Refresh only authenticated surfaces; public marketing remains independent.
+  const authenticatedSurface = /^\/(?:ar\/|en\/)?(?:app|admin|login)(?:\/|$)/.test(req.nextUrl.pathname);
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!authenticatedSurface || !url || !key) return intl(req);
+
+  const refreshedCookies: { name: string; value: string; options: CookieOptions }[] = [];
+  const refreshHeaders = new Headers();
+  const supabase = createServerClient(url, key, {
+    cookies: {
+      getAll: () => req.cookies.getAll(),
+      setAll(cookies, headers) {
+        for (const cookie of cookies) {
+          req.cookies.set(cookie.name, cookie.value);
+          refreshedCookies.push(cookie);
+        }
+        for (const [name, value] of Object.entries(headers ?? {})) refreshHeaders.set(name, value);
+      },
+    },
+  });
+  await supabase.auth.getClaims();
+  const response = intl(req);
+  if (refreshedCookies.length) {
+    // Preserve next-intl's locale rewrite and request headers while forwarding
+    // the refreshed cookie header to the current Server Component request.
+    const forwarded = NextResponse.next({ request: { headers: req.headers } });
+    const overrides = new Set((response.headers.get('x-middleware-override-headers') ?? '').split(',').filter(Boolean));
+    for (const [name, value] of forwarded.headers) {
+      if (name.startsWith('x-middleware-request-')) {
+        response.headers.set(name, value);
+        overrides.add(name.slice('x-middleware-request-'.length));
+      }
+    }
+    response.headers.set('x-middleware-override-headers', [...overrides].join(','));
+    for (const cookie of refreshedCookies) response.cookies.set(cookie.name, cookie.value, cookie.options);
+    for (const [name, value] of refreshHeaders) response.headers.set(name, value);
+  }
+  return response;
 }
 
 export const config = {
