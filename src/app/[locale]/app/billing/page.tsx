@@ -9,6 +9,7 @@ export default async function BillingPage() {
     <h1 className="text-3xl font-bold">الباقة والاشتراك</h1>
     <p className="mt-6 text-xl">{PLANS[plan.code].name} · {plan.price_halalas / 100} ريال / شهريًا</p>
     <p className="mt-3">الحالة: {statuses[subscription.status]}</p>
+    <p className="mt-4">الدفع حاليًا بالتحويل البنكي. <Link href="/contact" className="underline">تواصل معنا للحصول على بيانات التحويل</Link>، ثم أرسل رقم مرجع العملية. يبدأ التفعيل بعد تحقق الإدارة من وصول المبلغ.</p>
     <p className="mt-3">نهاية الدورة: {new Date(subscription.period_end).toLocaleDateString('ar-SA', { timeZone: 'Asia/Riyadh', calendar: 'gregory' })}</p>
     <p className="mt-6 text-wood-600">يُحسب العميل مرة واحدة خلال دورة الاشتراك مهما تعددت الرسائل. رسوم رسائل واتساب ورصيدها منفصلان عن اشتراك المنصة.</p>
     {plan.code === 'starter' && <Link href="/app/billing/upgrade" className="mt-6 inline-block rounded-xl bg-sage-700 px-6 py-3 text-white">الترقية إلى النمو الاحترافية</Link>}

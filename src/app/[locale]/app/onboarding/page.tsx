@@ -11,7 +11,7 @@ export default function OnboardingPage() {
       <label className="block rounded-lg border p-4"><input type="radio" name="plan" value="starter_v1" required /> الانطلاق · 299 ريال · 2,000 عميل</label>
       <label className="block rounded-lg border border-sage-500 p-4"><input type="radio" name="plan" value="pro_growth_v1" required /> النمو الاحترافية · 399 ريال · 10,000 عميل · موصى بها</label>
     </fieldset>
-    <p className="text-sm">يُفعّل الاشتراك بعد إكمال الدفع. رسوم رسائل واتساب منفصلة.</p>
+    <p className="text-sm">الدفع حاليًا بالتحويل البنكي. تبقى مساحة العمل بانتظار التفعيل حتى تؤكد الإدارة وصول التحويل. رسوم رسائل واتساب منفصلة.</p>
     {state.error && <p role="alert" className="text-red-700">{state.error}</p>}
     <button disabled={pending} className="rounded-xl bg-sage-700 px-6 py-3 text-white disabled:opacity-50">{pending ? 'جارٍ الإنشاء…' : 'إنشاء مساحة العمل'}</button>
   </form>;
