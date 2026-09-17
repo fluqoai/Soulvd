@@ -94,25 +94,6 @@ export default async function AdminLayout({
   ].filter(Boolean) as NavItem[];
 
   const adminItems = [
-    ...(role === "owner"
-      ? [
-          {
-            href: "/admin/subscriptions",
-            label: "اشتراكات Soulvd والتحويلات",
-            iconName: "invoices",
-          },
-          {
-            href: "/admin/onboarding",
-            label: "ربط أرقام العملاء",
-            iconName: "clients",
-          },
-          {
-            href: "/admin/wallet",
-            label: "محافظ واتساب",
-            iconName: "invoices",
-          },
-        ]
-      : []),
     build("/admin/leads", "leads", "leads", true),
     build("/admin/clients", "clients", "clients", true),
     build("/admin/invoices", "invoices", "invoices", true),
@@ -149,6 +130,16 @@ export default async function AdminLayout({
               {
                 href: "/admin/subscriptions",
                 label: "الاشتراكات والتحويل البنكي",
+                iconName: "invoices",
+              },
+              {
+                href: "/admin/onboarding",
+                label: "ربط أرقام العملاء",
+                iconName: "clients",
+              },
+              {
+                href: "/admin/wallet",
+                label: "محافظ واتساب",
                 iconName: "invoices",
               },
             ],

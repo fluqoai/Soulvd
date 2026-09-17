@@ -107,7 +107,11 @@ export async function Sidebar({
           مساحة واتساب
         </Link>
         <NavGroup title={t('groups.content')} items={visible(contentItems)} />
-        {role === 'owner' && <Link href="/admin/subscriptions" className="block rounded-md px-3 py-2 text-sm text-linen-200 hover:bg-linen-400/10">الاشتراكات والتحويل البنكي</Link>}
+        {role === 'owner' && <NavGroup title="اشتراكات العملاء" items={[
+          { href: '/admin/subscriptions', labelKey: 'الاشتراكات والتحويل البنكي', iconName: ICON.invoices },
+          { href: '/admin/onboarding', labelKey: 'ربط أرقام العملاء', iconName: ICON.clients },
+          { href: '/admin/wallet', labelKey: 'محافظ واتساب', iconName: ICON.invoices },
+        ]} />}
         {role === 'owner' && <NavGroup title={t('groups.admin')} items={visible(adminItems)} />}
         {role === 'owner' && <NavGroup title={t('groups.system')} items={visible(systemItems)} />}
       </nav>
