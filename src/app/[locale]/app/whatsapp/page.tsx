@@ -1,25 +1,116 @@
-import { createClient } from '@/lib/supabase/server';
-import { tenantUsage } from '@/lib/tenancy/context';
-import WhatsAppConsole from './Console';
+import Link from "next/link";
+import { CheckCircle2, ArrowUpLeft } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { tenantUsage } from "@/lib/tenancy/context";
+import WhatsAppConsole from "./Console";
 
 export default async function WhatsAppPage() {
   const { context, isActive } = await tenantUsage();
   const db = await createClient();
-  const [numbers, templates, messages, contacts] = await Promise.all([
-    db.from('whatsapp_numbers').select('id,phone,status').eq('tenant_id', context.tenantId),
-    db.from('whatsapp_templates').select('id,name,status,language,provider_status,parameter_count,body').eq('tenant_id', context.tenantId).order('name').limit(100),
-    db.from('whatsapp_messages').select('id,contact_id,direction,kind,body,status,created_at').eq('tenant_id', context.tenantId).order('created_at', { ascending: false }).limit(100),
-    db.from('whatsapp_contacts').select('id,wa_id').eq('tenant_id', context.tenantId).order('last_inbound_at', { ascending: false }).limit(200),
+  const [numbers, templates, messages] = await Promise.all([
+    db
+      .from("whatsapp_numbers")
+      .select("id,phone,status")
+      .eq("tenant_id", context.tenantId),
+    db
+      .from("whatsapp_templates")
+      .select("id,name,status,language,provider_status,parameter_count,body")
+      .eq("tenant_id", context.tenantId)
+      .order("name")
+      .limit(100),
+    db
+      .from("whatsapp_messages")
+      .select("id,contact_id,direction,kind,body,status,created_at")
+      .eq("tenant_id", context.tenantId)
+      .order("created_at", { ascending: false })
+      .limit(100),
   ]);
-  const unavailable = [numbers, templates, messages, contacts].some(result => result.error);
-  if (unavailable) return <div role="status" className="rounded-xl border border-sage-200 bg-white p-6"><h1 className="text-2xl font-bold">واتساب</h1><p className="mt-4">لم تكتمل تهيئة قاعدة بيانات واتساب بعد. تواصل مع إدارة المنصة.</p></div>;
-  const phoneByContact = new Map(contacts.data?.map(contact => [contact.id, contact.wa_id]));
-  const labels: Record<string,string> = { received: 'واردة', queued: 'في القائمة', processing: 'قيد التنفيذ', accepted: 'استلمت خدمة واتساب الطلب', sent: 'أُرسلت', delivered: 'تم التسليم', read: 'مقروءة', failed: 'فشل الطلب', unknown: 'نتيجة غير مؤكدة', pending: 'قيد مراجعة Meta', approved: 'معتمد', rejected: 'مرفوض', archived: 'مؤرشف' };
-  return <div className="space-y-8">
-    <div><h1 className="text-3xl font-bold">واتساب</h1><p className="mt-2">المحادثات والقوالب في مساحة {context.name}</p></div>
-    <div className="rounded-xl border border-sage-200 bg-white p-5">{numbers.data?.length ? numbers.data.map(number => <p key={number.id}><b dir="ltr">{number.phone}</b> — {number.status === 'connected' ? 'تفويض محفوظ؛ تحقق من الإرسال والاستقبال' : 'الربط غير مكتمل'}</p>) : 'لم يُربط رقم بهذه المساحة بعد.'}</div>
-    <WhatsAppConsole templates={templates.data ?? []} connected={numbers.data?.some(number => number.status === 'connected') ?? false} canManage={['owner','admin'].includes(context.role)} canConnect={context.role === 'owner' && isActive} appId={process.env.NEXT_PUBLIC_META_APP_ID} configId={process.env.NEXT_PUBLIC_META_CONFIG_ID} version={process.env.META_GRAPH_VERSION} />
-    <section className="space-y-3"><h2 className="text-xl font-bold">القوالب</h2>{templates.data?.map(template => <p key={template.id} className="rounded-lg border border-sage-200 bg-white p-3"><span dir="ltr">{template.name}</span> — {labels[template.status] ?? template.status} ({template.language})</p>)}{!templates.data?.length && <p>لا توجد قوالب بعد.</p>}</section>
-    <section className="space-y-3"><h2 className="text-xl font-bold">آخر 100 رسالة</h2>{messages.data?.map(message => <article key={message.id} className="rounded-xl border border-sage-200 bg-white p-4"><div className="flex flex-wrap gap-3 text-sm"><b>{message.direction === 'inbound' ? 'واردة' : 'صادرة'}</b><span dir="ltr">{phoneByContact.get(message.contact_id) ?? 'عميل'}</span><span>{labels[message.status] ?? message.status}</span><time dateTime={message.created_at}>{new Date(message.created_at).toLocaleString('ar-SA', { timeZone: 'Asia/Riyadh' })}</time></div><p className="mt-3 whitespace-pre-wrap break-words">{message.body}</p></article>)}{!messages.data?.length && <p>ستظهر الرسائل بعد اختبار الربط والاستقبال.</p>}</section>
-  </div>;
+  if ([numbers, templates, messages].some((r) => r.error))
+    throw new Error("تعذر تحميل محادثات واتساب.");
+  const contactIds = [
+    ...new Set((messages.data ?? []).map((m) => m.contact_id)),
+  ];
+  const contacts = contactIds.length
+    ? await db
+        .from("whatsapp_contacts")
+        .select("id,wa_id")
+        .eq("tenant_id", context.tenantId)
+        .in("id", contactIds)
+    : { data: [], error: null };
+  if (contacts.error) throw new Error("تعذر تحميل جهات اتصال المحادثات.");
+  const phoneByContact = new Map(contacts.data?.map((c) => [c.id, c.wa_id]));
+  const connected = numbers.data?.find((n) => n.status === "connected");
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">المحادثات</h1>
+          <p className="mt-2 text-sm text-ink-500">
+            تواصل مع عملائك وتابع حالة كل رد من مكان واحد.
+          </p>
+        </div>
+        <Link
+          href="/app/readiness"
+          className="inline-flex items-center gap-2 rounded-xl border border-sage-200 bg-white px-4 py-2.5 text-sm font-medium"
+        >
+          اختبار الربط
+          <ArrowUpLeft size={16} aria-hidden="true" />
+        </Link>
+      </div>
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-sage-100 bg-white px-5 py-3 text-sm">
+        {connected ? (
+          <>
+            <CheckCircle2
+              size={18}
+              className="text-sage-600"
+              aria-hidden="true"
+            />
+            <span>الرقم المربوط</span>
+            <bdi className="font-semibold">{connected.phone}</bdi>
+            <span className="text-xs text-ink-500">
+              تابع دليل التسليم في المحادثة
+            </span>
+          </>
+        ) : (
+          "لم يُربط رقم بهذه المساحة بعد."
+        )}
+      </div>
+      <WhatsAppConsole
+        key={context.tenantId}
+        messages={(messages.data ?? []).map((m) => ({
+          ...m,
+          phone: phoneByContact.get(m.contact_id) ?? "",
+        }))}
+        templates={templates.data ?? []}
+        connected={Boolean(connected)}
+        canManage={["owner", "admin"].includes(context.role)}
+        canConnect={context.role === "owner" && isActive}
+        appId={process.env.NEXT_PUBLIC_META_APP_ID}
+        configId={process.env.NEXT_PUBLIC_META_CONFIG_ID}
+        version={process.env.META_GRAPH_VERSION}
+      />
+      {Boolean(templates.data?.length) && (
+        <details className="rounded-xl border border-sage-100 bg-white p-5">
+          <summary className="cursor-pointer text-sm font-semibold">
+            حالة القوالب ({templates.data?.length})
+          </summary>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {templates.data?.map((t) => (
+              <p key={t.id} className="rounded-lg bg-sage-50 p-3 text-xs">
+                <bdi>{t.name}</bdi> ·{" "}
+                {t.status === "approved"
+                  ? "معتمد"
+                  : t.status === "pending"
+                    ? "قيد المراجعة"
+                    : t.status === "rejected"
+                      ? "مرفوض"
+                      : "مؤرشف"}{" "}
+                ({t.language})
+              </p>
+            ))}
+          </div>
+        </details>
+      )}
+    </div>
+  );
 }

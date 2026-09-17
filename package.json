@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:subscriptions": "node scripts/test-subscriptions.mjs",
+    "test:platform": "npm run test:subscriptions && npm run test:bank-transfers && npm run test:meta && npm run test:ycloud && npm run test:studio",
     "test:meta": "node scripts/test-meta.mjs",
     "test:ycloud": "node scripts/test-ycloud.mjs",
     "test:studio": "node scripts/test-studio.mjs && node scripts/test-studio-worker.mjs && node scripts/test-studio-api.mjs",
