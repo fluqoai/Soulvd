@@ -26,6 +26,13 @@ provider login, credential or provider dashboard is exposed to merchants.
 
 ## Behavior and verification
 
+Staff sign-in opens `/admin`. The desktop sidebar and mobile administration
+menu link to `/app/whatsapp` as `مساحة واتساب`; opening that URL directly also
+works. Workspace membership still controls access. Only accounts belonging to
+more than one workspace see the workspace selector and `فتح` button. The
+merchant header identifies the signed-in email and current workspace; a Meta
+reviewer account does not gain membership in the operator's YCloud test space.
+
 Signed events are committed before HTTP 200; persistence failures return 503 for
 provider retry. Signatures use HMAC-SHA256 over `timestamp.rawBody`, constant-time
 comparison and a five-minute freshness check. Event IDs and provider message IDs

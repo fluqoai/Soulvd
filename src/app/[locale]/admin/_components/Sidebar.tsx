@@ -103,6 +103,9 @@ export async function Sidebar({
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+        <Link href="/app/whatsapp" className="block rounded-md border border-linen-400/20 px-3 py-3 text-sm font-semibold text-paper hover:bg-linen-400/10">
+          مساحة واتساب
+        </Link>
         <NavGroup title={t('groups.content')} items={visible(contentItems)} />
         {role === 'owner' && <NavGroup title={t('groups.admin')} items={visible(adminItems)} />}
         {role === 'owner' && <NavGroup title={t('groups.system')} items={visible(systemItems)} />}

@@ -106,6 +106,7 @@ export default async function AdminLayout({
   ];
 
   const groups = [
+    { title: 'مساحة العمل', items: [{ href: '/app/whatsapp', label: 'مساحة واتساب', iconName: 'integrations' }] },
     { title: tGroups('content'), items: content },
     ...(role === 'owner'
       ? [
