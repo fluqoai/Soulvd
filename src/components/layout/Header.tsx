@@ -1,20 +1,25 @@
-import { getTranslations } from 'next-intl/server';
-import Image from 'next/image';
-import { Link } from '@/i18n/routing';
-import { ButtonLink } from '@/components/ui/Button';
-import { LocaleToggle } from './LocaleToggle';
-import { MobileMenu } from './MobileMenu';
+import { getLocale, getTranslations } from "next-intl/server";
+import Image from "next/image";
+import { Link } from "@/i18n/routing";
+import { ButtonLink } from "@/components/ui/Button";
+import { LocaleToggle } from "./LocaleToggle";
+import { MobileMenu } from "./MobileMenu";
 
 export async function Header() {
-  const t = await getTranslations('nav');
-  const tSite = await getTranslations('site');
+  const t = await getTranslations("nav");
+  const tSite = await getTranslations("site");
+  const locale = await getLocale();
 
   const items = [
-    { href: '/', label: t('home') },
-    { href: '/services', label: t('services') },
-    { href: '/sectors', label: t('sectors') },
-    { href: '/about', label: t('about') },
-    { href: '/contact', label: t('contact') },
+    { href: "/", label: t("home") },
+    { href: "/services", label: t("services") },
+    {
+      href: "/plans",
+      label: locale === "ar" ? "باقات واتساب" : "WhatsApp plans",
+    },
+    { href: "/sectors", label: t("sectors") },
+    { href: "/about", label: t("about") },
+    { href: "/contact", label: t("contact") },
   ];
 
   return (
@@ -23,18 +28,18 @@ export async function Header() {
         <Link
           href="/"
           className="flex items-center gap-2 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage-500 rounded-md"
-          aria-label={tSite('name')}
+          aria-label={tSite("name")}
         >
           <Image
             src="/brand/soulvd-logo.png"
-            alt={tSite('name')}
+            alt={tSite("name")}
             width={180}
             height={48}
             priority
             // intrinsic aspect ratio 180/48 ≈ 3.75:1 — the visible mark+wordmark
             // fits inside the image with some breathing room. Setting height
             // only (via className) and width:auto keeps the original aspect.
-            style={{ width: 'auto', height: 'auto' }}
+            style={{ width: "auto", height: "auto" }}
             className="h-10 md:h-12"
           />
         </Link>
@@ -53,8 +58,8 @@ export async function Header() {
 
         <div className="flex items-center gap-2">
           <LocaleToggle className="hidden sm:inline-flex" />
-          <ButtonLink href="/contact" size="sm" className="hidden sm:inline-flex">
-            {t('contact')}
+          <ButtonLink href="/login" size="sm" className="hidden sm:inline-flex">
+            {locale === "ar" ? "دخول المنصة" : "Sign in"}
           </ButtonLink>
           <MobileMenu items={items} />
         </div>

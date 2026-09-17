@@ -9,6 +9,8 @@ import {
   Cable,
   ChevronLeft,
   CreditCard,
+  Wallet,
+  Smartphone,
   FlaskConical,
   LayoutDashboard,
   LogOut,
@@ -25,11 +27,13 @@ import { selectWorkspace } from "@/lib/tenancy/actions";
 const navigation = [
   { href: "/app", label: "نظرة عامة", icon: LayoutDashboard },
   { href: "/app/whatsapp", label: "المحادثات", icon: MessageCircle },
+  { href: "/app/connect", label: "ربط الرقم", icon: Smartphone },
   { href: "/app/automations", label: "الأتمتة والبوتات", icon: Bot },
   { href: "/app/templates", label: "مكتبة القوالب", icon: PanelsTopLeft },
   { href: "/app/integrations", label: "التكاملات", icon: Cable },
   { href: "/app/team", label: "فريق العمل", icon: Users },
   { href: "/app/billing", label: "الباقة والاستهلاك", icon: CreditCard },
+  { href: "/app/wallet", label: "رصيد واتساب", icon: Wallet },
   { href: "/app/readiness", label: "مركز الاختبار", icon: FlaskConical },
 ];
 type Props = {

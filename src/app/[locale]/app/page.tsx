@@ -22,6 +22,7 @@ export default async function MerchantOverview() {
     dismissedResources,
     isActive,
     observedAt,
+    usagePeriodStart,
   } = await tenantUsage();
   const { db } = await currentMerchant();
   const dayAgo = new Date(observedAt - 86400000).toISOString();
@@ -157,7 +158,7 @@ export default async function MerchantOverview() {
             </Link>
           </section>
           <UsageWidget
-            key={`${context.tenantId}:${context.userId}:${subscription.period_start}`}
+            key={`${context.tenantId}:${context.userId}:${usagePeriodStart}`}
             dismissedResources={dismissedResources}
             planCode={plan.code}
             rows={[

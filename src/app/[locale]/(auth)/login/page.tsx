@@ -1,7 +1,7 @@
-import { setRequestLocale, getTranslations } from 'next-intl/server';
-import Image from 'next/image';
-import { LoginForm } from '@/components/auth/LoginForm';
-import { Link } from '@/i18n/routing';
+import { setRequestLocale, getTranslations } from "next-intl/server";
+import Image from "next/image";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { Link } from "@/i18n/routing";
 
 export default async function LoginPage({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -11,8 +11,8 @@ export default async function LoginPage({
 }) {
   // Force Arabic — the admin section is always Arabic, and the
   // login is the gateway to admin.
-  setRequestLocale('ar');
-  const t = await getTranslations('auth.login');
+  setRequestLocale("ar");
+  const t = await getTranslations("auth.login");
 
   return (
     <div className="min-h-screen flex" dir="rtl" lang="ar">
@@ -28,15 +28,24 @@ export default async function LoginPage({
               // CSS `h-8` overrides one intrinsic dimension; explicit
               // `width: auto` keeps the aspect ratio. Avoids the
               // next/image "width or height modified" warning.
-              style={{ width: 'auto', height: 'auto' }}
+              style={{ width: "auto", height: "auto" }}
               className="h-8"
             />
           </Link>
           <h1 className="text-2xl md:text-3xl font-semibold text-ink-900 leading-tight mb-2">
-            {t('title')}
+            {t("title")}
           </h1>
-          <p className="text-base text-ink-600 mb-8">{t('subtitle')}</p>
+          <p className="text-base text-ink-600 mb-8">{t("subtitle")}</p>
           <LoginForm />
+          <p className="mt-6 text-center text-sm text-ink-600">
+            جديد في Soulvd؟{" "}
+            <Link
+              href="/signup"
+              className="font-semibold text-sage-800 underline"
+            >
+              أنشئ حسابك
+            </Link>
+          </p>
         </div>
       </div>
 
@@ -54,13 +63,13 @@ export default async function LoginPage({
         </div>
         <div className="relative max-w-md text-center">
           <p className="text-sm uppercase tracking-[0.2em] text-sage-300 mb-4">
-            {t('brand_eyebrow')}
+            {t("brand_eyebrow")}
           </p>
           <h2 className="text-3xl md:text-4xl font-semibold leading-tight text-balance">
-            {t('brand_title')}
+            {t("brand_title")}
           </h2>
           <p className="mt-5 text-base text-linen-300 leading-relaxed text-pretty">
-            {t('brand_subtitle')}
+            {t("brand_subtitle")}
           </p>
         </div>
       </div>

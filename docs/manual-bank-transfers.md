@@ -1,36 +1,36 @@
-# Manual payment pilot
+# Bank transfer subscriptions and WhatsApp wallet
 
-Merchants register, create a workspace and choose Starter SAR 299 or Pro Growth
-SAR 399. Their subscription remains pending until the platform owner verifies
-receipt in the bank and confirms it at `/admin/subscriptions`.
+New contracts are 3, 6 or 12 months, paid upfront. Annual contracts cost ten monthly payments. Starter totals: SAR 897 / 1,794 / 2,990. Pro Growth totals: SAR 1,197 / 2,394 / 3,990. Existing one-month review/test contracts remain intact. Monthly distinct-customer quotas reset on the activation-date anniversary independently of the contract duration; they do not roll over.
 
-Bank details are not invented: until supplied, billing directs merchants to
-contact Soulvd for beneficiary, bank and IBAN. A receipt image alone is not
-proof of cleared payment. WhatsApp messaging credits remain separate; this
-screen does not create or fund a messaging wallet.
+## Merchant and owner workflow
 
-The server authenticates the operator and checks their platform owner role.
-The service-only confirmation RPC independently checks that role, excludes test
-workspaces, verifies the exact plan amount, and atomically stores a unique bank
-reference with actor and timestamp before changing the subscription. A replay
-of the same reference, tenant, purpose and amount has no additional effect;
-reusing it for another payment fails. No real payment has been recorded by the
-deployment itself.
+1. Public pricing is at /plans. /signup opens only after platform_launch_settings.signup_ready is enabled following SMTP verification. Signups always create merchants; preference metadata never grants a role or an active plan.
+2. The merchant confirms email, creates a workspace and chooses a duration. The subscription remains pending.
+3. /app/billing creates a seven-day bank-transfer request with a server-calculated amount. BankDetails displays the user-provided beneficiary and IBAN; no bank name has been assumed. The customer submits the actual reference after transferring.
+4. /admin/subscriptions is platform-owner only. The owner independently checks cleared funds against the exact amount and reference, then confirms once. A reference cannot fund two subscriptions, a wallet and a subscription, or a CRM payment.
+5. Activation starts the entire purchased term at confirmation. A live term cannot be renewed early. Upgrades prorate the remaining term, retain its end and monthly usage, and use the quote frozen in the payment request. The customer must submit the reference before expiry; later staff review honors that submitted quote if the contract still matches. An upgrade after expiry requires manual review with the customer.
+6. /app/wallet accepts separate SAR 50–10,000 top-up requests, confirmed through the same owner review flow. Uploading an invoice or submitting a reference does not grant credit.
 
-Activation or renewal after expiry begins one calendar month from confirmation.
-Early renewal of an active cycle is rejected: future prepaid cycles require a
-separate scheduling model rather than merging monthly quotas. Upgrade uses
-the SAR 100 plan price difference for the existing cycle, keeps usage and end
-date, and changes the next renewal price to SAR 399.
+## Message charges and protection
 
-Production migration `20260917180128_manual_bank_transfers.sql` was applied
-successfully on 2026-09-17. Run `node scripts/test-bank-transfers.mjs` for exact
-amount, operator authorization, reference replay and upgrade/cycle checks.
+The policy is provider USD cost × 3.75 SAR/USD × 1.15. This is a 15% cost markup. Ledger arithmetic uses millionths of a riyal; the UI rounds for display. Each YCloud message reserves a conservative amount in the same transaction as enqueue. Insufficient balance or an unknown/expired destination rate rolls back the enqueue. Admission is rechecked when the worker claims a queued job. Meta review sandbox traffic is separate.
 
-The first live merchant still needs their actual email, business name, chosen
-plan and confirmed transfer. The operator then assists their YCloud Coexistence
-onboarding and verifies the resulting number before binding it to that
-merchant's workspace. Do not reuse the operator's number or give merchants
-access to the platform master account. Approved templates and live isolated
-send/receive tests follow. The existing direct Meta signup button does not
-constitute a YCloud Onboard Link integration.
+The initial rate card covers Saudi mobile recipients only. The reservation ceiling is USD .0598, including the published October changes; the ceiling is not the actual price charged. The second ceiling expires on January 1, 2027, intentionally requiring review before another rate period. Source: [YCloud rate card](https://docs.google.com/spreadsheets/d/1MULHp9AApGmRmCP6bHHKKoNOkPsY8WPWLrwh6Fs-BkA/edit?gid=1287089303). Add reviewed country ceilings before supporting other destinations.
+
+The signature-verified webhook settles final delivered/read totalPrice in USD once, bound to the sender, WABA, recipient and job/provider ID. Failed sends release a hold; ambiguous sends retain it and are never automatically resent. Missing prices/currencies and changed final prices surface for review. Charges above a reservation can make a wallet negative and block future sends. A scheduled worker queries known provider IDs to recover missing receipts. /admin/wallet exposes held balances, exceptions and a safe re-query action. Cases without a provider ID require a provider-console investigation; do not release money or resend blindly.
+
+Owner-funded test credits are explicitly labeled as test credit, never bank payments. They are restricted to test workspaces, audited and capped at SAR 5 cumulatively per workspace. No such grant is created automatically by migrations. Real bank transfers are forbidden on test workspaces.
+
+## Assisted Coexistence onboarding
+
+/app/connect collects the owner's authorized WhatsApp Business App number after subscription activation. /admin/onboarding stores a per-customer YCloud Onboard Link. Only the workspace owner can read it. The merchant completes provider/Meta authorization and requests verification. The platform owner checks asset ownership; the server retrieves the exact number from YCloud, verifies connected Coexistence status and atomically binds it to that tenant, rejecting an asset already bound elsewhere. No staff seat is inserted into the merchant team. Links are cleared when binding succeeds.
+
+This is assisted onboarding via the Pro Onboard Link model, not Soulvd's own Meta Embedded Signup. No Onboard Link creation API is assumed. YCloud branding may appear during authorization; conversation management stays in Soulvd. Before admitting customers, upgrade/verify the actual YCloud subscription and obtain a working Onboard Link. OpenRouter remains deferred with no paid-model allowance.
+
+## Deployment and email setup
+
+Run npm run test:platform and npm run build -- --webpack. scripts/deploy-launch-schema.mjs targets only Soulvd project lyvoiipsmcbffvpkrxhy. Supply SUPABASE_ACCESS_TOKEN securely. Its default verifies SQL with rollback; --apply commits pending release migrations and records normalized SHA-256 checksums in a private table. Do not use the legacy apply-schema script to replay historical migrations.
+
+Configure institutional SMTP in Supabase, including host/port/sender/user/password, and verify receipt with an owned email before enabling signup_ready. The callback and password-setting URLs are allowlisted on the canonical domain. docs/email-confirmation-template.html is the prepared confirmation email, using token_hash so confirmation works across browsers. It is not automatically installed before SMTP is available. Do not change existing recovery/invite templates for the Meta reviewer.
+
+No customer was enrolled, paid balance fabricated, subscription purchased, or live message sent as part of this implementation.

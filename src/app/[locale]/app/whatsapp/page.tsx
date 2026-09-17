@@ -72,7 +72,12 @@ export default async function WhatsAppPage() {
             </span>
           </>
         ) : (
-          "لم يُربط رقم بهذه المساحة بعد."
+          <span>
+            لم يُربط رقم بهذه المساحة بعد.{" "}
+            <Link href="/app/connect" className="underline">
+              ابدأ طلب الربط
+            </Link>
+          </span>
         )}
       </div>
       <WhatsAppConsole
@@ -84,7 +89,9 @@ export default async function WhatsAppPage() {
         templates={templates.data ?? []}
         connected={Boolean(connected)}
         canManage={["owner", "admin"].includes(context.role)}
-        canConnect={context.role === "owner" && isActive}
+        canConnect={
+          context.role === "owner" && isActive && context.isTest === true
+        }
         appId={process.env.NEXT_PUBLIC_META_APP_ID}
         configId={process.env.NEXT_PUBLIC_META_CONFIG_ID}
         version={process.env.META_GRAPH_VERSION}

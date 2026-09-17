@@ -1,18 +1,107 @@
-import Link from 'next/link';
-import { tenantUsage } from '@/lib/tenancy/context';
-import { PLANS } from '@/lib/billing/plans';
-
-const statuses = { pending: 'بانتظار تفعيل الاشتراك', active: 'نشط', past_due: 'متأخر السداد', cancelled: 'ملغي' };
+import Link from "next/link";
+import { tenantUsage } from "@/lib/tenancy/context";
+import { PLANS } from "@/lib/billing/plans";
+import { sar, termLabel } from "@/lib/billing/terms";
+import BankDetails from "@/components/billing/BankDetails";
+import {
+  ContractForm,
+  RequestPayment,
+  PaymentRequestCard,
+} from "@/components/billing/PaymentForms";
+import { paymentRequests } from "./actions";
+const statuses = {
+  pending: "بانتظار التفعيل",
+  active: "نشط",
+  past_due: "متأخر السداد",
+  cancelled: "ملغي",
+};
 export default async function BillingPage() {
-  const { subscription, plan } = await tenantUsage();
-  return <section className="rounded-2xl border border-sage-200 bg-white p-8">
-    <h1 className="text-3xl font-bold">الباقة والاشتراك</h1>
-    <p className="mt-6 text-xl">{PLANS[plan.code].name} · {plan.price_halalas / 100} ريال / شهريًا</p>
-    <p className="mt-3">الحالة: {statuses[subscription.status]}</p>
-    <p className="mt-4">الدفع حاليًا بالتحويل البنكي. <Link href="/contact" className="underline">تواصل معنا للحصول على بيانات التحويل</Link>، ثم أرسل رقم مرجع العملية. يبدأ التفعيل بعد تحقق الإدارة من وصول المبلغ.</p>
-    <p className="mt-3">نهاية الدورة: {new Date(subscription.period_end).toLocaleDateString('ar-SA', { timeZone: 'Asia/Riyadh', calendar: 'gregory' })}</p>
-    <p className="mt-6 text-wood-600">يُحسب العميل مرة واحدة خلال دورة الاشتراك مهما تعددت الرسائل. رسوم رسائل واتساب ورصيدها منفصلان عن اشتراك المنصة.</p>
-    {plan.code === 'starter' && <Link href="/app/billing/upgrade" className="mt-6 inline-block rounded-xl bg-sage-700 px-6 py-3 text-white">الترقية إلى النمو الاحترافية</Link>}
-    {subscription.status === 'pending' && <p className="mt-6">مساحة عملك جاهزة. <Link href="/contact" className="underline">تواصل معنا لإكمال تفعيل الاشتراك.</Link></p>}
-  </section>;
+  const { context, subscription: s, plan, isActive } = await tenantUsage();
+  const requests = (await paymentRequests()).filter(
+    (r) => r.purpose !== "wallet",
+  );
+  const open = requests.filter((r) =>
+    ["pending", "submitted"].includes(r.status),
+  );
+  const manage = context.role === "owner" && !context.isTest;
+  return (
+    <div className="space-y-6">
+      <section className="space-y-4 rounded-2xl border border-sage-200 bg-white p-6">
+        <h1 className="text-3xl font-bold">الباقة والاشتراك</h1>
+        <h2 className="text-xl">
+          {PLANS[plan.code].name} · {termLabel(s.billing_months)}
+        </h2>
+        <p className="text-2xl font-bold">
+          {sar(s.term_price_halalas / 100)} ريال عن المدة كاملة
+        </p>
+        <p>
+          الحالة:{" "}
+          {isActive
+            ? "نشط"
+            : s.status === "active"
+              ? "انتهى الاشتراك"
+              : statuses[s.status]}
+        </p>
+        {isActive && (
+          <p>
+            ينتهي في{" "}
+            {new Date(s.period_end).toLocaleDateString("ar-SA", {
+              calendar: "gregory",
+              timeZone: "Asia/Riyadh",
+            })}
+          </p>
+        )}
+        <p className="text-sm leading-7 text-wood-600">
+          تتجدد حصة العملاء شهريًا من تاريخ التفعيل، حتى عند الاشتراك السنوي. لا
+          يوجد خصم تلقائي للتجديد.{" "}
+          <Link href="/app/wallet" className="underline">
+            رصيد رسائل واتساب
+          </Link>{" "}
+          منفصل عن اشتراك المنصة.
+        </p>
+        {isActive && plan.code === "starter" && (
+          <Link
+            href="/app/billing/upgrade"
+            className="inline-block rounded-xl bg-sage-900 px-5 py-3 text-white"
+          >
+            الترقية إلى النمو الاحترافية
+          </Link>
+        )}
+      </section>
+      {context.isTest && (
+        <p className="rounded-xl bg-amber-50 p-4 text-sm">
+          هذه مساحة اختبار؛ لا يتم تحصيل اشتراك عليها.
+        </p>
+      )}
+      {manage && !isActive && !open.length && (
+        <>
+          <details className="rounded-xl border bg-white p-5">
+            <summary className="cursor-pointer font-bold">
+              تغيير الباقة أو مدة الاشتراك
+            </summary>
+            <div className="mt-6">
+              <ContractForm plan={s.plan_id} months={s.billing_months} />
+            </div>
+          </details>
+          <RequestPayment purpose="subscription" />
+        </>
+      )}
+      {manage && open.some((r) => r.status === "pending") && <BankDetails />}
+      {open.map((r) => (
+        <PaymentRequestCard key={r.id} item={r} canManage={manage} />
+      ))}
+      {requests.some((r) => r.status === "confirmed") && (
+        <details className="rounded-xl border bg-white p-5">
+          <summary className="cursor-pointer">الدفعات المؤكدة</summary>
+          <div className="mt-4 space-y-3">
+            {requests
+              .filter((r) => r.status === "confirmed")
+              .map((r) => (
+                <PaymentRequestCard key={r.id} item={r} canManage={false} />
+              ))}
+          </div>
+        </details>
+      )}
+    </div>
+  );
 }

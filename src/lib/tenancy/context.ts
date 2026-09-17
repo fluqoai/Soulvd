@@ -17,6 +17,8 @@ export type Subscription = {
   status: "pending" | "active" | "past_due" | "cancelled";
   period_start: string;
   period_end: string;
+  billing_months: number;
+  term_price_halalas: number;
 };
 export type PlanVersion = {
   id: string;
@@ -100,6 +102,14 @@ export const tenantUsage = cache(async function tenantUsage() {
     .single();
   if (error) throw new Error("تعذر تحميل الاشتراك.");
   const s = subscription as Subscription;
+  const { data: period, error: periodError } = await db
+    .from("subscription_usage_periods")
+    .select("usage_period_start")
+    .eq("tenant_id", context.tenantId)
+    .single();
+  if (periodError || !period?.usage_period_start)
+    throw new Error("تعذر تحميل دورة الاستخدام.");
+  const usagePeriodStart = period.usage_period_start as string;
   const [
     plan,
     usage,
@@ -115,7 +125,7 @@ export const tenantUsage = cache(async function tenantUsage() {
       .from("usage_counters")
       .select("conversations_used")
       .eq("tenant_id", context.tenantId)
-      .eq("period_start", s.period_start)
+      .eq("period_start", usagePeriodStart)
       .maybeSingle(),
     db
       .from("tenant_members")
@@ -146,7 +156,7 @@ export const tenantUsage = cache(async function tenantUsage() {
       .select("resource")
       .eq("tenant_id", context.tenantId)
       .eq("user_id", context.userId)
-      .eq("period_start", s.period_start),
+      .eq("period_start", usagePeriodStart),
   ]);
   if (
     [
@@ -166,6 +176,7 @@ export const tenantUsage = cache(async function tenantUsage() {
     observedAt,
     context,
     subscription: s,
+    usagePeriodStart,
     plan: plan.data as PlanVersion,
     isActive:
       s.status === "active" &&

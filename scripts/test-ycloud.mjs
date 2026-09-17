@@ -29,7 +29,7 @@ fail=true;assert.equal((await POST(request(body,sign(body)))).status,503);
 assert.equal((await POST(request('x'.repeat(1048577),'invalid'))).status,413);
 delete globalThis.ycloudTestDb;
 const originalFetch=globalThis.fetch;
-const client=await import(moduleUrl((await readFile('src/lib/ycloud/client.ts','utf8')).replace("import 'server-only';",'')));
+const client=await import(moduleUrl((await readFile('src/lib/ycloud/client.ts','utf8')).replace(/import ['"]server-only['"];/,'')));
 process.env.YCLOUD_API_KEY='test-key';
 let calls=0;
 globalThis.fetch=async (url,options)=>{calls++;assert.equal(options.headers['X-API-Key'],'test-key'); assert.equal(url,'https://api.ycloud.com/v2/whatsapp/messages/sendDirectly');return Response.json({id:'out-test'});};

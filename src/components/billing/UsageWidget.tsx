@@ -12,7 +12,7 @@ import {
 import { dismissUsageWarning } from "@/lib/billing/actions";
 
 const labels: Record<Resource, string> = {
-  conversations: "العملاء خلال الدورة",
+  conversations: "العملاء هذا الشهر",
   seats: "مقاعد الفريق والدعوات",
   templates: "القوالب المحجوزة",
   flows: "مسارات الأتمتة",
