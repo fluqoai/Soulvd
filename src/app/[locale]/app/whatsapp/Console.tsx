@@ -11,7 +11,7 @@ type Template = { id: string; name: string; status: string; language: string };
 const field = 'w-full rounded-lg border border-sage-200 bg-white p-3';
 const button = 'rounded-lg bg-sage-900 px-5 py-3 text-white hover:bg-sage-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-700 disabled:cursor-not-allowed disabled:opacity-50';
 
-export default function WhatsAppConsole({ templates, canManage, canConnect, appId, configId, version }: { templates: Template[]; canManage: boolean; canConnect: boolean; appId?: string; configId?: string; version?: string }) {
+export default function WhatsAppConsole({ templates, canManage, canConnect, connected, appId, configId, version }: { templates: Template[]; canManage: boolean; canConnect: boolean; connected: boolean; appId?: string; configId?: string; version?: string }) {
   const router = useRouter();
   const [result, setResult] = useState<ActionResult>();
   const [busy, setBusy] = useState(false);
@@ -88,9 +88,9 @@ export default function WhatsAppConsole({ templates, canManage, canConnect, appI
         <option value="coexistence">رقمي موجود في تطبيق واتساب الأعمال</option><option value="api">رقم مخصص لمنصة واتساب API</option>
       </select>
       <p className="text-sm">لا تحذف حساب تطبيق واتساب الأعمال. التسجيل والتفويض يتمان داخل نافذة Meta.</p>
-      <button className={button} disabled={busy || !canConnect || !appId || !configId || !version} onClick={start}>الربط عبر Meta</button>
-      <button className={`${button} ms-3`} disabled={busy} onClick={async () => { setBusy(true); try { setResult(await refreshTemplates()); router.refresh(); } catch { setResult({ ok: false, message: 'تعذر تحديث القوالب.' }); } finally { setBusy(false); } }}>تحديث القوالب من Meta</button>
-      {(!canConnect || !appId || !configId || !version) && <p className="text-sm">الربط يحتاج اشتراكًا فعالًا وإعداد تطبيق Meta واعتماده.</p>}
+      {!connected && <button className={button} disabled={busy || !canConnect || !appId || !configId || !version} onClick={start}>الربط عبر Meta</button>}
+      <button className={`${button} ms-3`} disabled={busy || !connected} onClick={async () => { setBusy(true); try { setResult(await refreshTemplates()); router.refresh(); } catch { setResult({ ok: false, message: 'تعذر تحديث القوالب.' }); } finally { setBusy(false); } }}>تحديث القوالب</button>
+      {connected ? <p className="text-sm">الرقم مربوط بهذه المساحة. يمكنك إرسال الرسائل وإدارة القوالب هنا.</p> : (!canConnect || !appId || !configId || !version) && <p className="text-sm">تواصل مع إدارة المنصة لإكمال تفعيل الرقم.</p>}
     </section>}
     <div className="grid gap-6 lg:grid-cols-2">
       <form onSubmit={event => void submit(event, 'message')} className="space-y-4 rounded-xl border border-sage-200 bg-white p-5">
@@ -100,7 +100,7 @@ export default function WhatsAppConsole({ templates, canManage, canConnect, appI
         <label className="block">نص الرد<textarea className={field} name="body" maxLength={4096} /></label>
         <label className="flex gap-2"><input type="checkbox" name="consent" />أؤكد وجود موافقة العميل على استقبال رسائل القوالب.</label>
         <p className="text-sm">رسوم Meta منفصلة عن الاشتراك. اعتماد القالب لا يعني أن الرسالة مجانية.</p>
-        <button className={button} disabled={busy}>إرسال</button>
+        <button className={button} disabled={busy || !connected}>إرسال</button>
       </form>
       {canManage && <form onSubmit={event => void submit(event, 'template')} className="space-y-4 rounded-xl border border-sage-200 bg-white p-5">
         <h2 className="text-xl font-bold">إنشاء قالب</h2>
@@ -109,7 +109,7 @@ export default function WhatsAppConsole({ templates, canManage, canConnect, appI
         <label className="block">الفئة<select className={field} name="category"><option value="UTILITY">خدمي</option><option value="MARKETING">تسويقي</option></select></label>
         <label className="block">نص القالب<textarea className={field} name="body" required maxLength={1024} /></label>
         <p className="text-sm">تدعم هذه النسخة قوالب نصية بلا متغيرات. القرار النهائي للفئة والاعتماد لدى Meta.</p>
-        <button className={button} disabled={busy}>إرسال للمراجعة</button>
+        <button className={button} disabled={busy || !connected}>إرسال للمراجعة</button>
       </form>}
     </div>
   </div>;

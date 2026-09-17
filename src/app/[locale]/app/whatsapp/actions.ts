@@ -7,6 +7,7 @@ import { requireTenant, tenantUsage } from '@/lib/tenancy/context';
 import { decryptToken, encryptToken, normalizePhone } from '@/lib/meta/security';
 import { exchangeCode, graph } from '@/lib/meta/client';
 import { dispatchOne } from '@/lib/meta/worker';
+import { providerTemplates } from '@/lib/ycloud/client';
 
 export type ActionResult = { ok: boolean; message: string; id?: string };
 const messages: Record<string, string> = {
@@ -23,7 +24,7 @@ async function enqueue(args: Record<string, unknown>): Promise<ActionResult> {
   let message = 'حُفظ الطلب في قائمة الإرسال.';
   try {
     const result = await dispatchOne(data.id);
-    if (result?.status === 'accepted') message = 'استلمت Meta الطلب. تابع حالة التسليم أو اعتماد القالب في السجل.';
+    if (result?.status === 'accepted') message = 'استلمت خدمة واتساب الطلب. تابع حالة التسليم أو اعتماد القالب في السجل.';
     if (result?.status === 'failed') message = 'رفض الطلب أو تعذر تنفيذه. راجع إعدادات الربط وسجل الحالة.';
     if (result?.status === 'unknown') message = 'نتيجة الطلب غير مؤكدة؛ لن نعيد إرساله تلقائيًا.';
   } catch { message = 'حُفظ الطلب؛ يحتاج العامل إلى متابعة حالته.'; }
@@ -69,8 +70,10 @@ export async function refreshTemplates(): Promise<ActionResult> {
   try {
     const connection = await db.rpc('soulvd_meta_connection', { p_tenant: context.tenantId });
     if (connection.error || !connection.data) return { ok: false, message: 'اربط رقمًا أولًا.' };
-    const result = await graph<{ data: { name: string; language: string; category: string; status: string; components: { type: string; text?: string }[] }[] }>(`${connection.data.waba_id}/message_templates?limit=100`, decryptToken(connection.data.encrypted_token));
-    const supported = result.data.filter(template => template.components.length === 1 && template.components[0].type === 'BODY').map(template => ({ ...template, body: template.components[0].text }));
+    const templates = connection.data.provider === 'ycloud'
+      ? await providerTemplates(connection.data.waba_id)
+      : (await graph<{ data: { name: string; language: string; category: string; status: string; components: { type: string; text?: string }[] }[] }>(`${connection.data.waba_id}/message_templates?limit=100`, decryptToken(connection.data.encrypted_token))).data;
+    const supported = templates.filter(template => template.components.length === 1 && template.components[0].type === 'BODY').map(template => ({ ...template, body: template.components[0].text }));
     const synced = await db.rpc('soulvd_meta_sync_templates', { p_tenant: context.tenantId, p_actor: context.userId, p_templates: supported });
     if (synced.error) throw new Error('SYNC_FAILED');
     revalidatePath('/app/whatsapp');

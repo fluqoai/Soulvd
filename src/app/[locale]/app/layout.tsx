@@ -23,7 +23,7 @@ export default async function MerchantLayout({ children }: { children: React.Rea
           <form action={logout} className="ms-auto"><button className="text-sm underline">تسجيل الخروج</button></form>
         </nav>
       </header>
-      {context?.isTest && <p role="status" className="bg-amber-50 px-6 py-3 text-center">مساحة اختبار Meta — ليست اشتراكًا مدفوعًا. قد تترتب رسوم Meta عند استخدام رقم حقيقي.</p>}
+      {context?.isTest && <p role="status" className="bg-amber-50 px-6 py-3 text-center">مساحة اختبار — ليست اشتراكًا مدفوعًا. قد تترتب رسوم واتساب عند استخدام رقم حقيقي.</p>}
       <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
     </div>
   );
