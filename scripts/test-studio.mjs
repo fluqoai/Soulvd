@@ -83,6 +83,7 @@ try {
     '20260917180128_manual_bank_transfers.sql',
     '20260917181416_automation_integrations_templates.sql',
     '20260917181430_automation_integrations_templates.sql',
+    '20260917201633_openrouter_ai_entitlements.sql',
   ])
     await db.exec(await readFile(`supabase/migrations/${name}`, 'utf8'));
   await db.exec(`insert into public.users values('${owner}','platform@test.invalid','Platform','owner'),('${actor}','merchant@test.invalid','Merchant','merchant'),('${outsider}','other@test.invalid','Other','merchant');
@@ -186,6 +187,14 @@ try {
   );
   const run = await q('select public.soulvd_automation_claim() as result');
   assert.equal(run.flows[0].id, flowId);
+  const reserve = (id = run.id) => q('select public.soulvd_ai_reserve($1,$2) as result', [tenant, id]);
+  assert.equal(await reserve(), false, 'a platform subscription does not grant AI');
+  await assert.rejects(db.exec(`insert into soulvd_private.ai_entitlements(tenant_id,enabled,period_start,period_end,request_limit,grant_reference) values('${tenant}',true,now(),now()+interval '1 day',10,'TEST')`), /permission denied/);
+  await db.exec(`reset role;
+    insert into soulvd_private.ai_entitlements(tenant_id,period_start,period_end,request_limit,grant_reference)
+    values('${tenant}',now()-interval '1 day',now()+interval '1 day',1,'TEST-ONLY');set role service_role;`);
+  assert.equal(await reserve(), false, 'disabled allowance blocks generation');
+  await db.exec(`update soulvd_private.ai_entitlements set enabled=true where tenant_id='${tenant}';`);
   assert.equal(
     await q('select public.soulvd_ai_reserve($1,$2) as result', [
       tenant,
@@ -200,6 +209,7 @@ try {
     ]),
     false,
   );
+  assert.equal(await q(`select requests_used as result from soulvd_private.ai_entitlements where tenant_id='${tenant}'`), 1, 'a run reserves allowance only once');
   await inbound('incoming2');
   assert.equal(
     await q('select public.soulvd_automation_claim() as result'),
@@ -232,6 +242,14 @@ try {
     /RUN_ALREADY_FINISHED/,
   );
   const run2 = await q('select public.soulvd_automation_claim() as result');
+  await db.exec(`update public.bot_settings set daily_limit=2 where tenant_id='${tenant}';`);
+  assert.equal(await reserve(run2.id), false, 'raising the daily setting cannot bypass the platform allowance');
+  await db.exec(`update soulvd_private.ai_entitlements set request_limit=2 where tenant_id='${tenant}';update public.bot_settings set daily_limit=1 where tenant_id='${tenant}';`);
+  assert.equal(await reserve(run2.id), false, 'daily cap is enforced in addition to the period allowance');
+  await db.exec(`update public.bot_settings set daily_limit=2 where tenant_id='${tenant}';update soulvd_private.ai_entitlements set period_end=now()-interval '1 hour' where tenant_id='${tenant}';`);
+  assert.equal(await reserve(run2.id), false, 'expired allowance blocks generation');
+  await db.exec(`update soulvd_private.ai_entitlements set period_end=now()+interval '1 day' where tenant_id='${tenant}';`);
+  assert.equal(await reserve(run2.id), true);
   await db.query('update public.automation_runs set flow_id=$1 where id=$2', [
     flowId,
     run2.id,

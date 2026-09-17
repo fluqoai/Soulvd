@@ -20,14 +20,14 @@ const retrieved = knowledgeContext(
 );
 assert.ok(retrieved.startsWith('Returns'));
 assert.ok(retrieved.length <= 16000);
-let run, updates, requests, sendCount, aiCount, dispatchCount, generated;
+let run, updates, requests, sendCount, aiCount, dispatchCount, generated, aiAllowed;
 globalThis.studioMocks = {
   db: {
     rpc: async (name, args) => {
       requests.push({ name, args });
       if (name === 'soulvd_automation_claim')
         return { data: structuredClone(run), error: null };
-      if (name === 'soulvd_ai_reserve') return { data: true, error: null };
+      if (name === 'soulvd_ai_reserve') return { data: aiAllowed, error: null };
       if (name === 'soulvd_automation_send') {
         sendCount++;
         return { data: { allowed: true, id: 'job' }, error: null };
@@ -76,6 +76,8 @@ globalThis.studioMocks = {
     assert.ok(options.instructions.includes('لا تخترع'));
     assert.ok(options.prompt.includes('Within 2 days'));
     assert.equal(options.maxOutputTokens, 500);
+    assert.equal(options.model.modelId, 'test/provider');
+    assert.ok(options.model.provider.startsWith('openrouter'));
     return { text: generated, usage: { inputTokens: 10, outputTokens: 5 } };
   },
   dispatch: async () => {
@@ -84,6 +86,7 @@ globalThis.studioMocks = {
 };
 const source = (await readFile('src/lib/studio/worker.ts', 'utf8'))
   .replace("import 'server-only';", '')
+  .replace("'@openrouter/ai-sdk-provider'", JSON.stringify(import.meta.resolve('@openrouter/ai-sdk-provider')))
   .replace(
     "import { generateText } from 'ai';",
     'const generateText=globalThis.studioMocks.generate;',
@@ -114,6 +117,7 @@ function reset(action = 'text', mode = 'draft') {
   aiCount = 0;
   dispatchCount = 0;
   generated = 'Within 2 days.';
+  aiAllowed = true;
   run = {
     id: 'run',
     tenant_id: 'tenant',
@@ -184,7 +188,12 @@ assert.equal(state().error_code, 'AI_NOT_CONFIGURED');
 assert.equal(aiCount, 0);
 process.env.SOULVD_AI_ENABLED = 'true';
 process.env.SOULVD_AI_MODEL = 'test/provider';
-process.env.AI_GATEWAY_API_KEY = 'test-only';
+process.env.OPENROUTER_API_KEY = 'test-only';
+reset('ai');
+aiAllowed = false;
+await worker.automationOne();
+assert.equal(state().error_code, 'AI_ACCESS_OR_LIMIT');
+assert.equal(aiCount, 0, 'no provider call without a platform allowance');
 reset('ai');
 await worker.automationOne();
 assert.equal(aiCount, 1);
