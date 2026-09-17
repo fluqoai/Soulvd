@@ -1,7 +1,10 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { verifyYCloudSignature } from '@/lib/ycloud/security';
+import { after } from 'next/server';
+import { runStudioWorker } from '@/lib/studio/worker';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 export async function POST(request: Request) {
   const secret = process.env.YCLOUD_WEBHOOK_SECRET;
   if (!secret) return new Response('Not configured', { status: 503 });
@@ -23,6 +26,7 @@ export async function POST(request: Request) {
   try {
     const { error } = await createAdminClient().rpc('soulvd_ycloud_ingest', { p_id: payload.id, p_payload: payload });
     if (error) return new Response('Persistence unavailable', { status: 503 });
+    after(async()=>{ try { await runStudioWorker(); } catch { /* Durable queue is retried by the scheduled worker. */ } });
     return Response.json({ received: true });
   } catch { return new Response('Persistence unavailable', { status: 503 }); }
 }

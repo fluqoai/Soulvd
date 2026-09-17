@@ -1,8 +1,11 @@
 import { createHash } from 'node:crypto';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { secretMatches, verifySignature } from '@/lib/meta/security';
+import { after } from 'next/server';
+import { runStudioWorker } from '@/lib/studio/worker';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   if (params.get('hub.mode') !== 'subscribe' || !secretMatches(params.get('hub.verify_token'), process.env.META_WEBHOOK_VERIFY_TOKEN)) return new Response('Forbidden', { status: 403 });
@@ -29,6 +32,7 @@ export async function POST(request: Request) {
   try {
     const { error } = await createAdminClient().rpc('soulvd_meta_ingest', { p_id: createHash('sha256').update(raw).digest('hex'), p_payload: payload });
     if (error) return new Response('Persistence unavailable', { status: 503 });
+    after(async()=>{ try { await runStudioWorker(); } catch { /* Durable queue is retried by the scheduled worker. */ } });
     return new Response('EVENT_RECEIVED');
   } catch { return new Response('Persistence unavailable', { status: 503 }); }
 }

@@ -19,6 +19,9 @@ export default async function MerchantLayout({ children }: { children: React.Rea
           <Link href="/app" className="text-xl font-bold">Soulvd</Link>
           <Link href="/app">نظرة عامة</Link><Link href="/app/team">الفريق</Link>
           <Link href="/app/whatsapp">واتساب</Link>
+          <Link href="/app/automations">الأتمتة والبوتات</Link>
+          <Link href="/app/templates">مكتبة القوالب</Link>
+          <Link href="/app/integrations">التكاملات</Link>
           <Link href="/app/billing">الباقة والاستهلاك</Link>
           {profile && ['owner', 'editor'].includes(profile.role) && <Link href="/admin">لوحة الإدارة</Link>}
           {(workspaces?.length ?? 0) > 1 && <form action={selectWorkspace} className="flex items-center gap-2"><select name="tenant" aria-label="مساحة العمل" defaultValue={context?.tenantId} className="rounded border border-sage-200 p-2">{workspaces?.map(workspace => <option key={workspace.id} value={workspace.id}>{workspace.name}{workspace.is_test ? ' (اختبار)' : ''}</option>)}</select><button className="text-sm underline">فتح</button></form>}

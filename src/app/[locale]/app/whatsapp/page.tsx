@@ -7,7 +7,7 @@ export default async function WhatsAppPage() {
   const db = await createClient();
   const [numbers, templates, messages, contacts] = await Promise.all([
     db.from('whatsapp_numbers').select('id,phone,status').eq('tenant_id', context.tenantId),
-    db.from('whatsapp_templates').select('id,name,status,language,provider_status').eq('tenant_id', context.tenantId).order('name').limit(100),
+    db.from('whatsapp_templates').select('id,name,status,language,provider_status,parameter_count,body').eq('tenant_id', context.tenantId).order('name').limit(100),
     db.from('whatsapp_messages').select('id,contact_id,direction,kind,body,status,created_at').eq('tenant_id', context.tenantId).order('created_at', { ascending: false }).limit(100),
     db.from('whatsapp_contacts').select('id,wa_id').eq('tenant_id', context.tenantId).order('last_inbound_at', { ascending: false }).limit(200),
   ]);

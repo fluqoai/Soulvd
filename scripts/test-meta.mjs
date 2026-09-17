@@ -25,6 +25,8 @@ assert.throws(() => security.normalizePhone('0500000000'));
 let persisted = 0, failPersistence = false;
 globalThis.metaTestDb = { rpc: async () => { persisted++; return { error: failPersistence ? { message:'unavailable' } : null }; } };
 const routeSource = (await readFile(new URL('../src/app/api/meta/whatsapp/webhook/route.ts',import.meta.url),'utf8'))
+ .replace("import { after } from 'next/server';",'const after = () => {};')
+ .replace("import { runStudioWorker } from '@/lib/studio/worker';",'const runStudioWorker = async () => {};')
  .replace("import { createAdminClient } from '@/lib/supabase/admin';", 'const createAdminClient = () => globalThis.metaTestDb;')
  .replace("'@/lib/meta/security'", JSON.stringify(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`));
 const route = await import(`data:text/javascript;base64,${Buffer.from(ts.transpileModule(routeSource,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText).toString('base64')}`);

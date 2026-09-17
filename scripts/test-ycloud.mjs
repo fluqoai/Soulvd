@@ -16,6 +16,8 @@ assert.equal(verifyYCloudSignature(body,'t=bad,s=bad','test-secret'),false);
 let persisted=0, fail=false;
 globalThis.ycloudTestDb={rpc:async (name,args)=>{assert.equal(name,'soulvd_ycloud_ingest');assert.equal(args.p_id,'evt-test');persisted++;return {error:fail?{}:null};}};
 const routeSource=(await readFile('src/app/api/ycloud/whatsapp/webhook/route.ts','utf8'))
+ .replace("import { after } from 'next/server';",'const after = () => {};')
+ .replace("import { runStudioWorker } from '@/lib/studio/worker';",'const runStudioWorker = async () => {};')
  .replace("import { createAdminClient } from '@/lib/supabase/admin';",'const createAdminClient=()=>globalThis.ycloudTestDb;')
  .replace("'@/lib/ycloud/security'",JSON.stringify(securityUrl));
 const {POST}=await import(moduleUrl(routeSource));

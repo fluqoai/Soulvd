@@ -8,6 +8,7 @@ import { decryptToken, encryptToken, normalizePhone } from '@/lib/meta/security'
 import { exchangeCode, graph } from '@/lib/meta/client';
 import { dispatchOne } from '@/lib/meta/worker';
 import { providerTemplates } from '@/lib/ycloud/client';
+import { templateSchema, parameterCount } from '@/lib/studio/schema';
 
 export type ActionResult = { ok: boolean; message: string; id?: string };
 const messages: Record<string, string> = {
@@ -15,10 +16,11 @@ const messages: Record<string, string> = {
   WINDOW_CLOSED: 'انتهت نافذة الرد؛ استخدم قالبًا معتمدًا.', CONSENT_REQUIRED: 'يجب تأكيد موافقة العميل على استقبال رسائل القوالب.',
   TEMPLATE_NOT_APPROVED: 'القالب غير معتمد.', LIMIT_EXCEEDED: 'بلغت حصة الباقة. يمكنك الترقية من صفحة الباقات.',
   RATE_LIMITED: 'طلبات كثيرة خلال دقيقة. انتظر قليلًا ثم أعد المحاولة.',
+  MARKETING_OPTED_OUT: 'طلب العميل إيقاف الرسائل التسويقية.',
 };
 async function enqueue(args: Record<string, unknown>): Promise<ActionResult> {
   const context = await requireTenant();
-  const { data, error } = await createAdminClient().rpc('soulvd_meta_enqueue', { p_tenant: context.tenantId, p_actor: context.userId, ...args });
+  const { data, error } = await createAdminClient().rpc('soulvd_enqueue_message', { p_tenant: context.tenantId, p_actor: context.userId, ...args });
   if (error) return { ok: false, message: 'تعذر حفظ الطلب. لا تكرر الإرسال قبل مراجعة السجل.' };
   if (!data.allowed) return { ok: false, message: messages[data.code] ?? 'لا يمكن تنفيذ الإجراء.' };
   let message = 'حُفظ الطلب في قائمة الإرسال.';
@@ -31,17 +33,18 @@ async function enqueue(args: Record<string, unknown>): Promise<ActionResult> {
   revalidatePath('/app/whatsapp');
   return { ok: true, message, id: data.id };
 }
-export async function sendMessage(input: { requestId: string; to: string; body: string; templateId?: string; consent: boolean }) {
-  const parsed = z.object({ requestId: z.string().uuid(), to: z.string().max(30), body: z.string().max(4096), templateId: z.string().uuid().optional(), consent: z.boolean() }).safeParse(input);
+export async function sendMessage(input: { requestId: string; to: string; body: string; templateId?: string; consent: boolean; parameters?: string[] }) {
+  const parsed = z.object({ requestId: z.string().uuid(), to: z.string().max(30), body: z.string().max(4096), templateId: z.string().uuid().optional(), consent: z.boolean(), parameters: z.array(z.string().min(1).max(1000)).max(10).default([]) }).safeParse(input);
   if (!parsed.success) return { ok: false, message: 'تحقق من بيانات الرسالة.' };
   let phone: string;
   try { phone = normalizePhone(input.to); } catch { return { ok: false, message: 'أدخل رقمًا دوليًا مثل +9665xxxxxxxx.' }; }
-  return enqueue({ p_request: input.requestId, p_kind: 'message', p_to: phone, p_body: input.body, p_template: input.templateId ?? null, p_consent: input.consent });
+  return enqueue({ p_request: input.requestId, p_kind: 'message', p_to: phone, p_body: input.body, p_template: input.templateId ?? null, p_consent: input.consent, p_parameters: parsed.data.parameters });
 }
-export async function createTemplate(input: { requestId: string; name: string; language: string; category: string; body: string }) {
-  const parsed = z.object({ requestId: z.string().uuid(), name: z.string().regex(/^[a-z][a-z0-9_]{0,119}$/), language: z.enum(['ar','en_US']), category: z.enum(['UTILITY','MARKETING']), body: z.string().trim().min(1).max(1024).refine(text => !/[{}]/.test(text)) }).safeParse(input);
-  if (!parsed.success) return { ok: false, message: 'استخدم اسمًا إنجليزيًا صغيرًا وشرطات سفلية، ونصًا بلا متغيرات في هذه النسخة.' };
-  return enqueue({ p_request: input.requestId, p_kind: 'template', p_to: '', p_body: JSON.stringify({ name: input.name, language: input.language, category: input.category, components: [{ type: 'BODY', text: input.body }] }), p_template: null, p_consent: false });
+export async function createTemplate(input: { requestId: string; name: string; language: string; category: string; body: string; examples?: string[] }) {
+  const parsed = templateSchema.safeParse({ ...input, examples: input.examples ?? [] });
+  if (!z.uuid().safeParse(input.requestId).success || !parsed.success) return { ok: false, message: 'تحقق من اسم القالب ونصه. استخدم متغيرات متسلسلة {{1}} و{{2}} وأدخل مثالًا لكل متغير.' };
+  const data = parsed.data;
+  return enqueue({ p_request: input.requestId, p_kind: 'template', p_to: '', p_body: JSON.stringify({ name: data.name, language: data.language, category: data.category, components: [{ type: 'BODY', text: data.body, ...(data.examples.length ? { example: { body_text: [data.examples] } } : {}) }] }), p_template: null, p_consent: false });
 }
 export async function finishSignup(input: { code: string; wabaId: string; phoneNumberId: string; mode: 'api' | 'coexistence' }): Promise<ActionResult> {
   const context = await requireTenant();
@@ -73,7 +76,10 @@ export async function refreshTemplates(): Promise<ActionResult> {
     const templates = connection.data.provider === 'ycloud'
       ? await providerTemplates(connection.data.waba_id)
       : (await graph<{ data: { name: string; language: string; category: string; status: string; components: { type: string; text?: string }[] }[] }>(`${connection.data.waba_id}/message_templates?limit=100`, decryptToken(connection.data.encrypted_token))).data;
-    const supported = templates.filter(template => template.components.length === 1 && template.components[0].type === 'BODY').map(template => ({ ...template, body: template.components[0].text }));
+    const supported = templates.filter(template => {
+      if (template.components.length !== 1 || template.components[0].type !== 'BODY' || !template.components[0].text) return false;
+      try { parameterCount(template.components[0].text); return true; } catch { return false; }
+    }).map(template => ({ ...template, body: template.components[0].text }));
     const synced = await db.rpc('soulvd_meta_sync_templates', { p_tenant: context.tenantId, p_actor: context.userId, p_templates: supported });
     if (synced.error) throw new Error('SYNC_FAILED');
     revalidatePath('/app/whatsapp');

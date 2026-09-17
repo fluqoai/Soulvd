@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test:subscriptions": "node scripts/test-subscriptions.mjs",
     "test:meta": "node scripts/test-meta.mjs",
-    "test:ycloud": "node scripts/test-ycloud.mjs"
+    "test:ycloud": "node scripts/test-ycloud.mjs",
+    "test:studio": "node scripts/test-studio.mjs && node scripts/test-studio-worker.mjs && node scripts/test-studio-api.mjs",
+    "test:bank-transfers": "node scripts/test-bank-transfers.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.9.0",
@@ -17,6 +19,7 @@
     "@react-three/fiber": "^9.7.0",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
+    "ai": "7.0.105",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^13.1.1",
@@ -45,5 +48,8 @@
     "pizzip": "^3.2.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }

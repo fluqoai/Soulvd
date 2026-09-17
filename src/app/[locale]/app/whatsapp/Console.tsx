@@ -7,7 +7,7 @@ import { createTemplate, finishSignup, refreshTemplates, sendMessage, type Actio
 
 type Facebook = { init(options: object): void; login(callback: (response: { authResponse?: { code?: string } }) => void, options: object): void };
 declare global { interface Window { FB?: Facebook } }
-type Template = { id: string; name: string; status: string; language: string };
+type Template = { id: string; name: string; status: string; language: string; parameter_count: number; body: string };
 const field = 'w-full rounded-lg border border-sage-200 bg-white p-3';
 const button = 'rounded-lg bg-sage-900 px-5 py-3 text-white hover:bg-sage-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-700 disabled:cursor-not-allowed disabled:opacity-50';
 
@@ -15,6 +15,8 @@ export default function WhatsAppConsole({ templates, canManage, canConnect, conn
   const router = useRouter();
   const [result, setResult] = useState<ActionResult>();
   const [busy, setBusy] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const chosenTemplate = templates.find(t => t.id === selectedTemplate);
   const [mode, setMode] = useState<'api' | 'coexistence'>('coexistence');
   const code = useRef<string | null>(null);
   const assets = useRef<{ wabaId: string; phoneNumberId: string } | null>(null);
@@ -61,10 +63,10 @@ export default function WhatsAppConsole({ templates, canManage, canConnect, conn
     key.current ||= crypto.randomUUID();
     try {
       const response = kind === 'message'
-        ? await sendMessage({ requestId: key.current, to: String(data.get('to')), body: String(data.get('body')), templateId: String(data.get('templateId') || '') || undefined, consent: data.get('consent') === 'on' })
-        : await createTemplate({ requestId: key.current, name: String(data.get('name')), language: String(data.get('language')), category: String(data.get('category')), body: String(data.get('body')) });
+        ? await sendMessage({ requestId: key.current, to: String(data.get('to')), body: String(data.get('body') || ''), templateId: String(data.get('templateId') || '') || undefined, consent: data.get('consent') === 'on', parameters: data.getAll('parameter').map(String) })
+        : await createTemplate({ requestId: key.current, name: String(data.get('name')), language: String(data.get('language')), category: String(data.get('category')), body: String(data.get('body')), examples: String(data.get('examples') || '').split('\n').map(s => s.trim()).filter(Boolean) });
       setResult(response);
-      if (response.ok) { key.current = ''; form.reset(); }
+      if (response.ok) { key.current = ''; form.reset(); if (kind === 'message') setSelectedTemplate(''); }
       router.refresh();
     } catch { setResult({ ok: false, message: 'تعذر تأكيد الطلب. أعد المحاولة بالبيانات نفسها؛ سيُستخدم معرّف الطلب نفسه لمنع التكرار.' }); }
     finally { setBusy(false); }
@@ -96,8 +98,8 @@ export default function WhatsAppConsole({ templates, canManage, canConnect, conn
       <form onSubmit={event => void submit(event, 'message')} className="space-y-4 rounded-xl border border-sage-200 bg-white p-5">
         <h2 className="text-xl font-bold">إرسال رسالة</h2>
         <label className="block">رقم العميل الدولي<input className={field} name="to" type="tel" placeholder="+9665xxxxxxxx" required maxLength={30} dir="ltr" /></label>
-        <label className="block">نوع الرسالة<select className={field} name="templateId"><option value="">رد نصي خلال نافذة 24 ساعة</option>{templates.filter(template => template.status === 'approved').map(template => <option key={template.id} value={template.id}>{template.name} ({template.language})</option>)}</select></label>
-        <label className="block">نص الرد<textarea className={field} name="body" maxLength={4096} /></label>
+        <label className="block">نوع الرسالة<select className={field} name="templateId" value={selectedTemplate} onChange={e => setSelectedTemplate(e.target.value)}><option value="">رد نصي خلال نافذة 24 ساعة</option>{templates.filter(template => template.status === 'approved').map(template => <option key={template.id} value={template.id}>{template.name} ({template.language})</option>)}</select></label>
+        {chosenTemplate ? <><p className="whitespace-pre-wrap rounded bg-sage-50 p-3">{chosenTemplate.body}</p>{Array.from({length:chosenTemplate.parameter_count},(_,i)=><label key={`${chosenTemplate.id}-${i}`} className="block">قيمة المتغير {i+1}<input name="parameter" className={field} required maxLength={1000}/></label>)}</> : <label className="block">نص الرد<textarea className={field} name="body" maxLength={4096} required /></label>}
         <label className="flex gap-2"><input type="checkbox" name="consent" />أؤكد وجود موافقة العميل على استقبال رسائل القوالب.</label>
         <p className="text-sm">رسوم Meta منفصلة عن الاشتراك. اعتماد القالب لا يعني أن الرسالة مجانية.</p>
         <button className={button} disabled={busy || !connected}>إرسال</button>
@@ -108,7 +110,8 @@ export default function WhatsAppConsole({ templates, canManage, canConnect, conn
         <label className="block">اللغة<select className={field} name="language"><option value="ar">العربية</option><option value="en_US">English</option></select></label>
         <label className="block">الفئة<select className={field} name="category"><option value="UTILITY">خدمي</option><option value="MARKETING">تسويقي</option></select></label>
         <label className="block">نص القالب<textarea className={field} name="body" required maxLength={1024} /></label>
-        <p className="text-sm">تدعم هذه النسخة قوالب نصية بلا متغيرات. القرار النهائي للفئة والاعتماد لدى Meta.</p>
+        <label className="block">أمثلة المتغيرات، مثال لكل سطر<textarea className={field} name="examples" placeholder={'أحمد\n1024'} /></label>
+        <p className="text-sm">تدعم القوالب النصية متغيرات مثل {'{{1}}'} و{'{{2}}'}. القرار النهائي للفئة والاعتماد لدى Meta. تجد النماذج الجاهزة في مكتبة القوالب.</p>
         <button className={button} disabled={busy || !connected}>إرسال للمراجعة</button>
       </form>}
     </div>
