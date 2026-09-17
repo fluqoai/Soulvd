@@ -50,6 +50,26 @@ new inbound test visible in the chosen Soulvd workspace, a reply sent from that
 workspace, and its delivered/read receipt. Never report a synthetic webhook as
 proof of an actual WhatsApp delivery.
 
+## Production activation — 2026-09-17
+
+- Adapter commit `41d2cd5` deployed to Vercel production with status Ready.
+- Provider migration applied successfully to the verified Soulvd project.
+- Server-only production API and endpoint signing secrets configured.
+- Separate test workspace `Soulvd — اختبار واتساب` created for the existing
+  staff owner, with a 30-day explicit test subscription. The Meta review
+  workspace and its direct Meta connection were preserved.
+- The verified Coexistence number was bound to this test workspace.
+- YCloud endpoint `6aac1ac736127c2d37e22516` activated at the canonical www URL
+  for inbound messages, message updates and template review events.
+- Production rejected unsigned POSTs with 403. A signed synthetic connection
+  probe returned 200 and its event was verified in the private database.
+- Verified ingest privileges: anon=false, authenticated=false,
+  service_role=true.
+- Pending live acceptance: log into the staff owner account, select the new
+  test workspace, receive a new actual WhatsApp message, reply from Soulvd,
+  and verify delivery. The browser session currently exposes only the Meta
+  review workspace. Synthetic persistence is not delivery evidence.
+
 ## Official references
 
 - https://docs.ycloud.com/reference/webhook-integration-guide
