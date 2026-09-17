@@ -59,3 +59,11 @@ The September 18 release implements the tenant WhatsApp wallet and reservation/r
 - Commit `85707fc` was successfully deployed by the primary Vercel project. Production pricing displayed the correct 3/6/12-month totals and signup links. The authenticated owner's wallet showed zero balances and the 15% markup policy; the existing test contract remained a one-month active contract, exempt from collection.
 - A fifth forward migration aligns payment confirmation's subscription/request lock order with request creation. It passed the launch test suite and a production rollback-only check before application. No applied migration was rewritten.
 - Final production inspection found five recorded release migrations, two test tenants, zero real tenants, zero payment requests and zero wallet ledger entries. The existing studio worker schedule remains active every minute. SMTP is unconfigured and public signup remains closed.
+
+## Resend SMTP verification — September 18
+
+- Verified Soulvd's existing Resend domain soulvd.sa has sending enabled and click/open tracking disabled.
+- Installed Resend SMTP in the correct Soulvd project and the committed Arabic confirmation template. Read-back confirmed the sender, port, rate limit and template. Email confirmation and the recovery/invite/magic-link templates were preserved.
+- A Supabase Auth recovery email to the existing platform owner's mailbox was accepted by SMTP and recorded as delivered by Resend at 22:34 UTC on September 17 (September 18 in Riyadh). No link was consumed, password changed or customer registered. Recipient inbox placement is awaiting user confirmation; new-customer signup end-to-end remains untested.
+- At the user's request, a second Supabase Auth test was sent to their existing Gmail review account at 22:36 UTC. Resend recorded it as delivered. The reviewer account's password, permissions and workspace membership were not changed.
+- Public signup remains closed pending the remaining YCloud commercial launch prerequisites. No frontend deployment is needed for the SMTP configuration itself.
