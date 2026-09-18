@@ -62,7 +62,7 @@ export default async function WalletPage() {
             {sar((balance - held) / 1000000)} <span className="text-base font-normal text-white/75">ريال</span>
           </p>
           <p className="text-sm leading-7 text-white/80">
-            {balance - held <= 0 ? "يلزم رصيد متاح قبل إرسال الرسائل، حتى مع وجود اشتراك نشط." : "هذا المبلغ متاح بعد استبعاد العمليات التي تنتظر التسوية."}
+            {balance - held <= 0 ? "يلزم رصيد متاح للرسائل المدفوعة. الردود التي يثبت النظام مجانيتها تُرسل دون حجز مالي." : "هذا المبلغ متاح بعد استبعاد العمليات التي تنتظر التسوية."}
           </p>
           {canManage && (
             <a href="#wallet-funding" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#d9e8b5] px-4 py-3 text-sm font-bold text-[#173e32] hover:bg-white">
@@ -96,7 +96,7 @@ export default async function WalletPage() {
         </p>
         <p>
           يُحجز تقدير محافظ قبل إرسال الرسالة ويُخصم المبلغ النهائي عند تأكيد
-          التسليم. تُحرر الزيادة والرسائل المجانية بعد التسوية، وتبقى الحالات
+          التسليم. لا نطلب حجزًا للردود النصية والوسائط التي تثبت مجانيتها وفق سياسة التسعير السارية؛ وتُحرر الزيادة بعد التسوية. تبقى الحالات
           غير المحسومة محجوزة للمراجعة. يظهر الرصيد بمنزلتين، وتُحفظ الحسابات
           بدقة أعلى.
         </p>
@@ -161,6 +161,8 @@ export default async function WalletPage() {
                 <span className={`rounded-lg p-2 ${row.kind === "message" ? "bg-slate-100 text-slate-600" : "bg-sage-50 text-sage-700"}`}><ArrowDownLeft size={16} aria-hidden="true" /></span>
                 {row.kind === "topup"
                   ? "شحن مؤكد"
+                  : row.kind === "welcome_credit"
+                    ? "هدية بداية من سولفد"
                   : row.kind === "test_credit"
                     ? "ميزانية اختبار من المنصة"
                     : "تكلفة رسالة"}{" "}

@@ -39,11 +39,12 @@ export async function requestPayment(
   if (context.role !== "owner" || !purpose.success)
     return { message: "متاح لمالك مساحة العمل فقط." };
   let amount: number | null = null;
-  if (purpose.data === "wallet") {
+  if (purpose.data === "wallet" || purpose.data === "subscription") {
     const value = z.coerce
       .number()
-      .min(50)
+      .min(0)
       .max(10000)
+      .refine((n) => n >= 50 || (purpose.data === "subscription" && n === 0))
       .refine((n) => Math.abs(n * 100 - Math.round(n * 100)) < 0.00001)
       .safeParse(form.get("amount"));
     if (!value.success)
@@ -129,7 +130,7 @@ export async function paymentRequests() {
   const { data, error } = await db
     .from("payment_requests")
     .select(
-      "id,purpose,amount_halalas,status,bank_reference,created_at,expires_at",
+      "id,purpose,amount_halalas,wallet_amount_halalas,welcome_amount_halalas,status,bank_reference,created_at,expires_at",
     )
     .eq("tenant_id", context.tenantId)
     .order("created_at", { ascending: false })

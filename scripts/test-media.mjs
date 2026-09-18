@@ -57,6 +57,9 @@ try {
   assert.equal(await q('select held_micro::text result from public.messaging_wallets where tenant_id=$1',[tenant]),'0');
   await db.query("update public.whatsapp_contacts set last_inbound_at=now() where tenant_id=$1",[tenant]);
   await db.query('update public.messaging_wallets set balance_micro=0 where tenant_id=$1',[tenant]);
+  await db.query("update soulvd_private.free_reply_policy set valid_from=now()-interval '1 day',valid_until=now()+interval '1 day'");
+  assert.equal((await send()).allowed,true, 'Verified free media can send with an empty wallet');
+  await db.query("update soulvd_private.free_reply_policy set valid_until=now()-interval '1 second'");
   assert.equal((await send()).code,'WALLET_INSUFFICIENT');
   await db.exec(`reset role;set role authenticated;set request.jwt.claim.sub='${actor}';`);
   await assert.rejects(rpc('soulvd_message_media',[tenant,actor,incoming.id]),/permission denied/);

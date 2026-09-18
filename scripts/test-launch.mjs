@@ -364,7 +364,7 @@ try {
       "select balance_micro::text result from public.messaging_wallets where tenant_id=$1",
       [tenant],
     ),
-    "100000000",
+    "105000000",
   );
   const otherTopup = await rpc("soulvd_request_payment", [
     outsider,
@@ -382,6 +382,29 @@ try {
     rpc("soulvd_confirm_payment", [owner, otherTopup, "bank-wallet", 10000]),
     /REFERENCE_ALREADY_USED/,
   );
+  // One transfer, separate accounting; no credit before verified receipt.
+  await assert.rejects(rpc("soulvd_request_payment", [outsider, other, "subscription", 4999]), /INVALID_AMOUNT/);
+  const oldBundle = await rpc("soulvd_request_payment", [outsider, other, "subscription", 10000]);
+  const bundle = await rpc("soulvd_request_payment", [outsider, other, "subscription", 5000]);
+  assert.notEqual(oldBundle, bundle);
+  assert.equal(await q("select status result from public.payment_requests where id=$1", [oldBundle]), "cancelled");
+  assert.equal(await q("select amount_halalas result from public.payment_requests where id=$1", [bundle]), 94700);
+  assert.equal(await q("select wallet_amount_halalas result from public.payment_requests where id=$1", [bundle]), 5000);
+  assert.equal(await q("select welcome_amount_halalas result from public.payment_requests where id=$1", [bundle]), 500);
+  assert.equal(await q("select count(*)::int result from public.wallet_ledger where tenant_id=$1", [other]), 0);
+  await rpc("soulvd_submit_payment", [outsider, other, bundle, "bank-bundle"]);
+  await assert.rejects(rpc("soulvd_confirm_payment", [owner, bundle, "bank-bundle", 89700]), /AMOUNT_OR_REFERENCE_MISMATCH/);
+  await rpc("soulvd_confirm_payment", [owner, bundle, "bank-bundle", 94700]);
+  await rpc("soulvd_confirm_payment", [owner, bundle, "bank-bundle", 94700]);
+  assert.equal(await q("select balance_micro::text result from public.messaging_wallets where tenant_id=$1", [other]), "55000000");
+  assert.equal(await q("select count(*)::int result from public.wallet_ledger where tenant_id=$1", [other]), 2);
+  // Renewal never repeats the welcome credit.
+  await db.query("update public.subscriptions set period_start=now()-interval '4 months',period_end=now()-interval '1 month' where tenant_id=$1", [other]);
+  const renewal = await rpc("soulvd_request_payment", [outsider, other, "subscription", null]);
+  assert.equal(await q("select welcome_amount_halalas result from public.payment_requests where id=$1", [renewal]), 0);
+  await rpc("soulvd_submit_payment", [outsider, other, renewal, "bank-renewal"]);
+  await rpc("soulvd_confirm_payment", [owner, renewal, "bank-renewal", 89700]);
+  assert.equal(await q("select balance_micro::text result from public.messaging_wallets where tenant_id=$1", [other]), "55000000");
   const request = await rpc("soulvd_onboarding_request", [
     merchant,
     tenant,
@@ -519,7 +542,7 @@ try {
       "select balance_micro::text result from public.messaging_wallets where tenant_id=$1",
       [tenant],
     ),
-    "99784375",
+    "104784375",
   );
   assert.equal(
     await q(
@@ -570,6 +593,27 @@ try {
     ),
     snapshot,
   );
+  // A contact timestamp alone is insufficient: require a received message on this number.
+  await db.exec("reset role");
+  await db.query("update soulvd_private.free_reply_policy set valid_from=now()-interval '1 day',valid_until=now()+interval '1 day'");
+  await db.query(`insert into public.whatsapp_messages(tenant_id,contact_id,number_id,direction,kind,body,status,meta_message_id)
+    select $1,id,$2,'inbound','text','Test inbound','received','ycloud:verified-inbound' from public.whatsapp_contacts where tenant_id=$1 and wa_id='966511111111'`, [tenant, number]);
+  await db.query("update soulvd_private.meta_jobs set claimed_at=now()-interval '10 seconds' where number_id=$1 and claimed_at is not null", [number]);
+  await db.exec("set role service_role");
+  const free = await send();
+  assert.equal(await q("select held_micro::text result from soulvd_private.message_holds where job_id=$1", [free.id]), "0");
+  assert.ok(await rpc("soulvd_meta_claim", [free.id]));
+  await rpc("soulvd_meta_finish", [free.id, "accepted", "ycloud:free", null]);
+  await rpc("soulvd_settle_message", [{...event, id:"free", externalId:free.id, totalPrice:0}]);
+  assert.equal(await q("select charged_micro::text result from soulvd_private.message_holds where job_id=$1", [free.id]), "0");
+  assert.equal(await q("select balance_micro::text result from public.messaging_wallets where tenant_id=$1", [tenant]), "0");
+  const delayed = await send();
+  await db.query("update soulvd_private.meta_jobs set claimed_at=now()-interval '10 seconds' where number_id=$1 and claimed_at is not null", [number]);
+  await db.query("update soulvd_private.free_reply_policy set valid_until=now()-interval '1 second'");
+  assert.equal(await rpc("soulvd_meta_claim", [delayed.id]), null);
+  assert.equal(await q("select error_code result from soulvd_private.meta_jobs where id=$1", [delayed.id]), "WALLET_INSUFFICIENT");
+  assert.equal(await q("select state result from soulvd_private.message_holds where job_id=$1", [delayed.id]), "released");
+  await assert.rejects(send(), /WALLET_INSUFFICIENT/);
   await db.exec("reset role");
   await db.query(
     "update soulvd_private.messaging_rate_limits set valid_until=now()-interval '1 second'",

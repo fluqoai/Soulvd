@@ -1,5 +1,6 @@
-import { currentMerchant, tenantContext } from "@/lib/tenancy/context";
+import { currentMerchant, tenantContext, tenantUsage } from "@/lib/tenancy/context";
 import WorkspaceShell from "./WorkspaceShell";
+import WalletNotice from "@/components/billing/WalletNotice";
 import "./workspace.css";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,10 @@ export default async function MerchantLayout({
         )
     : { data: [], error: null };
   if (workspaces.error) throw new Error("تعذر تحميل المساحات.");
+  const usage = context && !context.isTest && context.role !== "agent"
+    ? await tenantUsage()
+    : null;
+  const active = usage?.isActive;
   return (
     <WorkspaceShell
       userId={user.id}
@@ -42,6 +47,7 @@ export default async function MerchantLayout({
       )}
       workspaces={workspaces.data ?? []}
     >
+      {active && context && <WalletNotice key={context.tenantId} tenantId={context.tenantId} />}
       {children}
     </WorkspaceShell>
   );

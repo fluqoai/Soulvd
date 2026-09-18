@@ -1,5 +1,5 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   requestPayment,
   submitPayment,
@@ -11,14 +11,37 @@ import { sar } from "@/lib/billing/terms";
 export function RequestPayment({
   purpose,
   disabled = false,
+  subscriptionHalalas = 0,
 }: {
   purpose: "subscription" | "upgrade" | "wallet";
   disabled?: boolean;
+  subscriptionHalalas?: number;
 }) {
   const [state, action, busy] = useActionState(requestPayment, {});
+  const [initialCredit, setInitialCredit] = useState(0);
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="purpose" value={purpose} />
+      {purpose === "subscription" && (
+        <section className="sv-surface space-y-4 p-5">
+          <h2 className="font-bold">اشتراكك ورصيد البداية · تحويل واحد</h2>
+          <label className="block text-sm">
+            رصيد واتساب اختياري، يُضاف إلى محفظتك بعد تأكيد التحويل
+            <select name="amount" value={initialCredit} onChange={(event) => setInitialCredit(Number(event.target.value))} className="mt-2 block w-full rounded-xl border bg-white p-3">
+              <option value={0}>الاشتراك فقط · أشحن لاحقًا</option>
+              <option value={50}>50 ريال رصيد بداية</option>
+              <option value={100}>100 ريال رصيد بداية</option>
+              <option value={200}>200 ريال رصيد بداية</option>
+            </select>
+          </label>
+          <dl className="space-y-2 text-sm">
+            <div className="flex justify-between gap-3"><dt>اشتراك المدة المختارة</dt><dd>{sar(subscriptionHalalas / 100)} ريال</dd></div>
+            <div className="flex justify-between gap-3"><dt>رصيد واتساب</dt><dd>{sar(initialCredit)} ريال</dd></div>
+            <div className="flex justify-between gap-3 border-t pt-3 text-lg font-bold"><dt>إجمالي التحويل</dt><dd>{sar(subscriptionHalalas / 100 + initialCredit)} ريال</dd></div>
+          </dl>
+          <p className="text-xs leading-6 text-wood-600">هدية بداية: 5 ريالات رصيد واتساب مرة واحدة للمساحة بعد تأكيد أول اشتراك مدفوع. لا تُضاف إلى مبلغ التحويل، ولا تُمنح للتسجيل المجاني أو للتجديد.</p>
+        </section>
+      )}
       {purpose === "wallet" && (
         <label className="block text-sm">
           مبلغ الشحن بالريال
@@ -58,6 +81,8 @@ export type PaymentRequest = {
   id: string;
   purpose: string;
   amount_halalas: number;
+  wallet_amount_halalas: number;
+  welcome_amount_halalas: number;
   status: string;
   bank_reference: string | null;
   expires_at: string;
@@ -92,6 +117,12 @@ export function PaymentRequestCard({
       <p className="text-2xl font-bold">
         {sar(item.amount_halalas / 100)} ريال
       </p>
+      {item.purpose === "subscription" && (
+        <div className="rounded-xl bg-sage-50 p-3 text-sm leading-7">
+          <p>الاشتراك: {sar((item.amount_halalas - item.wallet_amount_halalas) / 100)} ريال · رصيد واتساب: {sar(item.wallet_amount_halalas / 100)} ريال</p>
+          {item.welcome_amount_halalas > 0 && <p>رصيد الترحيب: {sar(item.welcome_amount_halalas / 100)} ريال هدية بعد التأكيد، خارج إجمالي التحويل.</p>}
+        </div>
+      )}
       <p className="text-xs text-wood-600">
         رقم الطلب: <bdi>{item.id}</bdi>
       </p>

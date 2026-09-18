@@ -28,7 +28,7 @@ export default async function SubscriptionAdmin() {
     admin
       .from("payment_requests")
       .select(
-        "id,tenant_id,purpose,status,amount_halalas,bank_reference,created_at",
+        "id,tenant_id,purpose,status,amount_halalas,wallet_amount_halalas,welcome_amount_halalas,bank_reference,created_at",
       )
       .eq("status", "submitted")
       .order("created_at")
@@ -79,6 +79,7 @@ export default async function SubscriptionAdmin() {
               <p className="mt-2">
                 مرجع العميل: <bdi>{r.bank_reference}</bdi>
               </p>
+              {r.purpose === "subscription" && <p className="mt-2 text-sm leading-7">الاشتراك: {sar((r.amount_halalas - r.wallet_amount_halalas) / 100)} ريال · شحن المحفظة: {sar(r.wallet_amount_halalas / 100)} ريال · هدية الترحيب: {sar(r.welcome_amount_halalas / 100)} ريال (لا تدخل في مبلغ التحويل).</p>}
               <PaymentReview id={r.id} />
             </article>
           ))}
