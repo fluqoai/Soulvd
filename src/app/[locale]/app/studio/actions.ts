@@ -13,6 +13,7 @@ import { webhookUrl } from '@/lib/studio/network';
 import { encryptToken } from '@/lib/meta/security';
 import { dispatchOne } from '@/lib/meta/worker';
 import { aiReady } from '@/lib/studio/worker';
+import { aiStatus } from '@/lib/studio/ai-status';
 
 export type StudioResult = {
   ok: boolean;
@@ -28,6 +29,10 @@ const errors: Record<string, string> = {
   LIMIT_EXCEEDED: 'بلغت الحد المتاح في باقتك.',
   PAYMENT_REQUIRED: 'يجب تأكيد رسوم التكامل أولًا.',
   NOT_FOUND: 'العنصر غير موجود في هذه المساحة.',
+  CONVERSATION_CHANGED: 'وصلت رسالة أحدث أو رد موظف. راجع المحادثة بدل إرسال مسودة قديمة.',
+  INTEGRATION_INACTIVE: 'فعّل التكامل وجدّد مفاتيحه قبل اختبار الاتصال.',
+  WALLET_INSUFFICIENT: 'رصيد واتساب غير كافٍ للرسالة المدفوعة. اشحن المحفظة ثم حاول.',
+  WALLET_RATE_UNAVAILABLE: 'تعرفة هذه الوجهة غير متاحة حاليًا. تواصل مع الدعم.',
 };
 function fail(code: string): StudioResult {
   return {
@@ -79,6 +84,14 @@ export async function saveStudio(
           message:
             'ربط الذكاء الاصطناعي لم يُفعّل على المنصة بعد. يمكنك حفظ المسار كمسودة.',
         };
+      if (flow.status === 'active' && flow.definition.action === 'ai') {
+        const allowance = await aiStatus(context.tenantId, context.userId);
+        if (!allowance.enabled || allowance.dailyRemaining < 1)
+          return { ok: false, message: 'لا توجد حصة ذكاء اصطناعي متاحة الآن. احفظ المسار كمسودة حتى تفعيل الحصة؛ الاشتراك لا يمنحها تلقائيًا.' };
+        const knowledge = await createAdminClient().from('bot_knowledge').select('id').eq('tenant_id', context.tenantId).limit(1);
+        if (knowledge.error || !knowledge.data?.length)
+          return { ok: false, message: 'أضف معلومات النشاط إلى قاعدة المعرفة قبل تفعيل المساعد.' };
+      }
     }
     const { error, data: savedId } = await createAdminClient().rpc(
       'soulvd_studio_save',
@@ -163,11 +176,21 @@ export async function approveDraft(
   if (!result.data.allowed)
     return {
       ok: false,
-      message: 'تعذر الإرسال: تحقق من نافذة 24 ساعة وحصة الاشتراك.',
+      message: errors[result.data.code] ?? 'تعذر الإرسال: تحقق من نافذة 24 ساعة وحصة الاشتراك.',
     };
-  await dispatchOne(result.data.id);
+  try { await dispatchOne(result.data.id); } catch { /* The admitted job remains recoverable by the scheduler. */ }
   refresh();
   return { ok: true, message: 'سُجل الرد. تابع حالة التسليم في صفحة واتساب.' };
+}
+export async function testIntegration(id: string): Promise<StudioResult> {
+  const { context } = await tenantUsage();
+  if (!z.uuid().safeParse(id).success) return fail('NOT_FOUND');
+  const result = await createAdminClient().rpc('soulvd_crm_test', {
+    p_tenant: context.tenantId, p_actor: context.userId, p_id: id,
+  });
+  if (result.error) return fail(result.error.message);
+  refresh();
+  return { ok: true, id: result.data, message: 'سُجل اختبار الاتصال بلا بيانات عملاء. تابع نتيجة integration.test في سجل التسليم؛ التسجيل وحده لا يعني نجاح الاتصال.' };
 }
 export async function integrationKeys(
   id: string,

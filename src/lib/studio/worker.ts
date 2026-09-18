@@ -57,6 +57,13 @@ export async function automationOne() {
       .eq('state', 'processing');
     if (result.error) throw new Error('RUN_PERSISTENCE_UNAVAILABLE');
   };
+  const handoff = async (code: string) => {
+    const paused = await db.from('whatsapp_contacts').update({ bot_paused: true })
+      .eq('tenant_id', r.tenant_id).eq('id', r.message.contact_id);
+    if (paused.error) throw new Error('PAUSE_FAILED');
+    await finish('handoff', code);
+  };
+  let usingAI = false;
   try {
     const s = r.subscription;
     if (
@@ -132,16 +139,9 @@ export async function automationOne() {
     }
     let output = flow.definition.reply;
     if (flow.definition.action === 'ai') {
+      usingAI = true;
       if (!aiReady()) {
-        await finish('skipped', 'AI_NOT_CONFIGURED');
-        return true;
-      }
-      const reserve = await db.rpc('soulvd_ai_reserve', {
-        p_tenant: r.tenant_id,
-        p_run: r.id,
-      });
-      if (reserve.error || !reserve.data) {
-        await finish('skipped', 'AI_ACCESS_OR_LIMIT');
+        await handoff('AI_NOT_CONFIGURED');
         return true;
       }
       const [knowledge, history] = await Promise.all([
@@ -173,6 +173,14 @@ export async function automationOne() {
         return true;
       }
       const context = knowledgeContext(knowledge.data, r.message.body);
+      const reserve = await db.rpc('soulvd_ai_reserve', {
+        p_tenant: r.tenant_id,
+        p_run: r.id,
+      });
+      if (reserve.error || !reserve.data) {
+        await handoff('AI_ACCESS_OR_LIMIT');
+        return true;
+      }
       const result = await generateText({
         model: createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })(
           process.env.SOULVD_AI_MODEL!,
@@ -223,7 +231,8 @@ export async function automationOne() {
     if (send.error) throw new Error('SEND_ADMISSION_FAILED');
     if (send.data?.allowed) await dispatchOne(send.data.id);
   } catch {
-    await finish('failed', 'AUTOMATION_FAILED');
+    if (usingAI) await handoff('AI_PROVIDER_UNAVAILABLE');
+    else await finish('failed', 'AUTOMATION_FAILED');
   }
   return true;
 }

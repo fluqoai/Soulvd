@@ -5,13 +5,15 @@ import Library from './Library';
 export default async function TemplatesPage() {
   const { context, plan, isActive } = await tenantUsage();
   const { db } = await currentMerchant();
-  const drafts = await db
+  const [drafts, submitted] = await Promise.all([db
     .from('template_drafts')
     .select('*')
     .eq('tenant_id', context.tenantId)
     .order('created_at', { ascending: false })
-    .limit(200);
-  if (drafts.error) throw new Error('تعذر تحميل المسودات.');
+    .limit(200),
+    db.from('whatsapp_templates').select('id,name,language,status,provider_status').eq('tenant_id', context.tenantId).order('name').limit(200),
+  ]);
+  if (drafts.error || submitted.error) throw new Error('تعذر تحميل القوالب.');
   const pro = isActive && plan.code === 'pro_growth';
   return (
     <div className="space-y-8">
@@ -23,6 +25,7 @@ export default async function TemplatesPage() {
         library={pro ? TEMPLATE_LIBRARY : []}
         pro={pro}
         drafts={drafts.data}
+        submitted={submitted.data}
         canManage={['owner', 'admin'].includes(context.role) && isActive}
       />
     </div>

@@ -38,7 +38,7 @@ async function enqueue(args: Record<string, unknown>): Promise<ActionResult> {
   if (error)
     return {
       ok: false,
-      message: "تعذر حفظ الطلب. لا تكرر الإرسال قبل مراجعة السجل.",
+      message: messages[error.message] ?? "تعذر حفظ الطلب. لا تكرر الإرسال قبل مراجعة السجل.",
     };
   if (!data.allowed)
     return {

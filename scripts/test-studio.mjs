@@ -49,6 +49,11 @@ const schema = await import(
 assert.equal(schema.parameterCount('Ø£Ù‡Ù„Ù‹Ø§ {{1}}ØŒ Ø§Ù„Ø·Ù„Ø¨ {{2}} Ø¨Ø§Ø³Ù… {{1}}'), 2);
 for (const bad of ['{{0}}', '{{2}}', '{{1}} {{3}}', '{name}', '{{11}}'])
   assert.throws(() => schema.parameterCount(bad));
+const keywordFlow = {id:'keyword',created_by:'actor',name:'Prices',status:'active',priority:1,definition:{trigger:'keywords',keywords:['ÇÓÚÇÑ'],action:'text',mode:'draft',reply:'Prices'}};
+const catchAll = {...keywordFlow,id:'all',priority:99,definition:{...keywordFlow.definition,trigger:'all'}};
+assert.equal(schema.matchFlow([catchAll,keywordFlow],'ÃóÓúÚóÇÑ ÇáÚíÇÏÉ').id,'keyword');
+assert.equal(schema.matchFlow([{...keywordFlow,status:'draft'}],'ÇÓÚÇÑ'),undefined);
+assert.equal(schema.matchFlow([{...keywordFlow,definition:{...keywordFlow.definition,keywords:['ó']}}],'anything'),undefined);
 const lib = await import(
   moduleUrl(await readFile('src/lib/studio/library.ts', 'utf8'))
 );
@@ -84,6 +89,7 @@ try {
     '20260917181416_automation_integrations_templates.sql',
     '20260917181430_automation_integrations_templates.sql',
     '20260917201633_openrouter_ai_entitlements.sql',
+    '20260918183220_studio_launch_hardening.sql',
   ])
     await db.exec(await readFile(`supabase/migrations/${name}`, 'utf8'));
   await db.exec(`insert into public.users values('${owner}','platform@test.invalid','Platform','owner'),('${actor}','merchant@test.invalid','Merchant','merchant'),('${outsider}','other@test.invalid','Other','merchant');
@@ -211,6 +217,8 @@ try {
   );
   assert.equal(await q(`select requests_used as result from soulvd_private.ai_entitlements where tenant_id='${tenant}'`), 1, 'a run reserves allowance only once');
   await inbound('incoming2');
+  // A delayed provider message is older than the triggering message.
+  await db.query("update public.whatsapp_messages set created_at=(select created_at-interval '1 second' from public.whatsapp_messages where id=$1) where meta_message_id='incoming2'", [run.message.id]);
   assert.equal(
     await q('select public.soulvd_automation_claim() as result'),
     null,
@@ -259,6 +267,13 @@ try {
     [run2.id, actor, 'Should not send'],
   );
   assert.equal(blocked.code, 'HUMAN_TAKEOVER');
+  await inbound('stale-draft', 'appointment', '966533333333');
+  const staleRun = await q('select public.soulvd_automation_claim() result');
+  await db.query("update public.automation_runs set state='draft',flow_id=$1 where id=$2",[flowId,staleRun.id]);
+  await inbound('changed-mind', 'cancel appointment', '966533333333');
+  await db.query("update public.whatsapp_messages set created_at=now()+interval '1 second' where meta_message_id='changed-mind'");
+  assert.equal((await q('select public.soulvd_automation_send($1,$2,$3,true) result',[staleRun.id,actor,'Old booking reply'])).code,'CONVERSATION_CHANGED');
+  assert.equal(await q("select count(*)::int result from public.whatsapp_messages where body='Old booking reply'"),0);
   await inbound('stop', 'stop');
   assert.equal(
     await q(
@@ -401,7 +416,21 @@ try {
     (await q('select public.soulvd_crm_claim() as result')).attempt,
     2,
   );
+  const ping = () => q('select public.soulvd_crm_test($1,$2,$3) result',[tenant,actor,integration]);
+  const pingId = await ping();
+  assert.equal(await ping(),pingId,'repeat test clicks must reuse the pending event');
+  const pingPayload = await q('select payload result from public.crm_deliveries where id=$1',[pingId]);
+  assert.equal(pingPayload.type,'integration.test');
+  assert.equal(pingPayload.test,true);
+  assert.equal('message' in pingPayload,false,'test event contains no customer data');
+  await assert.rejects(q('select public.soulvd_crm_test($1,$2,$3) result',[other,outsider,integration]),/NOT_FOUND/);
+  await assert.rejects(q('select public.soulvd_ai_status($1,$2) result',[tenant,outsider]),/FORBIDDEN/);
+  const aiStatus = await q('select public.soulvd_ai_status($1,$2) result',[tenant,actor]);
+  assert.equal(aiStatus.remaining,0);
+  assert.equal(aiStatus.enabled,false);
+  assert.equal('grant_reference' in aiStatus,false);
   await keys(true);
+  await assert.rejects(ping(),/INTEGRATION_INACTIVE/);
   assert.equal(await authenticate(), null);
   await keys();
   await db.exec(

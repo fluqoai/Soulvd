@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {createHmac} from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import ts from 'typescript';
 const url = (s) =>
@@ -20,11 +21,12 @@ const retrieved = knowledgeContext(
 );
 assert.ok(retrieved.startsWith('Returns'));
 assert.ok(retrieved.length <= 16000);
-let run, updates, requests, sendCount, aiCount, dispatchCount, generated, aiAllowed;
+let run, updates, requests, sendCount, aiCount, dispatchCount, generated, aiAllowed, knowledgeRows, generationFails, delivery, webhookCode, webhookCalls;
 globalThis.studioMocks = {
   db: {
     rpc: async (name, args) => {
       requests.push({ name, args });
+      if (name === 'soulvd_crm_claim') return {data:delivery,error:null};
       if (name === 'soulvd_automation_claim')
         return { data: structuredClone(run), error: null };
       if (name === 'soulvd_ai_reserve') return { data: aiAllowed, error: null };
@@ -63,7 +65,7 @@ globalThis.studioMocks = {
             error: null,
             data:
               table === 'bot_knowledge'
-                ? [{ title: 'Shipping', content: 'Within 2 days.' }]
+                ? knowledgeRows
                 : [],
           }).then(resolve);
         },
@@ -71,8 +73,10 @@ globalThis.studioMocks = {
       return query;
     },
   },
+  webhook: async (target,body,headers) => { webhookCalls.push({target,body,headers}); if(webhookCode===0) throw new Error('Network timeout'); return webhookCode; },
   generate: async (options) => {
     aiCount++;
+    if (generationFails) throw new Error('Provider unavailable');
     assert.ok(options.instructions.includes('لا تخترع'));
     assert.ok(options.prompt.includes('Within 2 days'));
     assert.equal(options.maxOutputTokens, 500);
@@ -107,7 +111,7 @@ const source = (await readFile('src/lib/studio/worker.ts', 'utf8'))
   .replace("'./knowledge'", JSON.stringify(knowledgeUrl))
   .replace(
     "import { sendSignedWebhook } from './network';",
-    'const sendSignedWebhook=async()=>204;',
+    'const sendSignedWebhook=globalThis.studioMocks.webhook;',
   );
 const worker = await import(url(source));
 function reset(action = 'text', mode = 'draft') {
@@ -118,6 +122,8 @@ function reset(action = 'text', mode = 'draft') {
   dispatchCount = 0;
   generated = 'Within 2 days.';
   aiAllowed = true;
+  generationFails = false;
+  knowledgeRows = [{ title: 'Shipping', content: 'Within 2 days.' }];
   run = {
     id: 'run',
     tenant_id: 'tenant',
@@ -210,6 +216,31 @@ run.contact.bot_paused = true;
 await worker.automationOne();
 assert.equal(aiCount, 0);
 assert.equal(sendCount, 0);
+reset('ai');
+knowledgeRows = [];
+await worker.automationOne();
+assert.equal(state().error_code, 'KNOWLEDGE_REQUIRED');
+assert.equal(aiCount, 0);
+assert.equal(requests.some(r=>r.name==='soulvd_ai_reserve'), false, 'missing knowledge does not consume allowance');
+reset('ai');
+generationFails = true;
+await worker.automationOne();
+assert.equal(state().state, 'handoff');
+assert.equal(state().error_code, 'AI_PROVIDER_UNAVAILABLE');
+assert.equal(aiCount,1);
+assert.equal(sendCount,0);
+assert.ok(updates.some(u=>u.table==='whatsapp_contacts' && u.value.bot_paused));
+for (const [code,attempt,expected] of [[204,1,'delivered'],[500,1,'queued'],[429,5,'failed'],[400,1,'failed'],[0,1,'queued']]) {
+  updates=[];webhookCalls=[];webhookCode=code;
+  delivery={id:'test-event',payload:{type:'integration.test',test:true},url:'https://clinic.example.com/hook',secret:'fixture-secret',attempt};
+  assert.equal(await worker.deliveryOne(),true);
+  const sent=webhookCalls[0];
+  assert.deepEqual(JSON.parse(sent.body),{id:'test-event',type:'integration.test',test:true});
+  assert.equal(sent.headers['X-Soulvd-Signature'],'sha256='+createHmac('sha256','fixture-secret').update(sent.headers['X-Soulvd-Timestamp']+'.'+sent.body).digest('hex'));
+  assert.equal(updates.at(-1).value.status,expected);
+  if(expected==='queued') assert.ok(Date.parse(updates.at(-1).value.next_attempt_at)>Date.now());
+}
+console.log('PASS: signed synthetic webhook, successful delivery, bounded retries for 429/5xx/timeouts and terminal 4xx. No network requests.');
 delete globalThis.studioMocks;
 console.log(
   'PASS: actual worker dispatch/draft paths, keyword matching, stale messages, customer handoff, missing AI configuration, bounded AI generation and no send on handoff/pause.',

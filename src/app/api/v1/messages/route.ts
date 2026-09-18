@@ -40,8 +40,11 @@ export async function POST(request: Request) {
       p_consent: data.consent,
       p_parameters: data.parameters,
     });
-    if (result.error)
-      return Response.json({ error: 'REQUEST_REJECTED' }, { status: 409 });
+    if (result.error) {
+      const known = ['WALLET_INSUFFICIENT', 'WALLET_RATE_UNAVAILABLE', 'INVALID_PARAMETERS', 'REQUEST_CONFLICT', 'FORBIDDEN', 'NOT_CONNECTED', 'SUBSCRIPTION_INACTIVE'];
+      const code = known.includes(result.error.message) ? result.error.message : 'REQUEST_REJECTED';
+      return Response.json({ error: code }, { status: code === 'WALLET_INSUFFICIENT' ? 402 : 409 });
+    }
     if (!result.data.allowed)
       return Response.json({ error: result.data.code }, { status: 409 });
     try {

@@ -13,7 +13,7 @@ export default async function IntegrationsPage() {
       .order('created_at', { ascending: false }),
     db
       .from('crm_deliveries')
-      .select('id,event_type,status,attempts,error_code,created_at')
+      .select('id,integration_id,event_type,status,attempts,error_code,http_status,created_at')
       .eq('tenant_id', context.tenantId)
       .order('created_at', { ascending: false })
       .limit(30),
@@ -40,6 +40,17 @@ export default async function IntegrationsPage() {
         canManage={available && ['owner', 'admin'].includes(context.role)}
       />
       <section className={cardClass + ' space-y-4'}>
+        <h2 className="text-xl font-bold">مثال: ربط نظام العيادة</h2>
+        <ol className="list-inside list-decimal space-y-3 text-sm leading-7">
+          <li>نراجع اسم نظام العيادة ووثائق API والعملية المطلوبة: الاستعلام عن المواعيد أم الحجز أم التذكير.</li>
+          <li>يستقبل خادم التكامل حدث الرسالة الموقّع، ويتحقق من التوقيع ومعرّف الحدث لمنع تكرار التنفيذ.</li>
+          <li>يتحقق النظام من هوية العميل وصلاحيته قبل قراءة بياناته، ثم يستعلم عن التوفر من نظام العيادة نفسه.</li>
+          <li>لا يُؤكد الحجز إلا بعد نجاحه في نظام العيادة. يُرسل الرد عبر API سولفد، أو قالب معتمد عندما تُغلق نافذة الرد.</li>
+          <li>نختبر التوقيع والرد وتكرار الحدث وفشل النظام والتحويل لموظف قبل التفعيل على عملاء حقيقيين.</li>
+        </ol>
+        <p className="rounded-xl bg-sage-50 p-3 text-sm leading-7">المتاح الآن هو API وسجل أحداث موقّع، وليس موصل عيادات جاهزًا. يلزم تنفيذ موصل يناسب نظامك؛ لا يُربط البوت بقاعدة بياناتك مباشرة. لا تضع ملفات المرضى أو كلمات المرور في معرفة المساعد العامة، وحدد جهة واحدة للرد الآلي لتجنب ردين من البوت ونظامك.</p>
+      </section>
+      <section className={cardClass + ' space-y-4'}>
         <h2 className="text-xl font-bold">دليل المطور</h2>
         <p>
           احفظ المفاتيح على خادم نظامك. حد API هو 60 طلبًا في الدقيقة لكل تكامل.
@@ -61,7 +72,7 @@ export default async function IntegrationsPage() {
         </p>
         <p>
           الأحداث: message.received وmessage.accepted وmessage.unknown وmessage.sent وmessage.delivered
-          وmessage.read وmessage.failed. تحقق من X-Soulvd-Signature باستخدام
+          وmessage.read وmessage.failed، وintegration.test لاختبار الاتصال. تحقق من X-Soulvd-Signature باستخدام
           HMAC-SHA256 على timestamp.rawBody وسر التوقيع، وارفض طابعًا زمنيًا
           أقدم من 5 دقائق. امنع معالجة الحدث مرتين باستخدام X-Soulvd-Event-Id.
         </p>
@@ -76,6 +87,7 @@ export default async function IntegrationsPage() {
         {deliveries.data.map((d) => (
           <div key={d.id} className="border-b py-3">
             <bdi>{d.event_type}</bdi>
+            <p className="mt-1 text-sm text-wood-600">{items.data.find((item) => item.id === d.integration_id)?.name ?? 'التكامل'} · {new Date(d.created_at).toLocaleString('ar-SA', { timeZone: 'Asia/Riyadh' })}{d.http_status ? ` · HTTP ${d.http_status}` : ''}</p>
             <p>
               {d.status === 'delivered'
                 ? 'تم التسليم'

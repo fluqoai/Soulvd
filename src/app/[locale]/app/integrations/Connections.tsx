@@ -1,8 +1,10 @@
 'use client';
-import { useTransition, useState } from 'react';
+import { useTransition, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   saveStudio,
   integrationKeys,
+  testIntegration,
   type StudioResult,
 } from '../studio/actions';
 import { buttonClass, cardClass, inputClass } from '../studio/ui';
@@ -21,10 +23,16 @@ export default function Connections({
 }) {
   const [result, setResult] = useState<StudioResult>();
   const [pending, start] = useTransition();
+  const router = useRouter();
+  useEffect(() => {
+    const timer = window.setInterval(() => { if (!document.hidden) router.refresh(); }, 15000);
+    return () => window.clearInterval(timer);
+  }, [router]);
   function act(fn: () => Promise<StudioResult>) {
     start(async () => {
       try {
         setResult(await fn());
+        router.refresh();
       } catch {
         setResult({
           ok: false,
@@ -141,6 +149,11 @@ export default function Connections({
                   ? 'تدوير المفاتيح وإلغاء القديمة'
                   : 'تفعيل وإصدار المفاتيح'}
               </button>
+              {i.status === 'active' && (
+                <button disabled={pending} className={buttonClass} onClick={() => act(() => testIntegration(i.id))}>
+                  اختبار الاتصال بدون بيانات عملاء
+                </button>
+              )}
               {i.status === 'active' && (
                 <button
                   disabled={pending}

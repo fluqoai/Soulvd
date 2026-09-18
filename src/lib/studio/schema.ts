@@ -62,13 +62,17 @@ export type Flow = z.infer<typeof flowSchema> & {
   id: string;
   created_by: string;
 };
+export function normalizeMatch(text: string) {
+  return text.normalize('NFKC').toLocaleLowerCase('ar')
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/[أإآٱ]/g, 'ا');
+}
 export function matchFlow(flows: Flow[], body: string) {
-  const text = body.normalize('NFKC').toLocaleLowerCase('ar');
-  return flows.find(
+  const text = normalizeMatch(body);
+  return flows.filter((flow) => flow.status === 'active').sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id)).find(
     (f) =>
       f.definition.trigger === 'all' ||
       f.definition.keywords.some((k) =>
-        text.includes(k.normalize('NFKC').toLocaleLowerCase('ar')),
+        normalizeMatch(k).length > 0 && text.includes(normalizeMatch(k)),
       ),
   );
 }

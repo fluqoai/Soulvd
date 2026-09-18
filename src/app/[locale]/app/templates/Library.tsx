@@ -5,6 +5,8 @@ import { saveStudio, type StudioResult } from '../studio/actions';
 import { createTemplate } from '../whatsapp/actions';
 import { buttonClass, cardClass, inputClass } from '../studio/ui';
 import type { LibraryTemplate } from '@/lib/studio/library';
+import { useRouter } from 'next/navigation';
+import { refreshTemplates } from '../whatsapp/actions';
 type Draft = {
   id?: string;
   name: string;
@@ -26,12 +28,15 @@ export default function Library({
   drafts,
   canManage,
   pro,
+  submitted,
 }: {
   library: LibraryTemplate[];
   drafts: Draft[];
   canManage: boolean;
   pro: boolean;
+  submitted: { id: string; name: string; language: string; status: string; provider_status: string | null }[];
 }) {
+  const router = useRouter();
   const [value, setValue] = useState<Draft>(empty);
   const [samples, setSamples] = useState('');
   const [query, setQuery] = useState('');
@@ -71,6 +76,7 @@ export default function Library({
           setResult({ ok: r.ok, message: r.message });
           if (r.ok) reviewKey.current = '';
         } else setResult(saved);
+        router.refresh();
       } catch {
         setResult({
           ok: false,
@@ -216,6 +222,10 @@ export default function Library({
             />
           </label>
           <p className="text-xs">{value.body.length} / 1024 حرف</p>
+          <div className="rounded-2xl border border-sage-200 bg-sage-50 p-4">
+            <h3 className="mb-2 text-sm font-bold">معاينة بالأمثلة · ليست رسالة مرسلة</h3>
+            <p className="whitespace-pre-wrap break-words text-sm leading-7">{value.body.replace(/\{\{([1-9][0-9]?)\}\}/g, (slot, n: string) => samples.split('\n').map((x) => x.trim()).filter(Boolean)[Number(n) - 1] || slot) || 'سيظهر نص القالب هنا.'}</p>
+          </div>
           <label className="block">
             أمثلة المتغيرات: مثال لكل سطر بالترتيب
             <textarea
@@ -244,6 +254,21 @@ export default function Library({
           </div>
         </section>
       )}
+      <section className={cardClass + ' space-y-3'}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-bold">القوالب المرسلة وحالة الاعتماد</h2>
+          {canManage && <button disabled={pending} className={buttonClass} onClick={() => start(async () => {
+            try { setResult(await refreshTemplates()); router.refresh(); }
+            catch { setResult({ ok: false, message: 'تعذر تحديث حالة القوالب الآن.' }); }
+          })}>تحديث حالة الاعتماد</button>}
+        </div>
+        <p className="text-sm leading-7">القالب المحفوظ كمسودة لم يُرسل للمراجعة بعد. يظهر القالب المعتمد عند اختيار قالب للمحادثة أو الحملة. نعرض آخر حالة وصلت؛ اعتماد Meta مستقل عن اشتراك المنصة.</p>
+        {!submitted.length && <p>لم تُرسل قوالب للمراجعة بعد.</p>}
+        {submitted.map((template) => <div key={template.id} className="flex flex-wrap justify-between gap-3 border-b py-3 text-sm">
+          <bdi>{template.name} · {template.language}</bdi>
+          <span>{({ approved: 'معتمد', pending: 'قيد المراجعة', rejected: 'مرفوض / غير متاح', draft: 'لم يُرسل بعد' } as Record<string, string>)[template.status] ?? template.status}</span>
+        </div>)}
+      </section>
       <section className={cardClass + ' space-y-3'}>
         <h2 className="text-xl font-bold">مسوداتي</h2>
         {!drafts.length && <p>احفظ نسخة من المكتبة أو أنشئ أول قالب.</p>}

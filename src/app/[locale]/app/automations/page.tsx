@@ -3,10 +3,11 @@ import { aiReady } from '@/lib/studio/worker';
 import { StudioHeader } from '../studio/ui';
 import Builder from './Builder';
 import Link from 'next/link';
+import { aiStatus } from '@/lib/studio/ai-status';
 export default async function AutomationsPage() {
   const { context, plan, isActive } = await tenantUsage();
   const { db } = await currentMerchant();
-  const [flows, settings, knowledge, runs, contacts] = await Promise.all([
+  const [flows, settings, knowledge, runs, contacts, allowance] = await Promise.all([
     db
       .from('automation_flows')
       .select('*')
@@ -36,6 +37,7 @@ export default async function AutomationsPage() {
       .eq('tenant_id', context.tenantId)
       .order('last_inbound_at', { ascending: false })
       .limit(50),
+    ['owner', 'admin'].includes(context.role) ? aiStatus(context.tenantId, context.userId) : Promise.resolve(null),
   ]);
   if ([flows, settings, knowledge, runs, contacts].some((r) => r.error))
     throw new Error('تعذر تحميل مركز الأتمتة.');
@@ -75,6 +77,7 @@ export default async function AutomationsPage() {
         contacts={contacts.data ?? []}
         canManage={isActive && ['owner', 'admin'].includes(context.role)}
         aiAvailable={aiReady()}
+        allowance={allowance}
         flowLimit={plan.flows_limit}
       />
     </div>

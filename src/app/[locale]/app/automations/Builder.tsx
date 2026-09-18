@@ -9,6 +9,7 @@ import {
 } from '../studio/actions';
 import { buttonClass, cardClass, inputClass } from '../studio/ui';
 import type { Flow } from '@/lib/studio/schema';
+import type { AIStatus } from '@/lib/studio/ai-status';
 type Settings = {
   enabled: boolean;
   instructions: string;
@@ -38,6 +39,8 @@ const reasons: Record<string, string> = {
   CUSTOMER_REQUEST: 'طلب العميل موظفًا أو إيقافًا',
   FLOW_HANDOFF: 'تحويل إلى موظف',
   AI_HANDOFF: 'تحتاج متابعة موظف',
+  AI_PROVIDER_UNAVAILABLE: 'تعذر الرد الذكي؛ حُوّلت المحادثة لموظف',
+  CONVERSATION_CHANGED: 'تغيّرت المحادثة؛ راجع آخر رسائل العميل',
   KNOWLEDGE_REQUIRED: 'أضف معلومات النشاط',
   AUTOMATION_FAILED: 'تعذر التنفيذ؛ راجع الإعدادات',
   WORKER_INTERRUPTED: 'انقطع التنفيذ؛ لم نكرر الرد تلقائيًا',
@@ -50,6 +53,7 @@ export default function Builder({
   contacts,
   canManage,
   aiAvailable,
+  allowance,
   flowLimit,
 }: {
   flows: Flow[];
@@ -59,6 +63,7 @@ export default function Builder({
   contacts: { id: string; wa_id: string; bot_paused: boolean }[];
   canManage: boolean;
   aiAvailable: boolean;
+  allowance: AIStatus | null;
   flowLimit: number | null;
 }) {
   const [pending, start] = useTransition();
@@ -116,7 +121,7 @@ export default function Builder({
           ['البوت', settings?.enabled ? 'مفعّل' : 'متوقف'],
           [
             'الذكاء الاصطناعي',
-            aiAvailable ? 'الربط جاهز؛ يلزم تفعيل الحصة' : 'غير مفعّل حاليًا',
+            !aiAvailable ? 'غير مفعّل حاليًا' : allowance?.enabled ? `${allowance.remaining} طلب متبقٍ` : 'يلزم تفعيل حصة مستقلة',
           ],
           [
             'المسارات',
@@ -196,6 +201,8 @@ export default function Builder({
               الحد اليومي يقلّل الاستخدام ولا يمنح رصيدًا. الردود الذكية تتطلب
               حصة مفعّلة من المنصة، وتتوقف عند انتهائها.
             </p>
+            {allowance?.enabled && <p className="text-sm">المتبقي اليوم: {Math.min(allowance.remaining, allowance.dailyRemaining)} طلب. تنتهي الحصة في {allowance.expiresAt ? new Date(allowance.expiresAt).toLocaleDateString('ar-SA', { calendar: 'gregory', timeZone: 'Asia/Riyadh' }) : '—'}.</p>}
+            <p className="rounded-xl bg-amber-50 p-3 text-sm leading-7">عند تعذر الذكاء الاصطناعي أو انتهاء حصته، تتوقف الردود الذكية لهذه المحادثة وتُحال لموظف. معرفة النشاط مرجع عام؛ لا تؤكد حجزًا أو تقرأ ملف عميل من نظام خارجي دون تكامل منفّذ ومختبر.</p>
             <p className="text-sm leading-7">
               يستخدم المساعد معلومات نشاطك مرجعًا للإجابة. ابدأ بوضع «مسودة لمراجعة موظف»
               وراجع الإجابات قبل تشغيل الإرسال التلقائي. الطلبات الذكية تخضع
@@ -261,7 +268,7 @@ export default function Builder({
                     definition: {
                       trigger: f.get('trigger'),
                       keywords: String(f.get('keywords'))
-                        .split(',')
+                        .split(/[,،\n]/)
                         .map((s) => s.trim())
                         .filter(Boolean),
                       action: f.get('action'),
@@ -311,7 +318,7 @@ export default function Builder({
                 </label>
               </div>
               <label className="block">
-                الكلمات (افصل بينها بفاصلة إنجليزية)
+                الكلمات (افصل بينها بفاصلة عربية أو إنجليزية)
                 <input
                   name="keywords"
                   defaultValue={edit?.definition?.keywords?.join(', ')}
