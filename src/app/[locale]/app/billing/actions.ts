@@ -121,7 +121,7 @@ export async function selectContract(
       p_months: parsed.data.months,
     },
   );
-  return result(error, "حُفظت الباقة والمدة. أنشئ طلب التحويل لتثبيت المبلغ.");
+  return result(error, "حُفظت الباقة والمدة. لم يبدأ الاشتراك المدفوع بعد.");
 }
 export async function paymentRequests() {
   const context = await requireTenant();

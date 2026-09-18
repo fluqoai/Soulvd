@@ -162,7 +162,11 @@ export function ContractForm({
 }) {
   const [state, action, busy] = useActionState(selectContract, {});
   return (
-    <form action={action} className="space-y-5">
+    <form
+      action={action}
+      onReset={(event) => event.preventDefault()}
+      className="space-y-5"
+    >
       <PlanPicker selectable initialMonths={months} initialPlan={plan} />
       <button
         disabled={busy}
