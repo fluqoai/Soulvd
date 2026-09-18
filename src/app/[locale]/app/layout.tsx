@@ -31,6 +31,7 @@ export default async function MerchantLayout({
   if (workspaces.error) throw new Error("تعذر تحميل المساحات.");
   return (
     <WorkspaceShell
+      userId={user.id}
       email={user.email ?? ""}
       currentId={context?.tenantId}
       currentName={context?.name}

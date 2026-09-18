@@ -36,11 +36,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Soulvd · سولڤد — WhatsApp AI for Saudi businesses',
+    default: 'Soulvd · سولفد — منصة واتساب للأعمال',
     template: '%s · Soulvd',
   },
   description:
-    'Soulvd builds WhatsApp Business automation for Saudi companies. Turn conversations into revenue with an AI assistant that speaks Saudi Arabic, qualifies leads, and supports sales workflows.',
+    'Soulvd brings WhatsApp Business conversations, templates, team collaboration and automation into one Arabic workspace.',
   applicationName: 'Soulvd',
   authors: [{ name: 'Soulvd', url: SITE_URL }],
   generator: 'Next.js',
@@ -48,7 +48,6 @@ export const metadata: Metadata = {
     'WhatsApp Business Saudi Arabia',
     'واتساب بزنس السعودية',
     'AI chatbot Saudi',
-    'Meta Business Partner',
     'WhatsApp automation',
     'بوت واتساب',
     'ذكاء اصطناعي',

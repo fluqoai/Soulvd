@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import Link from "next/link";
-import Inbox, { type InboxMessage } from "./Inbox";
+import Inbox from "./Inbox";
+import { Send, Smile, LayoutTemplate, X } from "lucide-react";
+import { useInbox } from "@/components/inbox/InboxProvider";
 import {
   createTemplate,
   finishSignup,
@@ -39,7 +41,7 @@ const button =
 
 export default function WhatsAppConsole({
   templates,
-  messages,
+  initialRecipient = "",
   canManage,
   canConnect,
   connected,
@@ -48,7 +50,7 @@ export default function WhatsAppConsole({
   version,
 }: {
   templates: Template[];
-  messages: InboxMessage[];
+  initialRecipient?: string;
   canManage: boolean;
   canConnect: boolean;
   connected: boolean;
@@ -57,9 +59,14 @@ export default function WhatsAppConsole({
   version?: string;
 }) {
   const router = useRouter();
+  const inbox = useInbox();
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [emoji, setEmoji] = useState(false);
+  const settings = useRef<HTMLDialogElement>(null);
+  const textarea = useRef<HTMLTextAreaElement>(null);
   const [result, setResult] = useState<ActionResult>();
   const [busy, setBusy] = useState(false);
-  const [recipient, setRecipient] = useState(messages[0]?.phone ?? "");
+  const [recipient, setRecipient] = useState(initialRecipient);
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const chosenTemplate = templates.find((t) => t.id === selectedTemplate);
   const [mode, setMode] = useState<"api" | "coexistence">("coexistence");
@@ -139,9 +146,8 @@ export default function WhatsAppConsole({
     const timer = window.setInterval(() => {
       if (!document.hidden) {
         void complete();
-        router.refresh();
       }
-    }, 10_000);
+    }, 1_000);
     return () => {
       mounted = false;
       window.removeEventListener("message", receive);
@@ -154,6 +160,7 @@ export default function WhatsAppConsole({
     kind: "message" | "template",
   ) {
     event.preventDefault();
+    if (busy) return;
     const form = event.currentTarget;
     const data = new FormData(form);
     setBusy(true);
@@ -185,7 +192,11 @@ export default function WhatsAppConsole({
       if (response.ok) {
         key.current = "";
         form.reset();
-        if (kind === "message") setSelectedTemplate("");
+        if (kind === "message") {
+          setSelectedTemplate("");
+          setDrafts((old) => ({ ...old, [recipient]: "" }));
+          void inbox.refresh();
+        }
       }
       router.refresh();
     } catch {
@@ -235,241 +246,364 @@ export default function WhatsAppConsole({
     );
   }
   return (
-    <div className="space-y-6">
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
       {canConnect && appId && configId && version && (
         <Script
           src="https://connect.facebook.net/en_US/sdk.js"
           strategy="afterInteractive"
         />
       )}
-      {result && (
-        <p
-          role="status"
-          className="rounded-lg border border-sage-200 bg-white p-4"
-        >
-          {result.message}
-        </p>
-      )}
-      {canManage && (
-        <details
-          open={!connected}
-          className="rounded-xl border border-sage-200 bg-white p-5 space-y-4"
-        >
-          <summary className="cursor-pointer text-sm font-semibold">
-            إعدادات الربط والقوالب
-          </summary>
-          <select
-            aria-label="طريقة الربط"
-            className={field}
-            value={mode}
-            onChange={(event) => setMode(event.target.value as typeof mode)}
-          >
-            <option value="coexistence">
-              رقمي موجود في تطبيق واتساب الأعمال
-            </option>
-            <option value="api">رقم مخصص لمنصة واتساب API</option>
-          </select>
-          <p className="text-sm">
-            لا تحذف حساب تطبيق واتساب الأعمال. التسجيل والتفويض يتمان داخل نافذة
-            Meta.
-          </p>
-          {!connected && (
-            <button
-              className={button}
-              disabled={busy || !canConnect || !appId || !configId || !version}
-              onClick={start}
-            >
-              الربط عبر Meta
-            </button>
-          )}
-          <button
-            className={`${button} ms-3`}
-            disabled={busy || !connected}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                setResult(await refreshTemplates());
-                router.refresh();
-              } catch {
-                setResult({ ok: false, message: "تعذر تحديث القوالب." });
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            تحديث القوالب
-          </button>
-          {connected ? (
-            <p className="text-sm">
-              الرقم مربوط بهذه المساحة. يمكنك إرسال الرسائل وإدارة القوالب هنا.
-            </p>
-          ) : (
-            (!canConnect || !appId || !configId || !version) && (
-              <p className="text-sm">
-                تواصل مع إدارة المنصة لإكمال تفعيل الرقم.
-              </p>
-            )
-          )}
-        </details>
-      )}
-      <Inbox messages={messages} recipient={recipient} select={setRecipient}>
+      <button
+        type="button"
+        onClick={() => settings.current?.showModal()}
+        className="flex shrink-0 items-center gap-1.5 self-end rounded-lg px-2 py-1 text-xs font-semibold text-sage-700 hover:bg-sage-50"
+      >
+        <LayoutTemplate size={14} />
+        القوالب وإعدادات الربط
+      </button>
+      <Inbox recipient={recipient} select={setRecipient}>
         <form
           onSubmit={(event) => void submit(event, "message")}
-          className="space-y-4 text-sm"
+          className="space-y-2 text-sm"
         >
-          <h2 className="font-semibold">إرسال رسالة</h2>
-          <label className="block">
-            رقم العميل الدولي
-            <input
-              className={field}
-              name="to"
-              type="tel"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              placeholder="+9665xxxxxxxx"
-              required
-              maxLength={30}
-              dir="ltr"
-            />
-          </label>
-          <label className="block">
-            نوع الرسالة
-            <select
-              className={field}
-              name="templateId"
-              value={selectedTemplate}
-              onChange={(e) => setSelectedTemplate(e.target.value)}
-            >
-              <option value="">رد نصي خلال نافذة 24 ساعة</option>
-              {templates
-                .filter((template) => template.status === "approved")
-                .map((template) => (
-                  <option key={template.id} value={template.id}>
-                    {template.name} ({template.language})
-                  </option>
-                ))}
-            </select>
-          </label>
-          {chosenTemplate ? (
-            <>
-              <p className="whitespace-pre-wrap rounded bg-sage-50 p-3">
-                {chosenTemplate.body}
-              </p>
-              {Array.from(
-                { length: chosenTemplate.parameter_count },
-                (_, i) => (
-                  <label key={`${chosenTemplate.id}-${i}`} className="block">
-                    قيمة المتغير {i + 1}
-                    <input
-                      name="parameter"
-                      className={field}
-                      required
-                      maxLength={1000}
-                    />
-                  </label>
-                ),
+          <fieldset
+            disabled={busy || !connected}
+            className="space-y-2 disabled:opacity-60"
+          >
+            <div className="flex items-center gap-2">
+              <input type="hidden" name="to" value={recipient} />
+              <label className="flex min-w-0 w-full items-center gap-1 text-sage-700">
+                <LayoutTemplate size={16} className="shrink-0" />
+                <select
+                  name="templateId"
+                  aria-label="نوع الرسالة أو القالب"
+                  value={selectedTemplate}
+                  onChange={(e) => setSelectedTemplate(e.target.value)}
+                  className="min-w-0 rounded-lg bg-transparent py-2 text-xs"
+                >
+                  <option value="">رد نصي</option>
+                  {templates
+                    .filter((t) => t.status === "approved")
+                    .map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} ({t.language})
+                      </option>
+                    ))}
+                </select>
+              </label>
+            </div>
+            {chosenTemplate && (
+              <div className="max-h-40 space-y-2 overflow-y-auto rounded-xl border border-sage-100 bg-white p-3">
+                <p className="whitespace-pre-wrap text-xs leading-6">
+                  {chosenTemplate.body}
+                </p>
+                {Array.from(
+                  { length: chosenTemplate.parameter_count },
+                  (_, i) => (
+                    <label
+                      key={`${chosenTemplate.id}-${i}`}
+                      className="block text-xs"
+                    >
+                      قيمة المتغير {i + 1}
+                      <input
+                        name="parameter"
+                        className={field}
+                        required
+                        maxLength={1000}
+                      />
+                    </label>
+                  ),
+                )}
+                <label className="flex items-start gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    name="consent"
+                    required
+                    className="mt-1"
+                  />
+                  أؤكد موافقة العميل على استقبال رسائل القوالب.
+                </label>
+              </div>
+            )}
+            <div className="flex items-end gap-2">
+              {!chosenTemplate && (
+                <>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      aria-label="إضافة رمز تعبيري"
+                      aria-expanded={emoji}
+                      onClick={() => setEmoji(!emoji)}
+                      className="rounded-full p-2.5 text-ink-500 hover:bg-sage-100"
+                    >
+                      <Smile size={22} />
+                    </button>
+                    {emoji && (
+                      <div className="absolute right-0 bottom-12 z-10 flex gap-1 rounded-xl border border-sage-100 bg-white p-2 shadow-lg">
+                        {["😊", "👍", "شكراً 🙏", "✅", "🌿"].map((e) => (
+                          <button
+                            key={e}
+                            type="button"
+                            aria-label={e}
+                            onClick={() => {
+                              setDrafts((old) => ({
+                                ...old,
+                                [recipient]: (old[recipient] || "") + e,
+                              }));
+                              setEmoji(false);
+                              textarea.current?.focus();
+                            }}
+                            className="whitespace-nowrap rounded p-2 hover:bg-sage-50"
+                          >
+                            {e}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <textarea
+                    ref={textarea}
+                    aria-label="نص الرد"
+                    name="body"
+                    value={drafts[recipient] || ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDrafts((old) => ({ ...old, [recipient]: value }));
+                    }}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === "Enter" &&
+                        !e.shiftKey &&
+                        !e.nativeEvent.isComposing
+                      ) {
+                        e.preventDefault();
+                        e.currentTarget.form?.requestSubmit();
+                      }
+                    }}
+                    placeholder="اكتب ردك…"
+                    required
+                    maxLength={4096}
+                    rows={1}
+                    className="max-h-28 min-h-12 min-w-0 flex-1 resize-y rounded-2xl border border-sage-200 bg-white px-4 py-3 text-sm outline-none focus:border-sage-500 focus:ring-2 focus:ring-sage-100"
+                  />
+                </>
               )}
-            </>
-          ) : (
-            <label className="block">
-              نص الرد
-              <textarea
-                className={field}
-                name="body"
-                maxLength={4096}
-                required
-              />
-            </label>
+              <button
+                type="submit"
+                aria-label="إرسال الرسالة"
+                className="flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-sage-800 px-4 text-white hover:bg-sage-700 disabled:opacity-50"
+                disabled={busy || !connected}
+              >
+                <Send size={18} className="rotate-180" />
+                <span className="text-xs font-bold">
+                  {busy ? "جارٍ الإرسال" : "إرسال"}
+                </span>
+              </button>
+            </div>
+          </fieldset>
+          {result && (
+            <p
+              role="status"
+              className={`rounded-lg px-3 py-2 text-xs ${result.ok ? "bg-sage-100 text-sage-900" : "bg-amber-50 text-amber-900"}`}
+            >
+              {result.message}
+            </p>
           )}
-          {chosenTemplate && (
-            <label className="flex gap-2">
-              <input type="checkbox" name="consent" required />
-              أؤكد وجود موافقة العميل على استقبال رسائل القوالب.
-            </label>
-          )}
-          <p className="text-sm">
-            رسوم Meta منفصلة عن الاشتراك. اعتماد القالب لا يعني أن الرسالة
-            مجانية.
+          <p className="text-[10px] text-ink-500">
+            {!connected
+              ? "اربط رقم واتساب لتفعيل الإرسال."
+              : chosenTemplate
+                ? "تُخصم تكلفة القالب من رصيد واتساب حسب التسعير."
+                : "Enter للإرسال · Shift + Enter لسطر جديد · الرد النصي خلال نافذة 24 ساعة"}
           </p>
-          <button className={button} disabled={busy || !connected}>
-            إرسال
-          </button>
         </form>
       </Inbox>
-      {canManage && (
-        <details className="rounded-xl border border-sage-200 bg-white p-5">
-          <summary className="cursor-pointer text-sm font-semibold">
-            إنشاء قالب جديد
-          </summary>
-          <p className="mt-3 text-sm text-ink-500">
-            استخدم{" "}
-            <Link
-              href="/app/templates"
-              className="font-medium text-sage-700 underline"
-            >
-              مكتبة القوالب
-            </Link>{" "}
-            لحفظ المسودات وتخصيص النماذج، أو أرسل قالبًا جديدًا من هنا.
-          </p>
-          <form
-            onSubmit={(event) => void submit(event, "template")}
-            className="mt-5 max-w-2xl space-y-4 text-sm"
+      <dialog
+        ref={settings}
+        aria-labelledby="whatsapp-settings-title"
+        className="m-auto w-[calc(100%-2rem)] max-w-2xl max-h-[85dvh] overflow-y-auto rounded-2xl border border-sage-100 bg-white p-5 text-ink-900 shadow-xl backdrop:bg-sage-900/30"
+      >
+        <header className="mb-5 flex items-center justify-between">
+          <h2 id="whatsapp-settings-title" className="font-bold">
+            القوالب وإعدادات الربط
+          </h2>
+          <button
+            type="button"
+            onClick={() => settings.current?.close()}
+            aria-label="إغلاق إعدادات الربط"
+            className="p-2"
           >
-            <h2 className="text-xl font-bold">إنشاء قالب</h2>
-            <label className="block">
-              اسم القالب
-              <input
+            <X size={20} />
+          </button>
+        </header>
+        {result && (
+          <p role="status" className="mb-4 rounded-lg bg-sage-50 p-3 text-sm">
+            {result.message}
+          </p>
+        )}
+        <div className="space-y-4">
+          {canManage && (
+            <details
+              open={!connected}
+              className="rounded-xl border border-sage-200 bg-white p-5 space-y-4"
+            >
+              <summary className="cursor-pointer text-sm font-semibold">
+                إعدادات الربط والقوالب
+              </summary>
+              <select
+                aria-label="طريقة الربط"
                 className={field}
-                name="name"
-                dir="ltr"
-                placeholder="order_update"
-                pattern="[a-z][a-z0-9_]*"
-                maxLength={120}
-                required
-              />
-            </label>
-            <label className="block">
-              اللغة
-              <select className={field} name="language">
-                <option value="ar">العربية</option>
-                <option value="en_US">English</option>
+                value={mode}
+                onChange={(event) => setMode(event.target.value as typeof mode)}
+              >
+                <option value="coexistence">
+                  رقمي موجود في تطبيق واتساب الأعمال
+                </option>
+                <option value="api">رقم مخصص لمنصة واتساب API</option>
               </select>
-            </label>
-            <label className="block">
-              الفئة
-              <select className={field} name="category">
-                <option value="UTILITY">خدمي</option>
-                <option value="MARKETING">تسويقي</option>
-              </select>
-            </label>
-            <label className="block">
-              نص القالب
-              <textarea
-                className={field}
-                name="body"
-                required
-                maxLength={1024}
-              />
-            </label>
-            <label className="block">
-              أمثلة المتغيرات، مثال لكل سطر
-              <textarea
-                className={field}
-                name="examples"
-                placeholder={"أحمد\n1024"}
-              />
-            </label>
-            <p className="text-sm">
-              تدعم القوالب النصية متغيرات مثل {"{{1}}"} و{"{{2}}"}. القرار
-              النهائي للفئة والاعتماد لدى Meta. تجد النماذج الجاهزة في مكتبة
-              القوالب.
-            </p>
-            <button className={button} disabled={busy || !connected}>
-              إرسال للمراجعة
-            </button>
-          </form>
-        </details>
-      )}
+              <p className="text-sm">
+                لا تحذف حساب تطبيق واتساب الأعمال. التسجيل والتفويض يتمان داخل
+                نافذة Meta.
+              </p>
+              {!connected && (
+                <button
+                  className={button}
+                  disabled={
+                    busy || !canConnect || !appId || !configId || !version
+                  }
+                  onClick={start}
+                >
+                  الربط عبر Meta
+                </button>
+              )}
+              <button
+                className={`${button} ms-3`}
+                disabled={busy || !connected}
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    setResult(await refreshTemplates());
+                    router.refresh();
+                  } catch {
+                    setResult({ ok: false, message: "تعذر تحديث القوالب." });
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                تحديث القوالب
+              </button>
+              {connected ? (
+                <p className="text-sm">
+                  الرقم مربوط بهذه المساحة. يمكنك إرسال الرسائل وإدارة القوالب
+                  هنا.
+                </p>
+              ) : (
+                (!canConnect || !appId || !configId || !version) && (
+                  <p className="text-sm">
+                    تواصل مع إدارة المنصة لإكمال تفعيل الرقم.
+                  </p>
+                )
+              )}
+            </details>
+          )}
+
+          {canManage && (
+            <details className="rounded-xl border border-sage-200 bg-white p-5">
+              <summary className="cursor-pointer text-sm font-semibold">
+                إنشاء قالب جديد
+              </summary>
+              <p className="mt-3 text-sm text-ink-500">
+                استخدم{" "}
+                <Link
+                  href="/app/templates"
+                  className="font-medium text-sage-700 underline"
+                >
+                  مكتبة القوالب
+                </Link>{" "}
+                لحفظ المسودات وتخصيص النماذج، أو أرسل قالبًا جديدًا من هنا.
+              </p>
+              <form
+                onSubmit={(event) => void submit(event, "template")}
+                className="mt-5 max-w-2xl space-y-4 text-sm"
+              >
+                <h2 className="text-xl font-bold">إنشاء قالب</h2>
+                <label className="block">
+                  اسم القالب
+                  <input
+                    className={field}
+                    name="name"
+                    dir="ltr"
+                    placeholder="order_update"
+                    pattern="[a-z][a-z0-9_]*"
+                    maxLength={120}
+                    required
+                  />
+                </label>
+                <label className="block">
+                  اللغة
+                  <select className={field} name="language">
+                    <option value="ar">العربية</option>
+                    <option value="en_US">English</option>
+                  </select>
+                </label>
+                <label className="block">
+                  الفئة
+                  <select className={field} name="category">
+                    <option value="UTILITY">خدمي</option>
+                    <option value="MARKETING">تسويقي</option>
+                  </select>
+                </label>
+                <label className="block">
+                  نص القالب
+                  <textarea
+                    className={field}
+                    name="body"
+                    required
+                    maxLength={1024}
+                  />
+                </label>
+                <label className="block">
+                  أمثلة المتغيرات، مثال لكل سطر
+                  <textarea
+                    className={field}
+                    name="examples"
+                    placeholder={"أحمد\n1024"}
+                  />
+                </label>
+                <p className="text-sm">
+                  تدعم القوالب النصية متغيرات مثل {"{{1}}"} و{"{{2}}"}. القرار
+                  النهائي للفئة والاعتماد لدى Meta. تجد النماذج الجاهزة في مكتبة
+                  القوالب.
+                </p>
+                <button className={button} disabled={busy || !connected}>
+                  إرسال للمراجعة
+                </button>
+              </form>
+            </details>
+          )}
+          <details className="rounded-xl border border-sage-100 p-5">
+            <summary className="cursor-pointer text-sm font-semibold">
+              حالة القوالب ({templates.length})
+            </summary>
+            <div className="mt-3 space-y-2">
+              {templates.map((t) => (
+                <p key={t.id} className="rounded-lg bg-sage-50 p-3 text-xs">
+                  <bdi>{t.name}</bdi> ·{" "}
+                  {t.status === "approved"
+                    ? "معتمد"
+                    : t.status === "pending"
+                      ? "قيد المراجعة"
+                      : t.status === "rejected"
+                        ? "مرفوض"
+                        : "مؤرشف"}{" "}
+                  ({t.language})
+                </p>
+              ))}
+            </div>
+          </details>
+        </div>
+      </dialog>
     </div>
   );
 }

@@ -1,6 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import {
+  InboxProvider,
+  NotificationBell,
+  useInbox,
+} from "@/components/inbox/InboxProvider";
 import { usePathname } from "next/navigation";
 import { useRef, type ReactNode } from "react";
 import {
@@ -39,6 +45,7 @@ const navigation = [
 type Props = {
   children: ReactNode;
   email: string;
+  userId: string;
   currentId?: string;
   currentName?: string;
   isTest?: boolean;
@@ -47,6 +54,7 @@ type Props = {
 };
 
 function Navigation({ path, close }: { path: string; close?: () => void }) {
+  const { unread } = useInbox();
   return (
     <nav aria-label="التنقل الرئيسي" className="space-y-1">
       {navigation.map(({ href, label, icon: Icon }) => {
@@ -61,6 +69,11 @@ function Navigation({ path, close }: { path: string; close?: () => void }) {
           >
             <Icon size={19} aria-hidden="true" />
             <span className="flex-1">{label}</span>
+            {href === "/app/whatsapp" && unread > 0 && (
+              <span className="rounded-full bg-sage-100 px-2 py-0.5 text-[10px] text-sage-900">
+                {unread > 99 ? "99+" : unread}
+              </span>
+            )}
             {active && <ChevronLeft size={15} aria-hidden="true" />}
           </Link>
         );
@@ -69,7 +82,18 @@ function Navigation({ path, close }: { path: string; close?: () => void }) {
   );
 }
 
-export default function WorkspaceShell({
+export default function WorkspaceShell(props: Props) {
+  return (
+    <InboxProvider
+      key={`${props.userId}.${props.currentId}`}
+      tenant={props.currentId ?? ""}
+      user={props.userId}
+    >
+      <WorkspaceContent {...props} />
+    </InboxProvider>
+  );
+}
+function WorkspaceContent({
   children,
   email,
   currentId,
@@ -102,7 +126,14 @@ export default function WorkspaceShell({
       <aside className="fixed inset-y-0 right-0 z-30 hidden w-64 flex-col border-l border-sage-100 bg-white px-4 py-6 lg:flex">
         <Link href="/app" className="mb-8 px-4 py-1">
           <span dir="ltr" className="text-3xl font-bold tracking-tight">
-            Soulvd<span className="text-sage-500">.</span>
+            <Image
+              src="/brand/soulvd-logo.png"
+              alt="Soulvd"
+              width={128}
+              height={45}
+              className="h-auto w-44"
+              priority
+            />
           </span>
         </Link>
         <p className="mb-3 px-4 text-xs font-medium text-ink-500">مساحة عملك</p>
@@ -136,9 +167,11 @@ export default function WorkspaceShell({
           </div>
         </div>
       </aside>
-      <div className="min-w-0 lg:mr-64">
-        <header className="sticky top-0 z-20 border-b border-sage-100 bg-white/95 px-4 py-4 backdrop-blur sm:px-8">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3">
+      <div
+        className={`min-w-0 lg:mr-64 ${path === "/app/whatsapp" ? "flex h-dvh flex-col overflow-hidden" : ""}`}
+      >
+        <header className="sticky top-0 z-20 shrink-0 border-b border-sage-100 bg-white/95 px-4 py-4 backdrop-blur sm:px-8">
+          <div className="mx-auto flex max-w-7xl items-center gap-2 sm:gap-3">
             <button
               aria-label="فتح قائمة التنقل"
               onClick={() => drawer.current?.showModal()}
@@ -155,7 +188,7 @@ export default function WorkspaceShell({
               aria-hidden="true"
             />
             <span className="text-sm font-semibold">{title}</span>
-            <div className="ms-auto w-full sm:max-w-sm sm:flex-1">
+            <div className="ms-auto min-w-0 max-w-[45%] sm:max-w-sm sm:flex-1">
               {workspaces.length > 1 ? (
                 <form
                   action={selectWorkspace}
@@ -187,16 +220,17 @@ export default function WorkspaceShell({
                 </p>
               )}
             </div>
+            <NotificationBell />
           </div>
         </header>
         <main
           id="workspace-content"
-          className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-8"
+          className={`mx-auto max-w-7xl ${path === "/app/whatsapp" ? "flex min-h-0 w-full flex-1 flex-col px-2 py-2 sm:px-5 sm:py-3" : "px-4 py-6 sm:px-8 sm:py-8"}`}
         >
           {isTest && (
             <div
               role="status"
-              className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200/70 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+              className={`flex items-start gap-2 rounded-xl border border-amber-200/70 bg-amber-50 px-3 py-2 text-amber-900 ${path === "/app/whatsapp" ? "mb-2 shrink-0 text-[11px]" : "mb-6 text-sm"}`}
             >
               <FlaskConical
                 size={18}
@@ -219,7 +253,13 @@ export default function WorkspaceShell({
       >
         <div className="mb-6 flex items-center justify-between">
           <strong dir="ltr" className="text-2xl">
-            Soulvd.
+            <Image
+              src="/brand/soulvd-logo.png"
+              alt="Soulvd"
+              width={112}
+              height={40}
+              className="h-auto w-36"
+            />
           </strong>
           <button
             onClick={close}

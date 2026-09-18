@@ -2,6 +2,7 @@ import Link from "next/link";
 import { tenantUsage } from "@/lib/tenancy/context";
 import { PLANS } from "@/lib/billing/plans";
 import { sar, termLabel } from "@/lib/billing/terms";
+import OnboardingSteps from "@/components/billing/OnboardingSteps";
 import BankDetails from "@/components/billing/BankDetails";
 import {
   ContractForm,
@@ -68,6 +69,35 @@ export default async function BillingPage() {
           </Link>
         )}
       </section>
+      {!context.isTest && (
+        <section className="rounded-2xl border border-sage-100 bg-white p-6">
+          <OnboardingSteps current={isActive ? 3 : 2} />
+          <div className="mt-6 rounded-xl bg-sage-50 p-4 text-sm leading-7">
+            <h2 className="font-bold">
+              {isActive
+                ? "اشتراكك مفعّل"
+                : open.some((r) => r.status === "submitted")
+                  ? "تحويلك قيد المراجعة"
+                  : "الخطوة التالية: تأكيد الدفع"}
+            </h2>
+            <p className="mt-1 text-ink-500">
+              {isActive
+                ? "انتقل لربط رقم واتساب وتجهيز أول محادثة. يمكنك مراجعة حالة طلب الربط في أي وقت."
+                : open.some((r) => r.status === "submitted")
+                  ? "استلمنا مرجع التحويل. تتأكد الإدارة من وصول المبلغ قبل تفعيل الاشتراك؛ لا ترسل تحويلًا آخر لنفس الطلب."
+                  : "أنشئ طلب الدفع بالباقة والمدة المختارتين، ثم حوّل المبلغ وأدخل مرجع العملية. سيظهر إجمالي الطلب وبيانات المستفيد قبل التحويل."}
+            </p>
+            {isActive && (
+              <Link
+                href="/app/connect"
+                className="mt-3 inline-block font-semibold text-sage-700 underline"
+              >
+                متابعة ربط الرقم ←
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
       {context.isTest && (
         <p className="rounded-xl bg-amber-50 p-4 text-sm">
           هذه مساحة اختبار؛ لا يتم تحصيل اشتراك عليها.

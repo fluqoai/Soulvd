@@ -15,19 +15,19 @@
     "hero": {
       "eyebrow": "WhatsApp Business solutions for companies · 2026",
       "title": "Turn WhatsApp conversations into real revenue",
-      "subtitle": "Soulvd is the platform Saudi businesses use to reply to customers in Arabic within seconds, qualify leads automatically, and close deals — right inside WhatsApp, with zero code to write.",
-      "cta_primary": "Book a free demo",
-      "cta_secondary": "See real results",
-      "trust_line_1": "Live now",
-      "trust_line_2": "No credit card · Cancel anytime",
+      "subtitle": "Bring customer conversations, team replies and automation flows into one Arabic workspace. Two clear plans for starting and growing.",
+      "cta_primary": "Explore plans",
+      "cta_secondary": "How it works",
+      "trust_line_1": "Starter SAR 299 · Pro Growth SAR 399 / month",
+      "trust_line_2": "3-month minimum · Pay by bank transfer",
       "trust_meta": "WhatsApp Business technology",
       "trust_meta_sub": "Built with official Meta APIs",
-      "trust_ai": "AI that speaks Saudi",
-      "trust_ai_sub": "Trained on local Saudi dialects",
+      "trust_ai": "Editable automations",
+      "trust_ai_sub": "Welcome, FAQs and follow-up",
       "trust_local": "Privacy and transparency",
       "trust_local_sub": "Clear data protection practices",
-      "trust_247": "24/7 human support",
-      "trust_247_sub": "Saudi team, replies in Arabic"
+      "trust_247": "One inbox for your team",
+      "trust_247_sub": "Messages, alerts and delivery status"
     },
     "why": {
       "title": "Why Soulvd?",
@@ -141,20 +141,24 @@
       "subtitle": "The questions our clients ask most before signing.",
       "list": [
         {
-          "q": "Does Soulvd use the official WhatsApp API?",
-          "a": "Yes. Soulvd integrations use the WhatsApp Business Platform and official Meta APIs. Connections and messaging remain subject to customer authorization and platform policies."
+          "q": "How does my subscription start?",
+          "a": "Choose a plan and term, create an account when registration opens and verify your email. Set up your workspace, request payment and submit your bank transfer reference. Activation follows verification of the funds received."
         },
         {
-          "q": "How long until we're actually live?",
-          "a": "Two weeks for most projects — one for discovery and setup, one for testing and launch. Smaller projects can wrap in 3-5 days."
+          "q": "Are SAR 299 and 399 the amounts I transfer?",
+          "a": "These are monthly reference prices. The minimum term is three months: SAR 897 for Starter or SAR 1,197 for Pro Growth. Six-month and annual terms are available; the annual term costs ten months. The full upfront total is shown before you choose, with no automatic renewal charge."
         },
         {
-          "q": "Where is customer data stored?",
-          "a": "We use trusted infrastructure providers to protect data. Some processing may occur outside Saudi Arabia with the procedures and safeguards required by applicable law."
+          "q": "What does the monthly customer allowance mean?",
+          "a": "Each distinct customer counts once per monthly usage period, regardless of the number of messages. The allowance renews monthly from activation. WhatsApp messaging fees are separate and deducted from your wallet based on usage."
         },
         {
-          "q": "Can I try before I commit?",
-          "a": "Absolutely. We offer a free, no-commitment 45-minute demo with a solutions engineer who runs the bot on your actual data before you pay a single riyal."
+          "q": "Can I keep the WhatsApp Business App?",
+          "a": "We help eligible numbers connect through Coexistence so the app can remain in use. Do not delete your account. Number eligibility, authorization and approvals are checked during connection."
+        },
+        {
+          "q": "Are AI and integrations included?",
+          "a": "Automation flows follow your plan limits. AI replies are not yet enabled and will have separate pricing and allowances. CRM setup requires technical review, with SAR 100 setup for an accepted integration and any external fees charged separately."
         }
       ]
     },
@@ -231,11 +235,11 @@
     "cta": {
       "eyebrow": "Let's start",
       "title": "Ready to transform your customer experience?",
-      "subtitle": "Launch in two weeks with a Saudi team specializing in WhatsApp Business automation. The first conversation is on us — no commitment.",
+      "subtitle": "Discuss your business needs or choose a plan. We explain workspace setup and WhatsApp connection before launch.",
       "primary": "Contact us",
       "secondary": "Explore services",
       "point_meta": "Integration through WhatsApp Business Platform",
-      "point_reply": "We reply within 24 hours on business days"
+      "point_reply": "Connection guidance from the Soulvd team"
     },
     "partners": {
       "eyebrow": "Trusted by the platforms we integrate with"
@@ -243,7 +247,7 @@
     "contact": {
       "eyebrow": "Get in touch",
       "title": "Tell us about your project",
-      "subtitle": "We reply within 24 hours on business days. Prefer to chat? Reach us on WhatsApp.",
+      "subtitle": "Tell us what your business needs. Our team will get in touch; you can also contact us on WhatsApp.",
       "name": "Name",
       "name_placeholder": "Your full name",
       "email": "Email",
@@ -254,7 +258,7 @@
       "submitting": "Sending...",
       "required_note": "Fields marked with * are required.",
       "success_title": "We've got your message.",
-      "success_description": "Thanks for reaching out. Our team will get back to you within 24 hours.",
+      "success_description": "Thank you. Our team will respond using the contact details you shared.",
       "error_description": "We couldn't send your message. Try again, or reach us on WhatsApp."
     }
   },
@@ -273,20 +277,48 @@
     "licenses": {
       "title": "Certifications & partnerships",
       "items": [
-        { "label": "WhatsApp Business integration", "value": "Cloud API" },
-        { "label": "Time to launch", "value": "2 weeks" },
-        { "label": "Ready integrations", "value": "100+ platforms" },
-        { "label": "Support", "value": "24/7" }
+        {
+          "label": "WhatsApp Business integration",
+          "value": "Cloud API"
+        },
+        {
+          "label": "Time to launch",
+          "value": "2 weeks"
+        },
+        {
+          "label": "Ready integrations",
+          "value": "100+ platforms"
+        },
+        {
+          "label": "Support",
+          "value": "24/7"
+        }
       ]
     },
     "values": {
       "title": "Our values",
       "subtitle": "The principles behind everything we build",
       "items": [
-        { "key": "local", "title": "Local market first", "description": "We design for the Saudi market specifically — its dialects, consumption patterns, and business culture." },
-        { "key": "trust", "title": "Trust over features", "description": "Secure infrastructure, clear access controls, and full transparency in everything we do." },
-        { "key": "outcomes", "title": "Measurable outcomes", "description": "We don't ship a feature without a clear impact on conversion, customer satisfaction, or operational efficiency." },
-        { "key": "partnership", "title": "Long-term partnership", "description": "We improve weekly with our clients. Every deployment is the start of a relationship, not the end of a project." }
+        {
+          "key": "local",
+          "title": "Local market first",
+          "description": "We design for the Saudi market specifically — its dialects, consumption patterns, and business culture."
+        },
+        {
+          "key": "trust",
+          "title": "Trust over features",
+          "description": "Secure infrastructure, clear access controls, and full transparency in everything we do."
+        },
+        {
+          "key": "outcomes",
+          "title": "Measurable outcomes",
+          "description": "We don't ship a feature without a clear impact on conversion, customer satisfaction, or operational efficiency."
+        },
+        {
+          "key": "partnership",
+          "title": "Long-term partnership",
+          "description": "We improve weekly with our clients. Every deployment is the start of a relationship, not the end of a project."
+        }
       ]
     }
   },
@@ -515,14 +547,14 @@
   "auth": {
     "login": {
       "title": "Sign in",
-      "subtitle": "Access the admin dashboard.",
+      "subtitle": "Welcome back to your workspace.",
       "email": "Email",
       "password": "Password",
       "submit": "Sign in",
       "submitting": "Signing in...",
-      "brand_eyebrow": "Soulvd Admin",
-      "brand_title": "Manage content, leads, and documents from one place.",
-      "brand_subtitle": "Restricted to authorized account holders."
+      "brand_eyebrow": "The Soulvd workspace",
+      "brand_title": "Your conversations, team and next opportunities.",
+      "brand_subtitle": "Follow up with customers and manage automation in one place. Each business has its own workspace."
     },
     "errors": {
       "invalid_credentials": "Invalid email or password.",

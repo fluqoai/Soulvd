@@ -1,4 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
+import OnboardingSteps from "@/components/billing/OnboardingSteps";
+import { PLANS } from "@/lib/billing/plans";
+import { termTotal, termLabel, sar } from "@/lib/billing/terms";
 import SignupForm from "./SignupForm";
 import { signupsReady } from "@/lib/billing/launch";
 export const metadata = {
@@ -15,6 +19,7 @@ export default async function SignupPage({
   const months = [3, 6, 12].includes(Number(params.months))
     ? Number(params.months)
     : 3;
+  const chosen = PLANS[plan === "starter_v1" ? "starter" : "pro_growth"];
   return (
     <main
       dir="rtl"
@@ -22,13 +27,40 @@ export default async function SignupPage({
     >
       <div className="w-full max-w-md rounded-3xl border border-sage-100 bg-white p-7 shadow-sm sm:p-9">
         <Link href="/" className="text-3xl font-bold tracking-tight" dir="ltr">
-          Soulvd.
+          <Image
+            src="/brand/soulvd-logo.png"
+            alt="Soulvd"
+            width={135}
+            height={40}
+            className="h-auto w-40"
+            priority
+          />
         </Link>
         <h1 className="mb-3 mt-7 text-2xl font-bold">ابدأ مساحة عملك</h1>
         <p className="mb-7 text-sm leading-7 text-ink-500">
-          أنشئ حسابك، ثم اختر الباقة والمدة. يبدأ الاشتراك بعد تأكيد التحويل
-          البنكي؛ إنشاء الحساب لا يخصم أي مبلغ.
+          اختيارك محفوظ أدناه. أكّد بريدك وجهّز مساحة منشأتك. يبدأ الاشتراك بعد
+          تأكيد التحويل البنكي؛ إنشاء الحساب لا يخصم أي مبلغ.
         </p>
+        <div className="mb-7">
+          <OnboardingSteps current={0} />
+        </div>
+        <div className="mb-6 rounded-2xl border border-sage-200 bg-sage-50 p-4 text-sm">
+          <div className="flex justify-between gap-2">
+            <h2 className="font-bold">{chosen.name}</h2>
+            <Link href="/plans" className="text-xs underline">
+              تغيير الاختيار
+            </Link>
+          </div>
+          <p className="mt-2 text-xs text-ink-500">
+            {termLabel(months)} · رصيد واتساب منفصل
+          </p>
+          <p className="mt-3 font-bold">
+            {sar(termTotal(chosen.priceSar, months))} ريال تُدفع مقدمًا
+          </p>
+          <p className="mt-1 text-xs text-ink-500">
+            لا يُطلب تحويل عند إنشاء الحساب.
+          </p>
+        </div>
         {(await signupsReady()) ? (
           <SignupForm plan={plan} months={months} />
         ) : (

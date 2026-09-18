@@ -6,7 +6,6 @@ import { HeroChat } from './HeroChat';
 
 export async function Hero() {
   const t = await getTranslations('home.hero');
-  const tSite = await getTranslations('site');
   const locale = await getLocale();
   const isRtl = locale === 'ar';
 
@@ -68,7 +67,7 @@ export async function Hero() {
 
             <div className="mt-8 md:mt-9 flex flex-wrap items-center gap-3">
               <TrackedLink
-                href="/contact"
+                href="/plans"
                 event="hero_cta_clicked"
                 eventProps={{ location: 'hero_primary' }}
                 size="lg"
@@ -83,7 +82,7 @@ export async function Hero() {
                 )}
               </TrackedLink>
               <TrackedLink
-                href="#case-studies"
+                href="#how-it-works"
                 event="hero_secondary_cta_clicked"
                 eventProps={{ location: 'hero_secondary' }}
                 size="lg"

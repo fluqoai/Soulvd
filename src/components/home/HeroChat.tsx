@@ -20,24 +20,24 @@ type Props = {
 function getConversation(locale: 'ar' | 'en'): Bubble[] {
   if (locale === 'ar') {
     return [
-      { side: 'in', text: 'السلام عليكم، أبغى أعرف عن خدماتكم في واتساب', time: '10:23 ص' },
-      { side: 'out', text: 'وعليكم السلام، سولڤد معك. البوت يرد على عملائك بالعربي خلال ثوانٍ. إيش مجال عملك؟', time: '10:23 ص', read: true },
-      { side: 'in', text: 'عندي مطعم في الخبر، أبغى أزيد الطلبات خاصة في الويكند', time: '10:24 ص' },
-      { side: 'out', text: 'ممتاز. عندنا بوت يرد على العملاء بالعربي ٢٤/٧ وياخذ الطلبات تلقائياً. أحجز لك ديمو مجاني؟', time: '10:24 ص', read: true },
+      { side: 'in', text: 'السلام عليكم، هل طلبي جاهز للاستلام؟', time: '10:23 ص' },
+      { side: 'out', text: 'وعليكم السلام، أهلاً أحمد 🌿 أعطني رقم الطلب وأتابعه لك.', time: '10:23 ص', read: true },
+      { side: 'in', text: 'رقم الطلب 1024، شكرًا لكم', time: '10:24 ص' },
+      { side: 'out', text: 'طلبك جاهز ✅ يمكنك استلامه من الفرع. يسعدنا خدمتك!', time: '10:24 ص', read: true },
     ];
   }
   return [
-    { side: 'in', text: 'Hi, I want to know more about your WhatsApp services', time: '10:23 AM' },
-    { side: 'out', text: "Hi there — Soulvd here. I can book you a free demo in 2 minutes. What's your business?", time: '10:23 AM', read: true },
-    { side: 'in', text: 'I run a restaurant in Al Khobar. I want to grow orders, especially on weekends.', time: '10:24 AM' },
-    { side: 'out', text: 'Perfect. We have a 24/7 Arabic bot that takes orders automatically. Shall I book a free demo for you?', time: '10:24 AM', read: true },
+    { side: 'in', text: 'Hi, is my order ready for collection?', time: '10:23 AM' },
+    { side: 'out', text: "Hi Ahmed! Share your order number and I will check for you.", time: '10:23 AM', read: true },
+    { side: 'in', text: 'Order 1024. Thank you!', time: '10:24 AM' },
+    { side: 'out', text: 'Your order is ready! You can collect it from the branch.', time: '10:24 AM', read: true },
   ];
 }
 
 export function HeroChat({ locale }: Props) {
   const bubbles = getConversation(locale);
   const botName = locale === 'ar' ? 'سولڤد' : 'Soulvd';
-  const botStatus = locale === 'ar' ? 'متصل الآن' : 'online now';
+  const botStatus = locale === 'ar' ? 'مثال توضيحي للمحادثة' : 'Illustrative conversation';
 
   return (
     <div

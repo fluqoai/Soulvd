@@ -1,5 +1,5 @@
 import { getTranslations, getLocale } from 'next-intl/server';
-import { ArrowRight, ArrowLeft, Sparkles, ShieldCheck, Clock, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ShieldCheck, Clock, CheckCircle2 } from 'lucide-react';
 import { Section } from '@/components/ui/Section';
 import { ScrollReveal } from '@/components/motion/Motion';
 import { HomeContactForm } from './HomeContactForm';
@@ -16,7 +16,6 @@ export async function CTAWithForm() {
   const tContact = await getTranslations('home.contact');
   const locale = await getLocale();
   const isRtl = locale === 'ar';
-  const ArrowEnd = isRtl ? ArrowLeft : ArrowRight;
 
   return (
     <Section
@@ -100,7 +99,7 @@ export async function CTAWithForm() {
             <ul className="mt-7 md:mt-9 space-y-3 text-sm md:text-[15px] text-linen-200/85">
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="size-5 text-sage-400 shrink-0 mt-0.5" aria-hidden />
-                <span>{tContact('success_title')}</span>
+                <span>{isRtl ? 'اختر باقتك قبل بدء الاشتراك' : 'Choose your plan before subscribing'}</span>
               </li>
               <li className="flex items-start gap-3">
                 <ShieldCheck className="size-5 text-sage-400 shrink-0 mt-0.5" aria-hidden />

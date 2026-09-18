@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 const ref='lyvoiipsmcbffvpkrxhy';
 const token=process.env.SUPABASE_ACCESS_TOKEN;
 if(!token)throw new Error('Set SUPABASE_ACCESS_TOKEN for the authorized Soulvd account.');
-const files=['20260917211829_subscription_terms.sql','20260917211847_messaging_wallet.sql','20260917211917_managed_onboarding.sql','20260917215705_wallet_operations.sql','20260917221615_payment_lock_order.sql'];
+const files=['20260917211829_subscription_terms.sql','20260917211847_messaging_wallet.sql','20260917211917_managed_onboarding.sql','20260917215705_wallet_operations.sql','20260917221615_payment_lock_order.sql','20260918005715_inbox_experience.sql'];
 async function request(path,body){
  const response=await fetch('https://api.supabase.com/v1/projects/'+ref+path,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
  if(!response.ok)throw new Error('Supabase Management API HTTP '+response.status);

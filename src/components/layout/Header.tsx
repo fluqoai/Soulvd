@@ -58,10 +58,24 @@ export async function Header() {
 
         <div className="flex items-center gap-2">
           <LocaleToggle className="hidden sm:inline-flex" />
-          <ButtonLink href="/login" size="sm" className="hidden sm:inline-flex">
+          <Link
+            href="/login"
+            className="hidden whitespace-nowrap px-2 text-xs font-semibold sm:inline-flex"
+          >
             {locale === "ar" ? "دخول المنصة" : "Sign in"}
+          </Link>
+          <ButtonLink href="/plans" size="sm">
+            {locale === "ar" ? "اختر باقتك" : "View plans"}
           </ButtonLink>
-          <MobileMenu items={items} />
+          <MobileMenu
+            items={[
+              ...items,
+              {
+                href: "/login",
+                label: locale === "ar" ? "دخول المنصة" : "Sign in",
+              },
+            ]}
+          />
         </div>
       </div>
     </header>

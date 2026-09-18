@@ -49,6 +49,10 @@ export default function PlanPicker({
           ))}
         </div>
       </fieldset>
+      <p className="rounded-xl border border-sage-200 bg-sage-50 px-4 py-3 text-sm leading-7 text-sage-900">
+        النمو تضيف 8,000 عميل شهريًا ومقاعد فريق غير محدودة مقابل 100 ريال
+        إضافية بالسعر الشهري المرجعي.
+      </p>
       <div className="grid gap-5 md:grid-cols-2">
         {Object.entries(PLANS).map(([code, plan]) => {
           const id = `${code}_v1`,
@@ -125,7 +129,7 @@ export default function PlanPicker({
                   href={`/signup?plan=${id}&months=${months}`}
                   className={`rounded-xl p-3 text-center font-semibold ${plan.recommended ? "bg-sage-900 text-white" : "border border-sage-300"}`}
                 >
-                  ابدأ مع {plan.name}
+                  اختر {plan.name}
                 </Link>
               )}
             </article>
