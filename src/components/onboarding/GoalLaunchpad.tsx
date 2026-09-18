@@ -8,6 +8,12 @@ import {
   Workflow,
 } from "lucide-react";
 import { goals } from "@/lib/growth/guide";
+import type { CSSProperties } from "react";
+const tones = [
+  ["#37634e", "#edf4ee"], ["#8b6230", "#faf2e4"],
+  ["#50668e", "#eff2f9"], ["#735d83", "#f5eff8"],
+  ["#386e79", "#eaf4f6"],
+];
 const icons = {
   message: MessageCircle,
   campaign: Megaphone,
@@ -29,20 +35,22 @@ export default function GoalLaunchpad() {
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {goals.map((g) => {
+        {goals.map((g, index) => {
           const Icon = icons[g.icon];
+          const [accent, tint] = tones[index % tones.length];
           return (
             <Link
               key={g.id}
               href={g.href}
-              className="group rounded-2xl border border-sage-100 bg-white p-5 transition hover:border-sage-400 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-sage-700"
+              className="sv-surface sv-goal group p-5"
+              style={{ "--sv-accent": accent, "--sv-tint": tint } as CSSProperties}
             >
-              <span className="mb-4 inline-flex rounded-xl bg-sage-50 p-3 text-sage-700">
-                <Icon size={22} />
+              <span className="sv-goal-icon mb-4 inline-flex p-3">
+                <Icon size={22} aria-hidden="true" />
               </span>
               <h3 className="flex items-center justify-between gap-2 font-bold">
                 {g.title}
-                <ArrowUpLeft size={17} />
+                <ArrowUpLeft size={17} aria-hidden="true" />
               </h3>
               <p className="mt-2 text-sm leading-7 text-ink-500">
                 {g.description}

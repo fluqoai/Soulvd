@@ -8,7 +8,7 @@ import {
   useInbox,
 } from "@/components/inbox/InboxProvider";
 import { usePathname } from "next/navigation";
-import { useRef, type ReactNode } from "react";
+import { Fragment, useRef, type ReactNode } from "react";
 import {
   ArrowUpLeft,
   Bot,
@@ -65,15 +65,20 @@ function Navigation({ path, close }: { path: string; close?: () => void }) {
   const { unread } = useInbox();
   return (
     <nav aria-label="التنقل الرئيسي" className="space-y-1">
-      {navigation.map(({ href, label, icon: Icon }) => {
+      {navigation.map(({ href, label, icon: Icon }, index) => {
         const active = href === "/app" ? path === href : path.startsWith(href);
         return (
+          <Fragment key={href}>
+          {[0, 4, 10].includes(index) && (
+            <p className="px-4 pb-2 pt-5 text-[11px] font-semibold text-ink-500">
+              {index === 0 ? "العمل اليومي" : index === 4 ? "ابنِ تجربة عملائك" : "إدارة المساحة"}
+            </p>
+          )}
           <Link
-            key={href}
             href={href}
             onClick={close}
             aria-current={active ? "page" : undefined}
-            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-600 ${active ? "bg-sage-900 text-white shadow-sm" : "text-ink-600 hover:bg-sage-50 hover:text-sage-900"}`}
+            className={`sv-nav-link flex items-center gap-3 rounded-xl border-s-[3px] border-transparent px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-sage-900 text-white" : "text-ink-600 hover:bg-sage-50 hover:text-sage-900"}`}
           >
             <Icon size={19} aria-hidden="true" />
             <span className="flex-1">{label}</span>
@@ -84,6 +89,7 @@ function Navigation({ path, close }: { path: string; close?: () => void }) {
             )}
             {active && <ChevronLeft size={15} aria-hidden="true" />}
           </Link>
+          </Fragment>
         );
       })}
     </nav>
@@ -123,7 +129,7 @@ function WorkspaceContent({
     <div
       dir="rtl"
       lang="ar"
-      className="min-h-screen bg-[#f6f7f5] font-arabic text-ink-900"
+      className="sv-workspace min-h-screen font-arabic text-ink-900"
     >
       <a
         href="#workspace-content"
@@ -131,8 +137,8 @@ function WorkspaceContent({
       >
         انتقل إلى المحتوى
       </a>
-      <aside className="fixed inset-y-0 right-0 z-30 hidden w-64 flex-col border-l border-sage-100 bg-white px-4 py-6 lg:flex">
-        <Link href="/app" className="mb-8 px-4 py-1">
+      <aside className="fixed inset-y-0 right-0 z-30 hidden w-64 flex-col overflow-y-auto overscroll-contain border-l border-sage-200 bg-white/95 px-4 py-6 lg:flex">
+        <Link href="/app" className="mb-3 shrink-0 px-4 py-1">
           <span dir="ltr" className="text-3xl font-bold tracking-tight">
             <Image
               src="/brand/soulvd-logo.png"
@@ -144,7 +150,6 @@ function WorkspaceContent({
             />
           </span>
         </Link>
-        <p className="mb-3 px-4 text-xs font-medium text-ink-500">مساحة عملك</p>
         <Navigation path={path} />
         <div className="mt-auto space-y-4 pt-8">
           {canAdmin && (

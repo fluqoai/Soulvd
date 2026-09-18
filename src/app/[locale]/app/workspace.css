@@ -1,0 +1,72 @@
+.sv-workspace {
+  background: radial-gradient(ellipse at 95% 0%, #e5efea 0, transparent 42%), #f5f5f0;
+  --sv-line: #d7e2db;
+}
+.sv-workspace .sv-surface {
+  border: 1px solid var(--sv-line);
+  border-radius: 24px 24px 10px 24px;
+  background: #fff;
+  box-shadow: 0 3px 0 #e8ede7, 0 12px 28px -24px #173e32;
+}
+.sv-workspace .sv-hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #356551;
+  border-radius: 28px 28px 12px 28px;
+  background: radial-gradient(ellipse at 0% 0%, #35614f 0, transparent 68%), #173e32;
+  color: #fff;
+  box-shadow: 0 5px 0 #cedcc8, 0 18px 36px -28px #173e32;
+}
+.sv-workspace .sv-hero::after {
+  content: '';
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  border: 1px solid #ffffff12;
+  border-radius: 50%;
+  inset-inline-end: -95px;
+  top: -110px;
+  box-shadow: 0 0 0 32px #ffffff05, 0 0 0 64px #ffffff04;
+  pointer-events: none;
+}
+.sv-workspace .sv-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+.sv-workspace .sv-goal {
+  border-block-start: 3px solid var(--sv-accent, #507460);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.sv-workspace .sv-goal:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 0 #dce6de, 0 16px 28px -22px #173e32;
+}
+.sv-workspace .sv-goal-icon {
+  background: var(--sv-tint, #edf4ee);
+  color: var(--sv-accent, #507460);
+  border: 1px solid currentColor;
+  border-radius: 14px 14px 6px 14px;
+}
+.sv-workspace .sv-nav-link[aria-current='page'] {
+  background: #173e32;
+  color: white;
+  box-shadow: 0 4px 10px -6px #173e3280;
+  border-inline-start: 3px solid #cedfa7;
+}
+.sv-workspace .sv-stat {
+  border-block-start: 3px solid #83a68e;
+}
+.sv-workspace .sv-stat:nth-child(2) { border-block-start-color: #c4a568; }
+.sv-workspace .sv-stat:nth-child(3) { border-block-start-color: #8799b6; }
+.sv-workspace :where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #467958;
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sv-workspace .sv-goal { transition: none; }
+  .sv-workspace .sv-goal:hover { transform: none; }
+}

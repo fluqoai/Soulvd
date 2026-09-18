@@ -30,7 +30,7 @@ export default async function BillingPage() {
   return (
     <div className="space-y-6">
       <SetupChecklist compact />
-      <section className="space-y-4 rounded-2xl border border-sage-200 bg-white p-6">
+      <section className="sv-surface space-y-4 p-6">
         <h1 className="text-3xl font-bold">الباقة والاشتراك</h1>
         <h2 className="text-xl">
           {PLANS[plan.code].name} · {termLabel(s.billing_months)}
@@ -73,7 +73,7 @@ export default async function BillingPage() {
         )}
       </section>
       {!context.isTest && (
-        <section className="rounded-2xl border border-sage-100 bg-white p-6">
+        <section className="sv-surface p-6">
           <div className="mt-6 rounded-xl bg-sage-50 p-4 text-sm leading-7">
             <h2 className="font-bold">
               {isActive

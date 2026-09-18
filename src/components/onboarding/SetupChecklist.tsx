@@ -71,7 +71,7 @@ export default async function SetupChecklist({
   return (
     <section
       aria-label="تجهيز مساحة العمل"
-      className="overflow-hidden rounded-3xl border border-sage-200 bg-white"
+      className="sv-surface overflow-hidden"
     >
       <details open={!compact} className="group">
         <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-7 [&::-webkit-details-marker]:hidden">

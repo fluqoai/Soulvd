@@ -1,5 +1,6 @@
 import { currentMerchant, tenantContext } from "@/lib/tenancy/context";
 import WorkspaceShell from "./WorkspaceShell";
+import "./workspace.css";
 
 export const dynamic = "force-dynamic";
 export const metadata = {

@@ -64,17 +64,17 @@ export default async function MerchantOverview() {
   if (subscription.status === "pending" && !context.isTest)
     return (
       <div className="space-y-6">
-        <header>
-          <p className="mb-2 text-sm text-ink-500">{context.name}</p>
+        <header className="sv-hero p-6 sm:p-8">
+          <p className="mb-2 text-sm text-sage-200">{context.name}</p>
           <h1 className="text-3xl font-bold">لنجهّز يومك الأول في سولفد</h1>
-          <p className="mt-3 text-sm leading-7 text-ink-500">
+          <p className="mt-3 text-sm leading-7 text-white/80">
             ابدأ بخطوة واحدة. نحفظ تقدمك، وتجد كل ما تحتاجه هنا.
           </p>
         </header>
         <GoalLaunchpad />
         <SetupChecklist />
         <div className="grid gap-5 md:grid-cols-2">
-          <section className="rounded-3xl border border-sage-100 bg-white p-6">
+          <section className="sv-surface p-6">
             <PanelsTopLeft size={25} className="mb-4 text-sage-600" />
             <h2 className="text-xl font-bold">تعرّف على صندوقك</h2>
             <p className="my-3 text-sm leading-8 text-ink-500">
@@ -88,7 +88,7 @@ export default async function MerchantOverview() {
               استكشف سولفد ←
             </Link>
           </section>
-          <section className="rounded-3xl border border-sage-100 bg-white p-6">
+          <section className="sv-surface p-6">
             <p className="mb-3 text-xs text-ink-500">
               اختيارك المبدئي · يمكنك تغييره
             </p>
@@ -163,7 +163,7 @@ export default async function MerchantOverview() {
         {stats.map(({ label, value, hint, icon: Icon }) => (
           <div
             key={label}
-            className="rounded-2xl border border-sage-100 bg-white p-5"
+            className="sv-surface sv-stat p-5"
           >
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm text-ink-600">{label}</p>
@@ -180,7 +180,7 @@ export default async function MerchantOverview() {
       </section>
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(260px,1fr)]">
         <div className="space-y-6">
-          <section className="overflow-hidden rounded-2xl bg-sage-900 p-6 text-white sm:p-7">
+          <section className="sv-hero p-6 sm:p-7">
             <div className="flex items-center gap-2 text-sm text-sage-200">
               <CircleDot size={16} aria-hidden="true" />
               {number ? "رقم واتساب مربوط" : "ابدأ بتوصيل رقمك"}
@@ -235,7 +235,7 @@ export default async function MerchantOverview() {
           />
         </div>
         <div className="space-y-5">
-          <section className="rounded-2xl border border-sage-100 bg-white p-5">
+          <section className="sv-surface sv-stat p-5">
             <p className="text-xs text-ink-500">باقتك الحالية</p>
             <h2 className="mt-2 text-lg font-semibold">
               {PLANS[plan.code].name}
@@ -257,7 +257,7 @@ export default async function MerchantOverview() {
               <ChevronArrow />
             </Link>
           </section>
-          <section className="rounded-2xl border border-sage-100 bg-white p-5">
+          <section className="sv-surface sv-stat p-5">
             <h2 className="mb-4 font-semibold">خطوتك التالية</h2>
             {[
               {
