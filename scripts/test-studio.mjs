@@ -49,11 +49,11 @@ const schema = await import(
 assert.equal(schema.parameterCount('ÿ£ŸáŸÑŸãÿß {{1}}ÿå ÿßŸÑÿ∑ŸÑÿ® {{2}} ÿ®ÿßÿ≥ŸÖ {{1}}'), 2);
 for (const bad of ['{{0}}', '{{2}}', '{{1}} {{3}}', '{name}', '{{11}}'])
   assert.throws(() => schema.parameterCount(bad));
-const keywordFlow = {id:'keyword',created_by:'actor',name:'Prices',status:'active',priority:1,definition:{trigger:'keywords',keywords:['«”⁄«—'],action:'text',mode:'draft',reply:'Prices'}};
+const keywordFlow = {id:'keyword',created_by:'actor',name:'Prices',status:'active',priority:1,definition:{trigger:'keywords',keywords:['\u0627\u0633\u0639\u0627\u0631'],action:'text',mode:'draft',reply:'Prices'}};
 const catchAll = {...keywordFlow,id:'all',priority:99,definition:{...keywordFlow.definition,trigger:'all'}};
-assert.equal(schema.matchFlow([catchAll,keywordFlow],'√Û”˙⁄Û«— «·⁄Ì«œ…').id,'keyword');
-assert.equal(schema.matchFlow([{...keywordFlow,status:'draft'}],'«”⁄«—'),undefined);
-assert.equal(schema.matchFlow([{...keywordFlow,definition:{...keywordFlow.definition,keywords:['Û']}}],'anything'),undefined);
+assert.equal(schema.matchFlow([catchAll,keywordFlow],'\u0623\u064e\u0633\u0652\u0639\u064e\u0627\u0631').id,'keyword');
+assert.equal(schema.matchFlow([{...keywordFlow,status:'draft'}],'\u0627\u0633\u0639\u0627\u0631'),undefined);
+assert.equal(schema.matchFlow([{...keywordFlow,definition:{...keywordFlow.definition,keywords:['\u064e']}}],'anything'),undefined);
 const lib = await import(
   moduleUrl(await readFile('src/lib/studio/library.ts', 'utf8'))
 );
