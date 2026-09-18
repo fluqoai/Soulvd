@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { currentMerchant, requireTenant } from "@/lib/tenancy/context";
 import Importer from "./Importer";
+import { contactSearch } from '@/lib/growth/contacts';
 export default async function ContactsPage({
   searchParams,
 }: {
@@ -14,11 +15,10 @@ export default async function ContactsPage({
     .from("audience_contacts")
     .select("id,phone,name,segment,consent_at,suppressed", { count: "exact" })
     .eq("tenant_id", c.tenantId);
-  if (q.trim())
-    query = query.ilike(
-      /^[+\d\s]+$/.test(q.trim()) ? "phone" : "name",
-      "%" + q.trim().slice(0, 100).replace(/[%_+]/g, "") + "%",
-    );
+  if (q.trim()) {
+    const search = contactSearch(q);
+    if (search.term) query = query.ilike(search.column, '%' + search.term + '%');
+  }
   const { data, error, count } = await query
     .order("created_at", { ascending: false })
     .range((n - 1) * 50, n * 50 - 1);

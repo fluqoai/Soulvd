@@ -1,5 +1,20 @@
 export type ImportRow = { phone: string; name: string };
 
+/** Match the stored international digits, while allowing partial phone searches. */
+export function contactSearch(value: string): { column: 'phone' | 'name'; term: string } {
+  const raw = value.trim().slice(0, 100);
+  const digits = raw.replace(/[٠-٩]/g, c => String(c.charCodeAt(0) - 1632))
+    .replace(/[۰-۹]/g, c => String(c.charCodeAt(0) - 1776));
+  if (/^[+\d\s()-]+$/.test(digits) && /\d/.test(digits)) {
+    const full = contactPhone(digits);
+    let term = digits.replace(/[^\d]/g, '');
+    if (term.startsWith('00')) term = term.slice(2);
+    else if (term.startsWith('05')) term = '966' + term.slice(1);
+    return { column: 'phone', term: full ?? term };
+  }
+  return { column: 'name', term: raw.replace(/[\\%_]/g, '') };
+}
+
 export function contactPhone(value: string): string | null {
   let n = value
     .trim()

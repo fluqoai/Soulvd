@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { provisionWorkspace } from "@/lib/tenancy/provision";
+import { invitationPath } from '@/lib/auth/return-path';
 
 const schema = z.object({
   email: z.string().email("email_invalid"),
@@ -61,6 +62,8 @@ export async function login(
     await supabase.auth.signOut();
     return { status: "error", error: "no_role" };
   }
+  const returnTo = invitationPath(formData.get('returnTo'));
+  if (returnTo) redirect(returnTo);
   if (profile.role === "merchant") {
     try {
       await provisionWorkspace(data.user);

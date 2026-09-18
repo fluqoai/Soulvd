@@ -12,6 +12,7 @@ export type Conversation = {
   status: string;
 };
 export type ChatMessage = {
+  media?: { mime: string | null; filename: string | null } | null;
   id: string;
   contact_id: string;
   direction: string;

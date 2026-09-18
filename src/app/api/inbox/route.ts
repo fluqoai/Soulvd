@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { tenantContext } from "@/lib/tenancy/context";
+import { contactSearch } from "@/lib/growth/contacts";
 const query = z.object({
   tenant: z.uuid(),
   phone: z
@@ -51,7 +52,7 @@ export async function GET(request: Request) {
       );
     let request = db
       .from("whatsapp_messages")
-      .select("id,contact_id,direction,kind,body,status,created_at,inbox_seq")
+      .select("id,contact_id,direction,kind,body,status,created_at,inbox_seq,media")
       .eq("tenant_id", p.tenant)
       .eq("contact_id", c.data.id)
       .order("created_at", { ascending: false })
@@ -89,11 +90,9 @@ export async function GET(request: Request) {
     );
   // Escape PostgREST filter syntax; search is plain text, never raw filter code.
   if (p.search) {
-    const value = p.search.replace(/[^\p{L}\p{N}\s+]/gu, "").trim();
-    if (value)
-      list = list.or(
-        `name.ilike.%${value}%,phone.ilike.%${value.replace(/\+/g, "")}%`,
-      );
+    const search = contactSearch(p.search);
+    const value = search.term.replace(/[^\p{L}\p{N}\s+]/gu, "").trim();
+    if (value) list = list.ilike(search.column, `%${value}%`);
   }
   if (p.unread) list = list.gt("unread", 0);
   const [rows, counts, alerts] = await Promise.all([

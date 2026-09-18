@@ -30,6 +30,11 @@ for (const value of [
   "++966577856389",
 ])
   assert.equal(contacts.contactPhone(value), null);
+for (const value of ['0577856389', '٠٥٧٧٨٥٦٣٨٩', '+966 (57) 785-6389', '00966577856389'])
+  assert.deepEqual(contacts.contactSearch(value), { column: 'phone', term: '966577856389' });
+assert.deepEqual(contacts.contactSearch('٠٥٧٧'), { column: 'phone', term: '966577' });
+assert.deepEqual(contacts.contactSearch('۶۳۸۹'), { column: 'phone', term: '6389' });
+assert.deepEqual(contacts.contactSearch('Noura_%\\'), { column: 'name', term: 'Noura' });
 const preview = contacts.previewContacts(
   contacts.parseContactsFile(
     '\uFEFFname,phone\r\n"Noura, A",0500000001\r\nOther,+966500000001\r\nBad,=SUM(1)\r\n"multi\nline",0500000002',

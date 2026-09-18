@@ -33,7 +33,7 @@ export default async function middleware(req: NextRequest) {
   if (adminRedirect) return adminRedirect;
   // Refresh only authenticated surfaces; public marketing remains independent.
   const authenticatedSurface =
-    /^\/(?:ar\/|en\/)?(?:app|admin|login|signup)(?:\/|$)/.test(
+    /^\/(?:ar\/|en\/)?(?:app|admin|login|signup|join|set-password)(?:\/|$)/.test(
       req.nextUrl.pathname,
     );
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

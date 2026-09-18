@@ -37,6 +37,7 @@ try {
     insert into public.users(id,email,role) values('${owner}','owner@test.invalid','owner'),('${other}','other@test.invalid','editor');
   `);
   await db.exec(await readFile(new URL('../supabase/migrations/20260916084850_merchant_subscriptions.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/20260918154723_team_invitation_delivery.sql', import.meta.url), 'utf8'));
   await db.exec(`insert into auth.users values('00000000-0000-4000-8000-000000000004','new@test.invalid','{}');`);
   assert.equal(await rpc(`select role as result from public.users where email='new@test.invalid'`), 'merchant');
   assert.equal(await rpc(`select role as result from public.users where id=$1`, [owner]), 'owner');
@@ -64,6 +65,15 @@ try {
   assert.ok(attempts.every(result => !result.allowed));
   const invite = await rpc('select public.soulvd_invite_member($1,$2,$3,$4) as result', [one, owner, 'agent@test.invalid', 'agent']);
   assert.equal(invite.allowed, true);
+  const delivery = await rpc('select public.soulvd_invitation_delivery($1,$2,$3) as result', [one, owner, invite.invitationId]);
+  assert.equal(delivery.email, 'agent@test.invalid');
+  assert.ok(delivery.deliveryKey);
+  assert.equal((await rpc('select public.soulvd_invitation_delivery($1,$2,$3) as result', [one, owner, invite.invitationId])).code, 'RETRY_LATER');
+  await assert.rejects(rpc('select public.soulvd_invitation_delivery($1,$2,$3) as result', [one, other, invite.invitationId]), /FORBIDDEN/);
+  await assert.rejects(rpc('select public.soulvd_accept_invitation($1,$2) as result', [other, invite.invitationId]), /FORBIDDEN/);
+  assert.equal(await rpc('select public.soulvd_revoke_invitation($1,$2,$3) as result', [one, owner, invite.invitationId]), true);
+  await assert.rejects(rpc('select public.soulvd_accept_invitation($1,$2) as result', [agent, invite.invitationId]), /INVITATION_EXPIRED/);
+  invite.invitationId = (await rpc('select public.soulvd_invite_member($1,$2,$3,$4) as result', [one, owner, 'agent@test.invalid', 'agent'])).invitationId;
   assert.equal((await rpc('select public.soulvd_invite_member($1,$2,$3,$4) as result', [one, owner, 'extra@test.invalid', 'agent'])).allowed, false);
   assert.equal(await rpc('select public.soulvd_accept_invitation($1,$2) as result', [agent, invite.invitationId]), true);
   assert.equal(await rpc('select public.soulvd_accept_invitation($1,$2) as result', [agent, invite.invitationId]), true);

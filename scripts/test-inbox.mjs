@@ -15,6 +15,11 @@ const historySource = ts.transpileModule(
 const { mergeRecentMessages } = await import(
   "data:text/javascript;base64," + Buffer.from(historySource).toString("base64")
 );
+const contactSource = ts.transpileModule(await readFile('src/lib/growth/contacts.ts', 'utf8'), {
+  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+}).outputText;
+const contactModule = 'data:text/javascript;base64,' + Buffer.from(contactSource).toString('base64');
+const { contactSearch } = await import(contactModule);
 const msg = (id, time, status = "received") => ({
   id,
   created_at: new Date(time).toISOString(),
@@ -92,6 +97,11 @@ try {
   await add(out, "outbound", "2026-09-02T00:00:00Z");
   await db.exec(await readFile("supabase/migrations/" + migration, "utf8"));
   await role(actor);
+  for (const input of ['0511111111', '٠٥١١١١١١١١', '+966 51 111 1111']) {
+    const search = contactSearch(input);
+    assert.equal(search.column, 'phone');
+    assert.equal(await q('select count(*)::int result from public.inbox_overview where phone ilike $1', ['%' + search.term + '%']), 1);
+  }
   assert.deepEqual(await counts(), { unread: 1, incoming: 1 });
   assert.equal(
     await q(
@@ -227,6 +237,7 @@ try {
       `import {NextResponse} from ${JSON.stringify(import.meta.resolve("next/server.js"))};`,
     )
     .replace(/from "zod"/, `from ${JSON.stringify(import.meta.resolve("zod"))}`)
+    .replace(/from "@\/lib\/growth\/contacts"/, `from ${JSON.stringify(contactModule)}`)
     .replace(
       /import \{ createClient \} from "@\/lib\/supabase\/server";/,
       "const createClient=async()=>({auth:{getUser:async()=>({data:{user:globalThis.inboxFixture.user}})}});",

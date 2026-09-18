@@ -21,6 +21,7 @@ import { useInbox } from "@/components/inbox/InboxProvider";
 import { mergeRecentMessages } from "@/lib/inbox/history";
 import { readConversation } from "@/lib/inbox/actions";
 import type { ChatMessage, Conversation } from "@/lib/inbox/types";
+import MessageMedia from '@/components/inbox/MessageMedia';
 const time = (date: string) =>
   new Intl.DateTimeFormat("ar-SA", {
     hour: "2-digit",
@@ -639,6 +640,7 @@ function Thread({
                   <div
                     className={`max-w-[88%] rounded-2xl px-3 py-2 shadow-sm sm:max-w-[78%] ${m.direction === "outbound" ? "rounded-tr-sm bg-[#dceccb]" : "rounded-tl-sm bg-white"}`}
                   >
+                    <MessageMedia message={m} />
                     <p
                       dir="auto"
                       className="whitespace-pre-wrap break-words text-[14px] leading-7 [overflow-wrap:anywhere]"

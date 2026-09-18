@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Script from "next/script";
 import Link from "next/link";
 import Inbox from "./Inbox";
-import { Send, Smile, LayoutTemplate, X } from "lucide-react";
+import { Send, Smile, LayoutTemplate, X, Paperclip } from "lucide-react";
 import { useInbox } from "@/components/inbox/InboxProvider";
 import {
   createTemplate,
@@ -62,6 +62,8 @@ export default function WhatsAppConsole({
   const inbox = useInbox();
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [emoji, setEmoji] = useState(false);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
   const settings = useRef<HTMLDialogElement>(null);
   const textarea = useRef<HTMLTextAreaElement>(null);
   const [result, setResult] = useState<ActionResult>();
@@ -167,8 +169,16 @@ export default function WhatsAppConsole({
     const key = kind === "message" ? messageKey : templateKey;
     key.current ||= crypto.randomUUID();
     try {
-      const response =
-        kind === "message"
+      let response: ActionResult;
+      if (kind === 'message' && attachment && !chosenTemplate) {
+        const payload = new FormData();
+        payload.set('file', attachment);
+        payload.set('to', recipient);
+        payload.set('caption', String(data.get('body') || ''));
+        payload.set('requestId', key.current);
+        const result = await fetch('/api/inbox/media', { method: 'POST', body: payload });
+        response = await result.json();
+      } else response = kind === "message"
           ? await sendMessage({
               requestId: key.current,
               to: String(data.get("to")),
@@ -194,6 +204,7 @@ export default function WhatsAppConsole({
         form.reset();
         if (kind === "message") {
           setSelectedTemplate("");
+          setAttachment(null);
           setDrafts((old) => ({ ...old, [recipient]: "" }));
           void inbox.refresh();
         }
@@ -261,7 +272,7 @@ export default function WhatsAppConsole({
         <LayoutTemplate size={14} />
         القوالب وإعدادات الربط
       </button>
-      <Inbox recipient={recipient} select={setRecipient}>
+      <Inbox recipient={recipient} select={phone => { setRecipient(phone); setAttachment(null); messageKey.current = ''; }}>
         <form
           onSubmit={(event) => void submit(event, "message")}
           className="space-y-2 text-sm"
@@ -278,7 +289,7 @@ export default function WhatsAppConsole({
                   name="templateId"
                   aria-label="نوع الرسالة أو القالب"
                   value={selectedTemplate}
-                  onChange={(e) => setSelectedTemplate(e.target.value)}
+                  onChange={(e) => { setSelectedTemplate(e.target.value); setAttachment(null); messageKey.current = ''; }}
                   className="min-w-0 rounded-lg bg-transparent py-2 text-xs"
                 >
                   <option value="">رد نصي</option>
@@ -328,6 +339,13 @@ export default function WhatsAppConsole({
             <div className="flex items-end gap-2">
               {!chosenTemplate && (
                 <>
+                  <input ref={fileInput} type="file" aria-label="اختيار مرفق" accept="image/jpeg,image/png,application/pdf,audio/mpeg,audio/ogg,audio/mp4,audio/aac,video/mp4" className="sr-only" onChange={event => {
+                    const file = event.target.files?.[0] ?? null;
+                    event.target.value = '';
+                    if (file && file.size > 3_800_000) { setResult({ ok: false, message: 'الحد الأقصى للمرفق 3.8 ميجابايت.' }); return; }
+                    setAttachment(file); messageKey.current = '';
+                  }} />
+                  <button type="button" aria-label="إرفاق ملف" onClick={() => fileInput.current?.click()} className="rounded-full p-2.5 text-ink-500 hover:bg-sage-100"><Paperclip size={22} /></button>
                   <div className="relative">
                     <button
                       type="button"
@@ -381,8 +399,8 @@ export default function WhatsAppConsole({
                       }
                     }}
                     placeholder="اكتب ردك…"
-                    required
-                    maxLength={4096}
+                    required={!attachment}
+                    maxLength={attachment ? 1024 : 4096}
                     rows={1}
                     className="max-h-28 min-h-12 min-w-0 flex-1 resize-y rounded-2xl border border-sage-200 bg-white px-4 py-3 text-sm outline-none focus:border-sage-500 focus:ring-2 focus:ring-sage-100"
                   />
@@ -401,6 +419,7 @@ export default function WhatsAppConsole({
               </button>
             </div>
           </fieldset>
+          {attachment && <div className="flex items-center justify-between gap-2 rounded-xl bg-white p-2 text-xs"><span className="truncate">{attachment.name} · {(attachment.size / 1_000_000).toFixed(1)} ميجابايت</span><button type="button" disabled={busy} onClick={() => { setAttachment(null); messageKey.current = ''; }} aria-label="إزالة المرفق"><X size={16} /></button></div>}
           {result && (
             <p
               role="status"
@@ -414,7 +433,7 @@ export default function WhatsAppConsole({
               ? "اربط رقم واتساب لتفعيل الإرسال."
               : chosenTemplate
                 ? "تُخصم تكلفة القالب من رصيد واتساب حسب التسعير."
-                : "Enter للإرسال · Shift + Enter لسطر جديد · الرد النصي خلال نافذة 24 ساعة"}
+                : "Enter للإرسال · Shift + Enter لسطر جديد · النص والمرفقات خلال نافذة 24 ساعة · حد المرفق 3.8 ميجابايت"}
           </p>
         </form>
       </Inbox>

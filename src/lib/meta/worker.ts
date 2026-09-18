@@ -13,10 +13,22 @@ export async function dispatchOne(id?: string) {
   const job = data as Job;
   let status = 'unknown', metaId: string | null = null, errorCode: string | null = null;
   try {
+    if (job.payload.media_file) {
+      const { data: media, error } = await db.rpc('soulvd_job_media', { p_job: job.id });
+      if (error || !media) throw new Error('MEDIA_UNAVAILABLE');
+      const signed = await db.storage.from('conversation-media').createSignedUrl(media.storage_path, 7200);
+      if (signed.error || !signed.data?.signedUrl) throw new Error('MEDIA_UNAVAILABLE');
+      const type = String(job.payload.type);
+      const item = { link: signed.data.signedUrl, ...(type !== 'audio' && job.payload.caption ? { caption: job.payload.caption } : {}), ...(type === 'document' ? { filename: media.filename } : {}) };
+      job.payload = { messaging_product: 'whatsapp', to: job.payload.to, type, [type]: item };
+    }
     if (job.provider === 'ycloud') {
       if (job.kind === 'message') {
         if (!job.phone) throw new YCloudError('PROVIDER_NUMBER_MISSING');
-        const result = await ycloud<{ id?: string }>('/whatsapp/messages/sendDirectly', { type: job.payload.type, text: job.payload.text, template: job.payload.template, from: job.phone, to: `+${job.payload.to}`, externalId: job.id });
+        const content = { ...job.payload };
+        delete content.messaging_product;
+        delete content.to;
+        const result = await ycloud<{ id?: string }>('/whatsapp/messages/sendDirectly', { ...content, from: job.phone, to: `+${job.payload.to}`, externalId: job.id });
         metaId = result.id ? `ycloud:${result.id}` : null;
       } else {
         const result = await ycloud<{ id?: string; name?: string }>('/whatsapp/templates', { ...job.payload, wabaId: job.waba_id });

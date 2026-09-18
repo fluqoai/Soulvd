@@ -6,10 +6,11 @@ import { LogIn, AlertCircle, Loader2 } from 'lucide-react';
 import { login, type LoginState } from '@/app/[locale]/(auth)/login/actions';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const initial: LoginState = { status: 'idle' };
 
-export function LoginForm() {
+export function LoginForm({ returnTo }: { returnTo?: string }) {
   const t = useTranslations('auth.login');
   const tErr = useTranslations('auth.errors');
   const [state, formAction, isPending] = useActionState<LoginState, FormData>(
@@ -21,6 +22,7 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="space-y-5" noValidate>
+      {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
       <Field
         name="email"
         type="email"
@@ -37,6 +39,7 @@ export function LoginForm() {
         required
         error={err('password')}
       />
+      <Link href="/forgot-password" className="block text-sm text-sage-800 underline">نسيت كلمة المرور؟</Link>
 
       {state.status === 'error' && state.error && (
         <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 p-3.5 text-sm text-red-800">

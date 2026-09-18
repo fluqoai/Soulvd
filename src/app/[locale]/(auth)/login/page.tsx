@@ -2,17 +2,21 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { Link } from "@/i18n/routing";
+import { invitationPath } from '@/lib/auth/return-path';
 
 export default async function LoginPage({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ next?: string }>;
 }) {
   // Force Arabic — the admin section is always Arabic, and the
   // login is the gateway to admin.
   setRequestLocale("ar");
   const t = await getTranslations("auth.login");
+  const returnTo = invitationPath((await searchParams).next);
 
   return (
     <div className="min-h-screen flex" dir="rtl" lang="ar">
@@ -36,7 +40,7 @@ export default async function LoginPage({
             {t("title")}
           </h1>
           <p className="text-base text-ink-600 mb-8">{t("subtitle")}</p>
-          <LoginForm />
+          <LoginForm returnTo={returnTo ?? undefined} />
           <p className="mt-6 text-center text-sm text-ink-600">
             جديد في Soulvd؟{" "}
             <Link

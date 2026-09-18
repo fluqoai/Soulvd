@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function SetPasswordPage() {
   const started = useRef(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [message, setMessage] = useState('جارٍ التحقق من رابط الدعوة…');
+  const [message, setMessage] = useState('جارٍ التحقق من الرابط…');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [busy, setBusy] = useState(false);
@@ -21,20 +21,23 @@ export default function SetPasswordPage() {
         const accessToken = params.get('access_token');
         const refreshToken = params.get('refresh_token');
         const type = params.get('type');
+        const code = new URLSearchParams(window.location.search).get('code');
         // Never fall back to another account already signed in in this browser.
-        if (!accessToken || !refreshToken || !['invite', 'recovery'].includes(type ?? '')) {
+        if (!code && (!accessToken || !refreshToken || !['invite', 'recovery'].includes(type ?? ''))) {
           throw new Error('Invalid invitation');
         }
         window.history.replaceState(null, '', window.location.pathname);
         const client = createClient();
-        const { data, error } = await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        const { data, error } = code
+          ? await client.auth.exchangeCodeForSession(code)
+          : await client.auth.setSession({ access_token: accessToken!, refresh_token: refreshToken! });
         if (error || !data.user) throw new Error('Invalid invitation');
         const verified = await client.auth.getUser();
         if (verified.error || verified.data.user?.id !== data.user.id) throw new Error('Invalid user');
         setUserId(data.user.id);
         setMessage(`عيّن كلمة مرور للحساب ${verified.data.user.email ?? ''}`);
       } catch {
-        setMessage('تعذر التحقق من الرابط. اطلب دعوة جديدة ثم افتح الرابط من بريدك.');
+        setMessage('الرابط منتهي أو غير صالح. اطلب رابطًا جديدًا وافتحه في المتصفح الذي طلبته منه.');
       }
     };
     void verify();
@@ -72,6 +75,7 @@ export default function SetPasswordPage() {
         <button disabled={busy} className="w-full rounded bg-sage-900 text-white p-3 disabled:opacity-50">{busy ? 'جارٍ الحفظ…' : 'حفظ كلمة المرور'}</button>
       </form>}
       <Link href="/login" className="mt-5 block text-sm underline">العودة إلى تسجيل الدخول</Link>
+      {!userId && <Link href="/forgot-password" className="mt-3 block text-sm underline">طلب رابط استعادة جديد</Link>}
     </div>
   </main>;
 }
