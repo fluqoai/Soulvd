@@ -11,6 +11,7 @@
 - Direct authenticated read from YCloud confirmed the existing owner number is `CONNECTED`, `isOnBizApp: true`, quality `GREEN`. This proves current number status, not onboarding entitlement or message delivery.
 - Real PostgreSQL transaction (`scripts/verify-launch-transaction.mjs`) verified payment amount validation, owner-only confirmation, idempotent confirmation/topup, subscription activation, monthly distinct-customer deduplication, the 2,000-customer cap, existing-customer access at the cap, simulated provider binding, message reservation, 15% markup settlement, duplicate receipt protection, and insufficient-wallet rejection. The entire transaction rolled back. No job became visible to workers and no real bank transfer/provider delivery occurred.
 - Live storage, internal email authorization, anonymous denial, and invitation reservation/cooldown/revocation rollback tests passed via `verify-repair-infrastructure.mjs`.
+- Changed-file ESLint, TypeScript and the production build passed after excluding the ignored scratch directory.
 
 ## Issues found and fixed in source
 
@@ -25,4 +26,4 @@
 - Onboarding a separate customer's authorized number. The existing number status and transaction fixture do not substitute for Meta authorization or a real YCloud Onboard Link.
 - Browser regression verification of the contract-form correction after deployment. Local Chrome navigation to `/app` was blocked by the browser (`ERR_BLOCKED_BY_CLIENT`); no bypass was attempted.
 
-No YCloud purchase was made. The checkout remained at Pro Monthly USD 118. The test account remains available for continued verification, with annual Growth selected but unpaid.
+No YCloud purchase was made. The checkout remained at Pro Monthly USD 118. The test account remains available for continued verification, with Growth selected but unpaid; annual and three-month selections were both saved during browser checks.
