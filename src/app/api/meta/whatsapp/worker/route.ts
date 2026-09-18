@@ -2,6 +2,7 @@ import { secretMatches } from "@/lib/meta/security";
 import { dispatchOne } from "@/lib/meta/worker";
 import { runStudioWorker } from "@/lib/studio/worker";
 import { reconcileWallet } from "@/lib/billing/wallet-worker";
+import { runCampaignWorker } from "@/lib/growth/worker";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
       runStudioWorker(),
       dispatchOne(),
       reconcileWallet(),
+      runCampaignWorker(),
     ]);
     if (result) results.push(result);
     return Response.json(

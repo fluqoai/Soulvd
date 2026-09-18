@@ -2,6 +2,7 @@ import { tenantUsage, currentMerchant } from '@/lib/tenancy/context';
 import { aiReady } from '@/lib/studio/worker';
 import { StudioHeader } from '../studio/ui';
 import Builder from './Builder';
+import Link from 'next/link';
 export default async function AutomationsPage() {
   const { context, plan, isActive } = await tenantUsage();
   const { db } = await currentMerchant();
@@ -65,6 +66,7 @@ export default async function AutomationsPage() {
         title="الأتمتة والبوت"
         description="صمّم ردودًا تعتمد على كلمات العميل، جهّز مساعدًا من معرفة نشاطك، وراجع كل تنفيذ من مكان واحد."
       />
+      <Link href="/app/guide?goal=automation" className="block rounded-2xl border border-sage-200 bg-sage-50 p-5 text-sm leading-7"><strong className="block text-lg">لا تعرف من أين تبدأ؟</strong>اختر وصفة ترحيب أو أسعار أو مواعيد، جرّبها، ثم احفظها كمسودة من الإعداد الموجّه ←</Link>
       <Builder
         flows={flows.data ?? []}
         settings={settings.data}

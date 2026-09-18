@@ -15,15 +15,21 @@ export default async function OnboardingAdmin() {
   if (profile?.role !== "owner") redirect("/admin");
   const admin = createAdminClient();
   const launch = await launchSettings();
-  const [requests, tenants] = await Promise.all([
+  const [requests, tenants, guides] = await Promise.all([
     admin
       .from("whatsapp_onboarding_requests")
       .select("id,tenant_id,phone,status,note,created_at,number_kind")
       .order("created_at", { ascending: false })
       .limit(100),
     admin.from("tenants").select("id,name"),
+    admin
+      .from("workspace_guides")
+      .select("tenant_id,data,submitted_at")
+      .not("submitted_at", "is", null)
+      .order("submitted_at", { ascending: false })
+      .limit(100),
   ]);
-  if (requests.error || tenants.error)
+  if (requests.error || tenants.error || guides.error)
     throw new Error("تعذر تحميل طلبات الربط.");
   const names = new Map(tenants.data.map((t) => [t.id, t.name]));
   const statuses: Record<string, string> = {
@@ -37,6 +43,33 @@ export default async function OnboardingAdmin() {
     <div className="mx-auto max-w-4xl space-y-6">
       <h1 className="text-3xl font-bold">طلبات ربط واتساب</h1>
       <LaunchForm {...launch} />
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold">طلبات تجهيز التكاملات</h2>
+        <p className="text-sm leading-7">
+          طلبات وصفية من العميل. راجع النطاق الفني والتواصل معه قبل طلب التحويل
+          أو إنشاء التكامل.
+        </p>
+        {!guides.data.length && (
+          <p className="text-sm text-ink-500">لا توجد طلبات مراجعة بعد.</p>
+        )}
+        {guides.data.map((g) => (
+          <article
+            key={g.tenant_id}
+            className="space-y-2 rounded-xl border bg-white p-5"
+          >
+            <h3 className="font-bold">{names.get(g.tenant_id)}</h3>
+            <p className="text-sm">
+              النظام: {String(g.data.system ?? "غير محدد")}
+            </p>
+            <p className="whitespace-pre-wrap text-sm leading-7">
+              {String(g.data.need ?? "")}
+            </p>
+            <p className="text-xs text-ink-500">
+              {new Date(g.submitted_at).toLocaleDateString("ar-SA")}
+            </p>
+          </article>
+        ))}
+      </section>
       <p className="text-sm leading-7">
         أنشئ Onboard Link للعميل من حساب YCloud ثم احفظه هنا. بعد تفويض العميل،
         طابق منشأته ورقمه وWABA قبل التحقق النهائي. لا تضف موظفي المنصة إلى فريق

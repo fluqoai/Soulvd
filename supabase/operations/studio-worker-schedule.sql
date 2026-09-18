@@ -9,7 +9,9 @@ language plpgsql security invoker set search_path='' as $$
 declare token text; request_id bigint; begin
  if not exists(select 1 from public.automation_runs where state in ('queued','processing'))
  and not exists(select 1 from public.crm_deliveries where (status='queued' and next_attempt_at<=now()) or status='processing')
- and not exists(select 1 from soulvd_private.meta_jobs where status in ('queued','processing')) then return null; end if;
+ and not exists(select 1 from soulvd_private.meta_jobs where status in ('queued','processing'))
+ and not exists(select 1 from public.campaigns where state='running')
+ and not exists(select 1 from soulvd_private.message_holds where state='held' and provider_id is not null and check_after<=now() and attempts<100) then return null; end if;
  select decrypted_secret into token from vault.decrypted_secrets where name='soulvd_worker_secret';
  if token is null then raise exception 'WORKER_SECRET_NOT_CONFIGURED'; end if;
  select net.http_post(

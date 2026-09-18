@@ -8,14 +8,15 @@
     "start": "next start",
     "lint": "eslint",
     "test:subscriptions": "node scripts/test-subscriptions.mjs",
-    "test:platform": "npm run test:subscriptions && npm run test:bank-transfers && npm run test:meta && npm run test:ycloud && npm run test:studio && npm run test:launch && npm run test:inbox && npm run test:onboarding",
+    "test:platform": "npm run test:subscriptions && npm run test:bank-transfers && npm run test:meta && npm run test:ycloud && npm run test:studio && npm run test:launch && npm run test:inbox && npm run test:onboarding && npm run test:growth",
     "test:onboarding": "node scripts/test-onboarding.mjs",
     "test:launch": "node scripts/test-launch.mjs",
     "test:meta": "node scripts/test-meta.mjs",
     "test:ycloud": "node scripts/test-ycloud.mjs",
     "test:studio": "node scripts/test-studio.mjs && node scripts/test-studio-worker.mjs && node scripts/test-studio-api.mjs",
     "test:bank-transfers": "node scripts/test-bank-transfers.mjs",
-    "test:inbox": "node scripts/test-inbox.mjs"
+    "test:inbox": "node scripts/test-inbox.mjs",
+    "test:growth": "node scripts/test-growth.mjs"
   },
   "dependencies": {
     "@openrouter/ai-sdk-provider": "3.0.0",

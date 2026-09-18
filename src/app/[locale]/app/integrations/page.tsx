@@ -26,6 +26,7 @@ export default async function IntegrationsPage() {
         title="التكاملات وAPI"
         description="اربط نظام شركتك بالمحادثات، وأرسل الرسائل من نظامك، واستقبل تحديثات الحالة في وجهة موثوقة."
       />
+      <Link href="/app/guide?goal=integration" className="block rounded-2xl border border-sage-200 bg-sage-50 p-5 text-sm leading-7"><strong className="block text-lg">تريد الربط ولا تعرف التفاصيل التقنية؟</strong>صف نظامك والنتيجة المطلوبة؛ نحفظ التجهيز ليُراجع قبل الاتفاق على نطاق الربط ورسومه ←</Link>
       {!available && (
         <p className={cardClass}>
           التكاملات متاحة مع اشتراك نمو نشط.{' '}

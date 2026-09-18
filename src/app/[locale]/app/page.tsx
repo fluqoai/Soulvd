@@ -13,6 +13,7 @@ import { tenantUsage, currentMerchant } from "@/lib/tenancy/context";
 import { PLANS } from "@/lib/billing/plans";
 import { UsageWidget } from "@/components/billing/UsageWidget";
 import SetupChecklist from "@/components/onboarding/SetupChecklist";
+import GoalLaunchpad from "@/components/onboarding/GoalLaunchpad";
 import { sar, termLabel } from "@/lib/billing/terms";
 
 export default async function MerchantOverview() {
@@ -70,6 +71,7 @@ export default async function MerchantOverview() {
             ابدأ بخطوة واحدة. نحفظ تقدمك، وتجد كل ما تحتاجه هنا.
           </p>
         </header>
+        <GoalLaunchpad />
         <SetupChecklist />
         <div className="grid gap-5 md:grid-cols-2">
           <section className="rounded-3xl border border-sage-100 bg-white p-6">
@@ -129,6 +131,7 @@ export default async function MerchantOverview() {
   return (
     <div className="space-y-7">
       <SetupChecklist />
+      <GoalLaunchpad />
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div>
           <p className="mb-2 text-sm text-ink-500">{context.name}</p>
