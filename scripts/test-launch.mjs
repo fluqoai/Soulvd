@@ -35,14 +35,29 @@ try {
   assert.equal(await rpc("soulvd_term_price", ["pro_growth_v1", 6]), 239400);
   assert.equal(await rpc("soulvd_term_price", ["starter_v1", 12]), 299000);
   assert.equal(await rpc("soulvd_term_price", ["pro_growth_v1", 12]), 399000);
-  const reviewSpace = await rpc('soulvd_meta_review_workspace', [owner]);
+  const reviewSpace = await rpc("soulvd_meta_review_workspace", [owner]);
   const testCredit = randomUUID();
-  await assert.rejects(rpc('soulvd_test_wallet_credit', [merchant, reviewSpace, testCredit, 100]), /TEST_STAFF_ONLY/);
-  await rpc('soulvd_test_wallet_credit', [owner, reviewSpace, testCredit, 100]);
-  await rpc('soulvd_test_wallet_credit', [owner, reviewSpace, testCredit, 100]);
-  assert.equal(await q('select balance_micro::text result from public.messaging_wallets where tenant_id=$1', [reviewSpace]), '1000000');
-  await assert.rejects(rpc('soulvd_test_wallet_credit', [owner, reviewSpace, testCredit, 200]), /REFERENCE_ALREADY_USED/);
-  await assert.rejects(rpc('soulvd_test_wallet_credit', [owner, reviewSpace, randomUUID(), 500]), /TEST_BUDGET_LIMIT/);
+  await assert.rejects(
+    rpc("soulvd_test_wallet_credit", [merchant, reviewSpace, testCredit, 100]),
+    /TEST_STAFF_ONLY/,
+  );
+  await rpc("soulvd_test_wallet_credit", [owner, reviewSpace, testCredit, 100]);
+  await rpc("soulvd_test_wallet_credit", [owner, reviewSpace, testCredit, 100]);
+  assert.equal(
+    await q(
+      "select balance_micro::text result from public.messaging_wallets where tenant_id=$1",
+      [reviewSpace],
+    ),
+    "1000000",
+  );
+  await assert.rejects(
+    rpc("soulvd_test_wallet_credit", [owner, reviewSpace, testCredit, 200]),
+    /REFERENCE_ALREADY_USED/,
+  );
+  await assert.rejects(
+    rpc("soulvd_test_wallet_credit", [owner, reviewSpace, randomUUID(), 500]),
+    /TEST_BUDGET_LIMIT/,
+  );
   await assert.rejects(
     rpc("soulvd_create_contract", [merchant, "Test", "starter_v1", 1]),
     /INVALID_TERM/,
@@ -72,6 +87,131 @@ try {
     "starter_v1",
     3,
   ]);
+  // New customers can prepare their workspace before commercial launch,
+  // but neither a pending contract nor a saved phone grants paid access.
+  assert.equal(
+    await q(
+      "select status result from public.subscriptions where tenant_id=$1",
+      [tenant],
+    ),
+    "pending",
+  );
+  await assert.rejects(
+    rpc("soulvd_request_payment", [merchant, tenant, "subscription", null]),
+    /PAYMENTS_NOT_READY/,
+  );
+  await assert.rejects(
+    rpc("soulvd_request_payment", [merchant, tenant, "wallet", 5000]),
+    /PAYMENTS_NOT_READY/,
+  );
+  await assert.rejects(
+    rpc("soulvd_set_launch_phase", [merchant, true, true, true]),
+    /FORBIDDEN/,
+  );
+  await assert.rejects(
+    rpc("soulvd_set_launch_phase", [owner, true, true, false]),
+    /ONBOARDING_REQUIRED_BEFORE_PAYMENTS/,
+  );
+  const prepared = await rpc("soulvd_prepare_connection", [
+    merchant,
+    tenant,
+    "+966500000009",
+    "business_app",
+  ]);
+  assert.equal(
+    await rpc("soulvd_prepare_connection", [
+      merchant,
+      tenant,
+      "+966500000009",
+      "business_app",
+    ]),
+    prepared,
+  );
+  await assert.rejects(
+    rpc("soulvd_prepare_connection", [
+      outsider,
+      tenant,
+      "+966500000009",
+      "business_app",
+    ]),
+    /FORBIDDEN/,
+  );
+  await assert.rejects(
+    rpc("soulvd_prepare_connection", [
+      merchant,
+      tenant,
+      "+966500000008",
+      "business_app",
+    ]),
+    /OPEN_CONNECTION_REQUEST/,
+  );
+  await assert.rejects(
+    rpc("soulvd_onboarding_link", [
+      owner,
+      prepared,
+      "https://www.ycloud.com/onboard/test",
+    ]),
+    /ONBOARDING_NOT_READY/,
+  );
+  await rpc("soulvd_restart_connection", [merchant, tenant, prepared]);
+  const newNumber = await rpc("soulvd_prepare_connection", [
+    merchant,
+    tenant,
+    "+966500000009",
+    "new_number",
+  ]);
+  await rpc("soulvd_set_launch_phase", [owner, true, false, true]);
+  await assert.rejects(
+    rpc("soulvd_onboarding_link", [
+      owner,
+      newNumber,
+      "https://www.ycloud.com/onboard/test",
+    ]),
+    /COEXISTENCE_REQUEST_REQUIRED/,
+  );
+  await rpc("soulvd_restart_connection", [merchant, tenant, newNumber]);
+  const retry = await rpc("soulvd_prepare_connection", [
+    merchant,
+    tenant,
+    "+966500000009",
+    "business_app",
+  ]);
+  await rpc("soulvd_onboarding_link", [
+    owner,
+    retry,
+    "https://www.ycloud.com/onboard/test",
+  ]);
+  await assert.rejects(
+    rpc("soulvd_restart_connection", [merchant, tenant, retry]),
+    /CONNECTION_ALREADY_STARTED/,
+  );
+  await assert.rejects(
+    rpc("soulvd_renew_connection_link", [merchant, tenant, retry]),
+    /LINK_NOT_EXPIRED/,
+  );
+  await db.query(
+    "update public.whatsapp_onboarding_requests set link_expires_at=now()-interval '1 minute' where id=$1",
+    [retry],
+  );
+  await assert.rejects(
+    rpc("soulvd_onboarding_ready", [merchant, tenant, retry]),
+    /LINK_EXPIRED_OR_NOT_READY/,
+  );
+  await assert.rejects(
+    rpc("soulvd_renew_connection_link", [outsider, tenant, retry]),
+    /FORBIDDEN/,
+  );
+  await rpc("soulvd_renew_connection_link", [merchant, tenant, retry]);
+  assert.equal(
+    await q(
+      "select onboarding_url result from public.whatsapp_onboarding_requests where id=$1",
+      [retry],
+    ),
+    null,
+  );
+  await rpc("soulvd_restart_connection", [merchant, tenant, retry]);
+  // The following original launch tests run against the enabled commercial phase.
+  await rpc("soulvd_set_launch_phase", [owner, true, true, true]);
   await assert.rejects(
     rpc("soulvd_request_payment", [outsider, tenant, "subscription", null]),
     /FORBIDDEN/,

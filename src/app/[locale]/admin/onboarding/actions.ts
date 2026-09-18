@@ -15,6 +15,10 @@ async function owner() {
   return data?.role === "owner" ? user : null;
 }
 const messages: Record<string, string> = {
+  ONBOARDING_NOT_READY:
+    "فعّل جاهزية الربط في إعداد مرحلة الإطلاق بعد التأكد من باقة المزود.",
+  COEXISTENCE_REQUEST_REQUIRED:
+    "رابط Pro مخصص لرقم واتساب الأعمال. يحتاج هذا الطلب إلى مسار آخر.",
   NUMBER_ALREADY_BOUND:
     "الرقم مربوط بمساحة أخرى. لا تنقله دون التحقق من الملكية.",
   PROVIDER_NUMBER_NOT_READY:
@@ -33,6 +37,29 @@ function finish(error: { message: string } | null, success: string) {
   revalidatePath("/[locale]/admin/onboarding", "page");
   revalidatePath("/[locale]/app", "layout");
   return { message: success };
+}
+export async function updateLaunchPhase(
+  _state: State,
+  form: FormData,
+): Promise<State> {
+  const user = await owner();
+  if (!user || form.get("verified") !== "on")
+    return { message: "متاح لمالك المنصة بعد مراجعة جاهزية المرحلة." };
+  const { error } = await createAdminClient().rpc("soulvd_set_launch_phase", {
+    p_actor: user.id,
+    p_signup: form.get("signup") === "on",
+    p_payments: form.get("payments") === "on",
+    p_onboarding: form.get("onboarding") === "on",
+  });
+  if (error)
+    return {
+      message:
+        error.message === "ONBOARDING_REQUIRED_BEFORE_PAYMENTS"
+          ? "فعّل جاهزية الربط قبل فتح الدفع."
+          : "تعذر حفظ مرحلة الإطلاق.",
+    };
+  revalidatePath("/[locale]/(auth)/signup", "page");
+  return finish(null, "تم تحديث مرحلة الإطلاق.");
 }
 export async function saveOnboardingLink(
   _state: State,

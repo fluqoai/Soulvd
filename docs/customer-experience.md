@@ -1,6 +1,6 @@
 # Customer experience release — 18 September 2026
 
-The public journey is home → plans → signup (with a visible selected plan and full upfront total) → email confirmation → workspace setup → verified bank transfer → assisted number connection → inbox. Public self-service signup remains gated by the existing launch readiness flag. This release does not enable signup, purchase provider channels, change customer contracts, fund wallets or enable AI.
+The initial release below used a gated signup and sequential payment flow. It is superseded by [guided customer setup](guided-customer-setup.md): workspace creation and preparation are available independently from provider activation and payment collection. The original inbox implementation and verification below remain applicable.
 
 ## Inbox and notifications
 

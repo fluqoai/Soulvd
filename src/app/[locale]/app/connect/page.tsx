@@ -1,127 +1,207 @@
 import Link from "next/link";
-import { currentMerchant, tenantUsage } from "@/lib/tenancy/context";
-import { ConnectionForm, ConnectionReady } from "./Forms";
+import {
+  CheckCircle2,
+  Clock3,
+  ExternalLink,
+  ShieldCheck,
+  Smartphone,
+} from "lucide-react";
+import { setupContext } from "@/lib/onboarding/context";
+import { connectionStage } from "@/lib/onboarding/journey";
+import SetupChecklist from "@/components/onboarding/SetupChecklist";
+import SetupRefresh from "@/components/onboarding/SetupRefresh";
+import { ConnectionForm, ConnectionReady, ConnectionRecovery } from "./Forms";
+
 export default async function ConnectPage() {
-  const { context, isActive, observedAt } = await tenantUsage();
-  const { db } = await currentMerchant();
-  const [numbers, request] = await Promise.all([
-    db
-      .from("whatsapp_numbers")
-      .select("phone,status")
-      .eq("tenant_id", context.tenantId),
-    db
-      .from("whatsapp_onboarding_requests")
-      .select("id,phone,status,onboarding_url,link_expires_at,note")
-      .eq("tenant_id", context.tenantId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ]);
-  if (numbers.error || request.error) throw new Error("تعذر تحميل طلب الربط.");
-  const connected = numbers.data.find((n) => n.status === "connected"),
-    r = request.data;
-  const canOpen =
-    r?.status === "awaiting_customer" &&
-    r.onboarding_url &&
-    r.link_expires_at &&
-    Date.parse(r.link_expires_at) > observedAt;
+  const {
+    context,
+    connected,
+    request: r,
+    launch,
+    isActive,
+    observedAt,
+  } = await setupContext();
+  const stage = connectionStage(
+    r,
+    Boolean(connected),
+    launch.onboarding,
+    observedAt,
+  );
+  const waiting = [
+    "review",
+    "waiting",
+    "preparing",
+    "authorize",
+    "assisted",
+  ].includes(stage);
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="text-3xl font-bold">اربط رقم واتساب للأعمال</h1>
-      <p className="leading-7 text-wood-600">
-        استمر في استخدام تطبيق واتساب للأعمال على جوالك، وأدر المحادثات من
-        Soulvd بعد إكمال التفويض والتحقق.
-      </p>
-      <ol className="grid gap-3 sm:grid-cols-3">
-        {[
-          "1. اطلب رابط الربط",
-          "2. فوّض الرقم وحساب الأعمال",
-          "3. نتحقق ونربطه بمساحتك",
-        ].map((label) => (
-          <li key={label} className="rounded-xl border bg-white p-4 text-sm">
-            {label}
-          </li>
-        ))}
-      </ol>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <SetupChecklist compact />
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="mb-2 text-xs font-semibold text-sage-600">
+            واتساب نشاطك، داخل سولفد
+          </p>
+          <h1 className="text-3xl font-bold">اربط رقمك بخطوات واضحة</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-ink-500">
+            احفظ رقمك أولًا. نرشدك إلى مسار التفويض المناسب، وتظهر حالة الربط
+            هنا حتى اكتماله.
+          </p>
+        </div>
+        <SetupRefresh watch={waiting} />
+      </header>
       {connected ? (
-        <section className="space-y-3 rounded-xl border border-sage-300 bg-sage-50 p-5">
-          <h2 className="font-bold">الرقم متصل</h2>
-          <bdi>{connected.phone}</bdi>
-          <div className="flex flex-wrap gap-4 text-sm">
-            <Link href="/app/whatsapp" className="underline">
-              فتح المحادثات
-            </Link>
-            <Link href="/app/wallet" className="underline">
-              رصيد واتساب
-            </Link>
-            <Link href="/app/readiness" className="underline">
-              اختبار الربط
-            </Link>
-          </div>
+        <section className="rounded-3xl border border-sage-200 bg-white p-7">
+          <CheckCircle2 size={36} className="mb-4 text-sage-600" />
+          <h2 className="text-xl font-bold">واتساب متصل بمساحتك</h2>
+          <p dir="ltr" className="my-4 text-right text-xl font-semibold">
+            {connected.phone}
+          </p>
+          <p className="mb-5 text-sm leading-7 text-ink-500">
+            {isActive
+              ? "أرسل رسالة من رقم آخر إلى رقم نشاطك، ثم افتح المحادثات للرد. يتطلب الإرسال رصيدًا كافيًا عند وجود رسوم."
+              : "اكتمل ربط الرقم. فعّل باقتك لبدء المراسلة."}
+          </p>
+          <Link
+            href={isActive ? "/app/whatsapp" : "/app/billing"}
+            className="inline-flex rounded-xl bg-sage-900 px-5 py-3 text-sm text-white"
+          >
+            {isActive ? "فتح صندوق المحادثات" : "متابعة الاشتراك"}
+          </Link>
         </section>
       ) : context.role !== "owner" ? (
-        <p>يتولى مالك مساحة العمل طلب الربط.</p>
-      ) : !isActive ? (
-        <p>
-          فعّل الاشتراك من{" "}
-          <Link href="/app/billing" className="underline">
-            صفحة الباقة
-          </Link>{" "}
-          أولًا.
-        </p>
-      ) : !r || r.status === "rejected" ? (
+        <section className="rounded-2xl border bg-white p-6">
+          يتولى مالك مساحة العمل ربط رقم المنشأة. يمكنك استكشاف الواجهة من
+          القائمة.
+        </section>
+      ) : stage === "choose" ? (
         <>
-          {r?.note && <p role="status">ملاحظة المراجعة: {r.note}</p>}
+          {r?.note && (
+            <p role="status" className="rounded-xl bg-amber-50 p-4 text-sm">
+              ملاحظة على الطلب السابق: {r.note}
+            </p>
+          )}
           <ConnectionForm />
         </>
       ) : (
-        <section className="space-y-4 rounded-xl border bg-white p-5">
-          <p>
-            الرقم المطلوب: <bdi>{r.phone}</bdi>
-          </p>
-          <h2 className="font-bold">
-            {r.status === "awaiting_link"
-              ? "نجهز رابط التفويض"
-              : r.status === "review"
-                ? "نتحقق من الرقم والربط"
-                : "أكمل التفويض"}
-          </h2>
-          {canOpen ? (
-            <>
-              <p className="text-sm leading-7">
-                يفتح الرابط صفحة مزود الربط ثم تفويض Meta. قد يظهر اسم المزود في
-                هذه الخطوة. استخدم الرقم المذكور أعلاه، واختر الربط مع تطبيق
-                واتساب للأعمال؛ لا تحذف حساب واتساب من جوالك.
+        <section className="overflow-hidden rounded-3xl border border-sage-200 bg-white">
+          <div className="flex items-center gap-3 border-b border-sage-100 bg-sage-50/50 p-5">
+            <Smartphone size={24} className="text-sage-700" />
+            <div>
+              <p className="text-xs text-ink-500">رقم نشاطك المحفوظ</p>
+              <p dir="ltr" className="mt-1 font-semibold">
+                {r?.phone}
               </p>
-              <a
-                href={r.onboarding_url!}
-                target="_blank"
-                rel="noopener noreferrer"
-                referrerPolicy="no-referrer"
-                className="inline-block rounded-xl border border-sage-400 px-5 py-3"
-              >
-                فتح رابط التفويض
-              </a>
-              <ConnectionReady id={r.id} />
-            </>
-          ) : r.status === "awaiting_customer" ? (
-            <p>انتهت صلاحية الرابط. تواصل مع الدعم لإعادة تجهيزه.</p>
-          ) : (
-            <p className="text-sm">
-              سيظهر التحديث هنا بعد مراجعة الإدارة. لا تحتاج حسابًا منفصلًا
-              لإدارة المحادثات.
-            </p>
-          )}
+            </div>
+            <span className="ms-auto rounded-full bg-white px-3 py-1 text-xs text-sage-700">
+              {r?.number_kind === "business_app"
+                ? "واتساب أعمال"
+                : r?.number_kind === "new_number"
+                  ? "رقم جديد"
+                  : "مزود آخر"}
+            </span>
+          </div>
+          <div className="space-y-5 p-6 sm:p-8">
+            {stage === "authorize" && r ? (
+              <>
+                <h2 className="text-xl font-bold">خطوتك الآن: تفويض الرقم</h2>
+                <p className="text-sm leading-7 text-ink-500">
+                  جهّز جوالك الذي يستخدم واتساب الأعمال. يفتح الزر صفحة الربط
+                  الآمن ثم خطوات Meta؛ قد يظهر اسم مزود الربط هناك. بعد
+                  الانتهاء، عد إلى هذه الصفحة وأكّد إكمال التفويض.
+                </p>
+                <ol className="space-y-3 text-sm leading-7">
+                  <li>1. استخدم الرقم المحفوظ أعلاه وحساب أعمال منشأتك.</li>
+                  <li>
+                    2. اختر ربط تطبيق WhatsApp Business واتبع التحقق الذي يظهر.
+                  </li>
+                  <li>
+                    3. أبقِ حساب واتساب على جوالك؛ لا تحذفه لإتمام الربط
+                    المتزامن.
+                  </li>
+                </ol>
+                <a
+                  href={r.onboarding_url!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  referrerPolicy="no-referrer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-sage-900 px-5 py-3 text-sm font-semibold text-white"
+                >
+                  ابدأ الربط الآمن
+                  <ExternalLink size={16} />
+                </a>
+                <p className="text-xs text-ink-500">
+                  يفتح في نافذة جديدة. يمكنك متابعة هذه الخطوة لاحقًا ما دام
+                  الرابط صالحًا.
+                </p>
+                <ConnectionReady id={r.id} />
+              </>
+            ) : (
+              <>
+                <Clock3 size={30} className="text-sage-600" />
+                <h2 className="text-xl font-bold">
+                  {
+                    {
+                      authorize: "أكمل التفويض",
+                      connected: "راجع حالة الرقم",
+                      preparing: "رقمك محفوظ، ومساحتك جاهزة للتجهيز",
+                      waiting: "نجهّز خطوة التفويض",
+                      assisted: "حفظنا رقمك للمسار المناسب",
+                      review: "اكتمل طلبك، نتحقق من الربط",
+                      expired: "لنجهّز لك رابطًا جديدًا",
+                      disconnected: "الرقم يحتاج متابعة الاتصال",
+                    }[stage]
+                  }
+                </h2>
+                <p className="text-sm leading-8 text-ink-500">
+                  {
+                    {
+                      authorize: "أكمل التفويض",
+                      connected: "راجع حالة الرقم",
+                      preparing:
+                        "تفعيل الربط للمنشآت الجديدة متاح قريبًا. لا يلزمك الدفع الآن، ولا إعادة إدخال رقمك. استكشف صندوق المحادثات واختر الباقة أثناء تجهيز الخدمة.",
+                      waiting:
+                        "سيظهر زر التفويض في هذه الصفحة بعد تجهيز رابط منشأتك. بياناتك محفوظة ولا تحتاج إلى إعادة الطلب.",
+                      assisted:
+                        "هذا الرقم يحتاج مسارًا مختلفًا عن ربط تطبيق واتساب الأعمال. سيراجع الفريق متطلبات الرقم الجديد أو النقل من المزود الحالي؛ لا تحذف حسابك أو تفصل مزودك الآن.",
+                      review:
+                        "نتحقق من حالة الرقم وارتباطه بمنشأتك قبل فتح المحادثات. تأكيد إكمال التفويض وحده لا يعني اكتمال الاتصال. تتحدث هذه الصفحة تلقائيًا أثناء فتحها.",
+                      expired:
+                        "انتهت صلاحية رابط التفويض. اطلب تجديده من الزر أدناه؛ تظل بيانات رقمك محفوظة.",
+                      disconnected:
+                        "طلب الربط مسجل، لكن الرقم لا يظهر متصلًا حاليًا. حدّث الحالة أو تواصل مع الدعم لمراجعة الاتصال.",
+                    }[stage]
+                  }
+                </p>
+                {r && (stage === "expired" || r.status === "awaiting_link") && (
+                  <ConnectionRecovery id={r.id} expired={stage === "expired"} />
+                )}
+              </>
+            )}
+          </div>
         </section>
       )}
-      <p className="text-sm leading-7 text-wood-600">
-        المسار الحالي للأرقام المستخدمة في تطبيق WhatsApp Business والمؤهلة
-        للربط المتزامن. للأرقام الجديدة أو لتعديل طلبك{" "}
-        <Link href="/contact" className="underline">
-          تواصل معنا
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Link
+          href="/app/explore"
+          className="rounded-2xl border border-sage-100 bg-white p-5"
+        >
+          <h2 className="font-bold">استكشف قبل الربط ←</h2>
+          <p className="mt-2 text-sm leading-7 text-ink-500">
+            جرّب الردود في صندوق توضيحي دون إرسال أي رسالة حقيقية.
+          </p>
         </Link>
-        .
-      </p>
+        <div className="rounded-2xl border border-sage-100 bg-white p-5">
+          <ShieldCheck size={20} className="mb-2 text-sage-600" />
+          <h2 className="font-bold">بيانات منشأتك في مساحتها</h2>
+          <p className="mt-2 text-sm leading-7 text-ink-500">
+            المحادثات متاحة لأعضاء فريقك المصرّح لهم.{" "}
+            <Link href="/contact" className="underline">
+              تحتاج مساعدة؟
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

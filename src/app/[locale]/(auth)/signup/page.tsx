@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import OnboardingSteps from "@/components/billing/OnboardingSteps";
 import { PLANS } from "@/lib/billing/plans";
 import { termTotal, termLabel, sar } from "@/lib/billing/terms";
 import SignupForm from "./SignupForm";
 import { signupsReady } from "@/lib/billing/launch";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 export const metadata = {
   title: "إنشاء حساب | Soulvd",
   robots: { index: false, follow: false },
@@ -15,6 +16,11 @@ export default async function SignupPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
+  const db = await createClient();
+  const {
+    data: { user },
+  } = await db.auth.getUser();
+  if (user) redirect("/app");
   const plan = params.plan === "starter_v1" ? "starter_v1" : "pro_growth_v1";
   const months = [3, 6, 12].includes(Number(params.months))
     ? Number(params.months)
@@ -36,15 +42,20 @@ export default async function SignupPage({
             priority
           />
         </Link>
-        <h1 className="mb-3 mt-7 text-2xl font-bold">ابدأ مساحة عملك</h1>
+        <h1 className="mb-3 mt-7 text-2xl font-bold">مساحتك تبدأ من هنا</h1>
         <p className="mb-7 text-sm leading-7 text-ink-500">
-          اختيارك محفوظ أدناه. أكّد بريدك وجهّز مساحة منشأتك. يبدأ الاشتراك بعد
-          تأكيد التحويل البنكي؛ إنشاء الحساب لا يخصم أي مبلغ.
+          أنشئ حسابك، أكّد بريدك، وادخل مباشرة إلى لوحة منشأتك. يمكنك استكشاف
+          التجربة وتجهيز رقمك قبل الدفع.
         </p>
         <div className="mb-7">
-          <OnboardingSteps current={0} />
+          <p className="rounded-xl bg-sage-50 p-3 text-center text-xs text-sage-700">
+            إنشاء الحساب ← تأكيد البريد ← مساحتك الخاصة
+          </p>
         </div>
-        <div className="mb-6 rounded-2xl border border-sage-200 bg-sage-50 p-4 text-sm">
+        <details className="mb-6 rounded-2xl border border-sage-200 bg-sage-50 p-4 text-sm">
+          <summary className="cursor-pointer font-semibold">
+            اختيارك: {chosen.name} · {termLabel(months)}
+          </summary>
           <div className="flex justify-between gap-2">
             <h2 className="font-bold">{chosen.name}</h2>
             <Link href="/plans" className="text-xs underline">
@@ -58,9 +69,9 @@ export default async function SignupPage({
             {sar(termTotal(chosen.priceSar, months))} ريال تُدفع مقدمًا
           </p>
           <p className="mt-1 text-xs text-ink-500">
-            لا يُطلب تحويل عند إنشاء الحساب.
+            اختيار مبدئي يمكنك تغييره داخل مساحتك. لا دفع لإنشاء الحساب.
           </p>
-        </div>
+        </details>
         {(await signupsReady()) ? (
           <SignupForm plan={plan} months={months} />
         ) : (

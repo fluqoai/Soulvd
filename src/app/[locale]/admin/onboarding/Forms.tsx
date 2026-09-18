@@ -4,9 +4,11 @@ import { saveOnboardingLink, verifyAndBind, rejectOnboarding } from "./actions";
 export default function OnboardingAdminForms({
   id,
   status,
+  coexistence = true,
 }: {
   id: string;
   status: string;
+  coexistence?: boolean;
 }) {
   const [link, linkAction, linkBusy] = useActionState(saveOnboardingLink, {}),
     [bind, bindAction, bindBusy] = useActionState(verifyAndBind, {}),
@@ -14,24 +16,26 @@ export default function OnboardingAdminForms({
   if (["connected", "rejected"].includes(status)) return null;
   return (
     <div className="mt-5 space-y-6">
-      <form action={linkAction} className="space-y-3">
-        <input type="hidden" name="id" value={id} />
-        <label className="block">
-          رابط Onboard Link المخصص لهذا العميل
-          <input
-            name="url"
-            type="url"
-            required
-            maxLength={2000}
-            className="mt-2 w-full rounded border p-3"
-          />
-        </label>
-        <button disabled={linkBusy} className="rounded border px-4 py-2">
-          حفظ رابط التفويض
-        </button>
-        {link.message && <p role="status">{link.message}</p>}
-      </form>
-      {status === "review" && (
+      {coexistence && (
+        <form action={linkAction} className="space-y-3">
+          <input type="hidden" name="id" value={id} />
+          <label className="block">
+            رابط Onboard Link المخصص لهذا العميل
+            <input
+              name="url"
+              type="url"
+              required
+              maxLength={2000}
+              className="mt-2 w-full rounded border p-3"
+            />
+          </label>
+          <button disabled={linkBusy} className="rounded border px-4 py-2">
+            حفظ رابط التفويض
+          </button>
+          {link.message && <p role="status">{link.message}</p>}
+        </form>
+      )}
+      {coexistence && status === "review" && (
         <form action={bindAction} className="space-y-3">
           <input type="hidden" name="id" value={id} />
           <label className="block">

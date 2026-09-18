@@ -64,8 +64,8 @@ export async function Header() {
           >
             {locale === "ar" ? "دخول المنصة" : "Sign in"}
           </Link>
-          <ButtonLink href="/plans" size="sm">
-            {locale === "ar" ? "اختر باقتك" : "View plans"}
+          <ButtonLink href="/signup" size="sm">
+            {locale === "ar" ? "أنشئ مساحتك" : "Create your workspace"}
           </ButtonLink>
           <MobileMenu
             items={[

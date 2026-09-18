@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { signupsReady } from "@/lib/billing/launch";
 
-export type SignupState = { sent?: boolean; message?: string };
+export type SignupState = { sent?: boolean; message?: string; email?: string };
 export async function signup(
   _previous: SignupState,
   form: FormData,
@@ -17,24 +17,23 @@ export async function signup(
     .object({
       email: z.email().max(254),
       full_name: z.string().trim().min(2).max(80),
+      business_name: z.string().trim().min(2).max(120),
       password: z.string().min(12).max(128),
-      confirmation: z.string(),
       terms: z.literal("on"),
     })
-    .refine((v) => v.password === v.confirmation)
     .safeParse({
       email: String(form.get("email") ?? "")
         .trim()
         .toLowerCase(),
       full_name: form.get("full_name"),
+      business_name: form.get("business_name"),
       password: form.get("password"),
-      confirmation: form.get("confirmation"),
       terms: form.get("terms"),
     });
   if (!parsed.success)
     return {
       message:
-        "راجع الاسم والبريد، واستخدم كلمة مرور من 12 حرفًا على الأقل مع تأكيد مطابق والموافقة على الشروط.",
+        "راجع اسمك واسم المنشأة والبريد، واستخدم كلمة مرور من 12 حرفًا على الأقل ووافق على الشروط.",
     };
   const db = await createClient();
   const current = await db.auth.getUser();
@@ -50,6 +49,7 @@ export async function signup(
       emailRedirectTo: "https://www.soulvd.sa/api/auth/confirm",
       data: {
         full_name: parsed.data.full_name,
+        business_name: parsed.data.business_name,
         preferred_plan:
           form.get("plan") === "starter_v1" ? "starter_v1" : "pro_growth_v1",
         preferred_months: [3, 6, 12].includes(Number(form.get("months")))
@@ -71,7 +71,36 @@ export async function signup(
   if (data.session) await db.auth.signOut();
   return {
     sent: true,
+    email: parsed.data.email,
     message:
-      "إذا كان البريد مؤهلًا للتسجيل، ستصلك رسالة تأكيد. افتحها ثم سجّل الدخول لاختيار باقتك. إذا كان لديك حساب بالفعل، استخدم صفحة الدخول.",
+      "إذا كان البريد مؤهلًا للتسجيل، ستصلك رسالة تأكيد تفتح مساحتك وتكمل تجهيزها. إذا كان لديك حساب بالفعل، استخدم صفحة الدخول.",
+  };
+}
+
+export async function resendSignup(
+  _previous: SignupState,
+  form: FormData,
+): Promise<SignupState> {
+  const email = z
+    .email()
+    .max(254)
+    .safeParse(
+      String(form.get("email") ?? "")
+        .trim()
+        .toLowerCase(),
+    );
+  if (!email.success || !(await signupsReady()))
+    return { message: "تعذر طلب رسالة التأكيد الآن." };
+  const db = await createClient();
+  const { error } = await db.auth.resend({
+    type: "signup",
+    email: email.data,
+    options: { emailRedirectTo: "https://www.soulvd.sa/api/auth/confirm" },
+  });
+  return {
+    message:
+      error?.status === 429
+        ? "انتظر قليلًا قبل طلب رسالة أخرى."
+        : "إذا كان حسابك ينتظر تأكيد البريد، ستصلك رسالة جديدة. للحساب المؤكد بالفعل، استخدم تسجيل الدخول.",
   };
 }

@@ -3,6 +3,7 @@ import { CheckCircle2, ArrowUpLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { tenantUsage } from "@/lib/tenancy/context";
 import WhatsAppConsole from "./Console";
+import InboxDemo from "@/components/onboarding/InboxDemo";
 
 export default async function WhatsAppPage({
   searchParams,
@@ -28,6 +29,25 @@ export default async function WhatsAppPage({
   if ([numbers, templates].some((r) => r.error))
     throw new Error("تعذر تحميل محادثات واتساب.");
   const connected = numbers.data?.find((n) => n.status === "connected");
+  if (!connected && !context.isTest)
+    return (
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-3xl space-y-5 p-2">
+          <h1 className="text-2xl font-bold">صندوقك جاهز لأول محادثة</h1>
+          <p className="text-sm leading-7 text-ink-500">
+            اربط رقم نشاطك وفعّل اشتراكك لاستقبال رسائل عملائك. إلى ذلك الحين،
+            جرّب الرد في المحادثة التوضيحية أدناه.
+          </p>
+          <Link
+            href="/app/connect"
+            className="inline-flex rounded-xl bg-sage-900 px-5 py-3 text-sm text-white"
+          >
+            متابعة ربط واتساب
+          </Link>
+          <InboxDemo />
+        </div>
+      </div>
+    );
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
       <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs">

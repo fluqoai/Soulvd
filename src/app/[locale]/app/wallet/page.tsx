@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { currentMerchant, requireTenant } from "@/lib/tenancy/context";
+import { currentMerchant, tenantUsage } from "@/lib/tenancy/context";
+import { launchSettings } from "@/lib/billing/launch";
 import { sar } from "@/lib/billing/terms";
 import BankDetails from "@/components/billing/BankDetails";
 import {
@@ -8,7 +9,8 @@ import {
 } from "@/components/billing/PaymentForms";
 import { paymentRequests } from "../billing/actions";
 export default async function WalletPage() {
-  const context = await requireTenant();
+  const { context, isActive } = await tenantUsage();
+  const launch = await launchSettings();
   const { db } = await currentMerchant();
   const [wallet, ledger, requests] = await Promise.all([
     db
@@ -31,7 +33,10 @@ export default async function WalletPage() {
     (r) =>
       r.purpose === "wallet" && ["pending", "submitted"].includes(r.status),
   );
-  const canManage = context.role === "owner" && !context.isTest;
+  const canManage =
+    context.role === "owner" &&
+    !context.isTest &&
+    (launch.payments || isActive);
   return (
     <div className="space-y-6">
       <header>
@@ -84,6 +89,12 @@ export default async function WalletPage() {
           الإدارة قبل إرسال رسائل مدفوعة.
         </p>
       )}
+      {!launch.payments && !isActive && !context.isTest && (
+        <p className="rounded-2xl bg-sage-50 p-5 text-sm leading-7">
+          لا تحتاج شحن الرصيد أثناء تجهيز المساحة. يصبح الشحن متاحًا عند فتح
+          تفعيل الخدمة.
+        </p>
+      )}
       {canManage && (
         <>
           <BankDetails />
@@ -105,7 +116,12 @@ export default async function WalletPage() {
               className="flex flex-wrap justify-between gap-3 py-3 text-sm"
             >
               <span>
-                {row.kind === "topup" ? "شحن مؤكد" : row.kind === "test_credit" ? "ميزانية اختبار من المنصة" : "تكلفة رسالة"} ·{" "}
+                {row.kind === "topup"
+                  ? "شحن مؤكد"
+                  : row.kind === "test_credit"
+                    ? "ميزانية اختبار من المنصة"
+                    : "تكلفة رسالة"}{" "}
+                ·{" "}
                 {new Date(row.created_at).toLocaleString("ar-SA", {
                   calendar: "gregory",
                   timeZone: "Asia/Riyadh",

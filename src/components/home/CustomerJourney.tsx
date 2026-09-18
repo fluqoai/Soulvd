@@ -13,17 +13,17 @@ export async function CustomerJourney() {
   const ar = (await getLocale()) === "ar";
   const steps = ar
     ? [
-        "اختر باقتك",
         "أنشئ حسابك وأكّد بريدك",
-        "أكمل التحويل",
-        "اربط رقم واتساب",
+        "استكشف مساحتك",
+        "جهّز رقم واتساب",
+        "اختر باقتك وفعّلها",
         "ابدأ المحادثات",
       ]
     : [
-        "Choose your plan",
         "Create and verify your account",
-        "Complete the transfer",
-        "Connect WhatsApp",
+        "Explore your workspace",
+        "Prepare your WhatsApp number",
+        "Choose and activate your plan",
         "Start conversations",
       ];
   const features = ar

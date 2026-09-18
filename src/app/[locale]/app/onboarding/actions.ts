@@ -27,5 +27,5 @@ export async function createWorkspace(
     p_months: parsed.data.months,
   });
   if (error) return { error: "تعذر إنشاء مساحة العمل. تواصل مع الدعم." };
-  redirect("/app/billing");
+  redirect("/app");
 }

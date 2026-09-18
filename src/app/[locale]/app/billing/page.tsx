@@ -2,7 +2,8 @@ import Link from "next/link";
 import { tenantUsage } from "@/lib/tenancy/context";
 import { PLANS } from "@/lib/billing/plans";
 import { sar, termLabel } from "@/lib/billing/terms";
-import OnboardingSteps from "@/components/billing/OnboardingSteps";
+import SetupChecklist from "@/components/onboarding/SetupChecklist";
+import { launchSettings } from "@/lib/billing/launch";
 import BankDetails from "@/components/billing/BankDetails";
 import {
   ContractForm,
@@ -18,6 +19,7 @@ const statuses = {
 };
 export default async function BillingPage() {
   const { context, subscription: s, plan, isActive } = await tenantUsage();
+  const launch = await launchSettings();
   const requests = (await paymentRequests()).filter(
     (r) => r.purpose !== "wallet",
   );
@@ -27,6 +29,7 @@ export default async function BillingPage() {
   const manage = context.role === "owner" && !context.isTest;
   return (
     <div className="space-y-6">
+      <SetupChecklist compact />
       <section className="space-y-4 rounded-2xl border border-sage-200 bg-white p-6">
         <h1 className="text-3xl font-bold">الباقة والاشتراك</h1>
         <h2 className="text-xl">
@@ -71,21 +74,24 @@ export default async function BillingPage() {
       </section>
       {!context.isTest && (
         <section className="rounded-2xl border border-sage-100 bg-white p-6">
-          <OnboardingSteps current={isActive ? 3 : 2} />
           <div className="mt-6 rounded-xl bg-sage-50 p-4 text-sm leading-7">
             <h2 className="font-bold">
               {isActive
                 ? "اشتراكك مفعّل"
-                : open.some((r) => r.status === "submitted")
-                  ? "تحويلك قيد المراجعة"
-                  : "الخطوة التالية: تأكيد الدفع"}
+                : !launch.payments
+                  ? "اختر الآن، وفعّل لاحقًا"
+                  : open.some((r) => r.status === "submitted")
+                    ? "تحويلك قيد المراجعة"
+                    : "الخطوة التالية: تأكيد الدفع"}
             </h2>
             <p className="mt-1 text-ink-500">
               {isActive
                 ? "انتقل لربط رقم واتساب وتجهيز أول محادثة. يمكنك مراجعة حالة طلب الربط في أي وقت."
-                : open.some((r) => r.status === "submitted")
-                  ? "استلمنا مرجع التحويل. تتأكد الإدارة من وصول المبلغ قبل تفعيل الاشتراك؛ لا ترسل تحويلًا آخر لنفس الطلب."
-                  : "أنشئ طلب الدفع بالباقة والمدة المختارتين، ثم حوّل المبلغ وأدخل مرجع العملية. سيظهر إجمالي الطلب وبيانات المستفيد قبل التحويل."}
+                : !launch.payments
+                  ? "أنت في مرحلة تجهيز مساحتك. يمكنك تغيير الباقة والمدة أدناه وحفظ اختيارك. لا تحوّل أي مبلغ الآن؛ يظهر طلب الدفع عند فتح التفعيل."
+                  : open.some((r) => r.status === "submitted")
+                    ? "استلمنا مرجع التحويل. تتأكد الإدارة من وصول المبلغ قبل تفعيل الاشتراك؛ لا ترسل تحويلًا آخر لنفس الطلب."
+                    : "أنشئ طلب الدفع بالباقة والمدة المختارتين، ثم حوّل المبلغ وأدخل مرجع العملية. سيظهر إجمالي الطلب وبيانات المستفيد قبل التحويل."}
             </p>
             {isActive && (
               <Link
@@ -113,7 +119,7 @@ export default async function BillingPage() {
               <ContractForm plan={s.plan_id} months={s.billing_months} />
             </div>
           </details>
-          <RequestPayment purpose="subscription" />
+          {launch.payments && <RequestPayment purpose="subscription" />}
         </>
       )}
       {manage && open.some((r) => r.status === "pending") && <BankDetails />}

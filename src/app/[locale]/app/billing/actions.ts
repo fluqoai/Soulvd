@@ -5,6 +5,8 @@ import { currentMerchant, requireTenant } from "@/lib/tenancy/context";
 import { createAdminClient } from "@/lib/supabase/admin";
 export type PaymentState = { message?: string };
 const errors: Record<string, string> = {
+  PAYMENTS_NOT_READY:
+    "مساحتك في مرحلة التجهيز. سنتيح طلب التحويل بعد فتح التفعيل؛ لا تحوّل أي مبلغ الآن.",
   TEST_WORKSPACE: "هذه مساحة اختبار؛ لا تُسجل عليها دفعات العملاء.",
   QUOTE_EXPIRED:
     "انتهت صلاحية الطلب. ألغِ الطلب غير المدفوع وأنشئ طلبًا جديدًا.",

@@ -12,6 +12,8 @@ import {
 import { tenantUsage, currentMerchant } from "@/lib/tenancy/context";
 import { PLANS } from "@/lib/billing/plans";
 import { UsageWidget } from "@/components/billing/UsageWidget";
+import SetupChecklist from "@/components/onboarding/SetupChecklist";
+import { sar, termLabel } from "@/lib/billing/terms";
 
 export default async function MerchantOverview() {
   const {
@@ -58,6 +60,52 @@ export default async function MerchantOverview() {
   if ([numbers, inbound, outbound, drafts, bot].some((r) => r.error))
     throw new Error("تعذر تحميل ملخص النشاط.");
   const number = numbers.data?.find((n) => n.status === "connected");
+  if (subscription.status === "pending" && !context.isTest)
+    return (
+      <div className="space-y-6">
+        <header>
+          <p className="mb-2 text-sm text-ink-500">{context.name}</p>
+          <h1 className="text-3xl font-bold">لنجهّز يومك الأول في سولفد</h1>
+          <p className="mt-3 text-sm leading-7 text-ink-500">
+            ابدأ بخطوة واحدة. نحفظ تقدمك، وتجد كل ما تحتاجه هنا.
+          </p>
+        </header>
+        <SetupChecklist />
+        <div className="grid gap-5 md:grid-cols-2">
+          <section className="rounded-3xl border border-sage-100 bg-white p-6">
+            <PanelsTopLeft size={25} className="mb-4 text-sage-600" />
+            <h2 className="text-xl font-bold">تعرّف على صندوقك</h2>
+            <p className="my-3 text-sm leading-8 text-ink-500">
+              جرّب محادثة توضيحية وردًا جاهزًا. لا تحتاج ربط رقم أو دفع مبلغ
+              لتتعرف على التجربة.
+            </p>
+            <Link
+              href="/app/explore"
+              className="text-sm font-semibold text-sage-800 underline"
+            >
+              استكشف سولفد ←
+            </Link>
+          </section>
+          <section className="rounded-3xl border border-sage-100 bg-white p-6">
+            <p className="mb-3 text-xs text-ink-500">
+              اختيارك المبدئي · يمكنك تغييره
+            </p>
+            <h2 className="text-xl font-bold">{PLANS[plan.code].name}</h2>
+            <p className="my-3 text-sm leading-8 text-ink-500">
+              {termLabel(subscription.billing_months)} ·{" "}
+              {sar(subscription.term_price_halalas / 100)} ريال عن المدة كاملة.
+              لم يبدأ اشتراكك المدفوع بعد.
+            </p>
+            <Link
+              href="/app/billing"
+              className="text-sm font-semibold text-sage-800 underline"
+            >
+              مراجعة الباقة والمدة ←
+            </Link>
+          </section>
+        </div>
+      </div>
+    );
   const stats = [
     {
       label: "الرسائل الواردة",
@@ -80,6 +128,7 @@ export default async function MerchantOverview() {
   ];
   return (
     <div className="space-y-7">
+      <SetupChecklist />
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div>
           <p className="mb-2 text-sm text-ink-500">{context.name}</p>
@@ -96,7 +145,7 @@ export default async function MerchantOverview() {
           <ArrowUpLeft size={18} aria-hidden="true" />
         </Link>
       </div>
-      {!isActive && (
+      {!isActive && subscription.status !== "pending" && (
         <p
           role="status"
           className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
