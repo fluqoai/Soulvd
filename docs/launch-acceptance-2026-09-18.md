@@ -12,6 +12,7 @@
 - Real PostgreSQL transaction (`scripts/verify-launch-transaction.mjs`) verified payment amount validation, owner-only confirmation, idempotent confirmation/topup, subscription activation, monthly distinct-customer deduplication, the 2,000-customer cap, existing-customer access at the cap, simulated provider binding, message reservation, 15% markup settlement, duplicate receipt protection, and insufficient-wallet rejection. The entire transaction rolled back. No job became visible to workers and no real bank transfer/provider delivery occurred.
 - Live storage, internal email authorization, anonymous denial, and invitation reservation/cooldown/revocation rollback tests passed via `verify-repair-infrastructure.mjs`.
 - Changed-file ESLint, TypeScript and the production build passed after excluding the ignored scratch directory.
+- Code revision `a36d6f3` deployed successfully to both production Vercel projects. Production browser regression passed: after saving annual Growth, the heading, checked duration/plan and neutral confirmation message all agree. The test account remains unpaid.
 
 ## Issues found and fixed in source
 
@@ -24,6 +25,6 @@
 - A fresh inbound WhatsApp message and actual reply/delivery receipt. The user was asked to send a unique test message and identify their sending number.
 - The owner's Soulvd messaging wallet has no balance record. An actual reply will require legitimate wallet funding or an explicitly designed, recorded test-credit mechanism; no fictitious bank confirmation was created.
 - Onboarding a separate customer's authorized number. The existing number status and transaction fixture do not substitute for Meta authorization or a real YCloud Onboard Link.
-- Browser regression verification of the contract-form correction after deployment. Local Chrome navigation to `/app` was blocked by the browser (`ERR_BLOCKED_BY_CLIENT`); no bypass was attempted.
+- Local Chrome navigation to `/app` was blocked by the browser (`ERR_BLOCKED_BY_CLIENT`); no bypass was attempted. The corrected form was instead verified on production after deployment.
 
 No YCloud purchase was made. The checkout remained at Pro Monthly USD 118. The test account remains available for continued verification, with Growth selected but unpaid; annual and three-month selections were both saved during browser checks.
