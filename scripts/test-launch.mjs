@@ -410,6 +410,22 @@ try {
     tenant,
     "+966500000000",
   ]);
+  await assert.rejects(rpc("soulvd_onboarding_assisted", [merchant, request]), /FORBIDDEN/);
+  await rpc("soulvd_onboarding_assisted", [owner, request]);
+  assert.equal(await q("select authorization_method result from public.whatsapp_onboarding_requests where id=$1", [request]), "assisted");
+  const assistedAsset = { id: "1234567890", wabaId: "999999999", phoneNumber: "+966500000000", status: "CONNECTED", isOnBizApp: true };
+  await assert.rejects(rpc("soulvd_onboarding_bind", [owner, request, assistedAsset]), /CUSTOMER_CONFIRMATION_REQUIRED/);
+  await assert.rejects(rpc("soulvd_onboarding_ready", [outsider, tenant, request]), /FORBIDDEN/);
+  await rpc("soulvd_onboarding_ready", [merchant, tenant, request]);
+  assert.equal(await q("select customer_confirmed_at is not null result from public.whatsapp_onboarding_requests where id=$1", [request]), true);
+  await assert.rejects(rpc("soulvd_onboarding_assisted", [owner, request]), /COEXISTENCE_REQUEST_REQUIRED/);
+  await db.exec("begin");
+  const assistedNumber = await rpc("soulvd_onboarding_bind", [owner, request, assistedAsset]);
+  assert.ok(assistedNumber);
+  assert.equal(await q("select status result from public.whatsapp_onboarding_requests where id=$1", [request]), "connected");
+  assert.equal(await rpc("soulvd_onboarding_bind", [owner, request, assistedAsset]), assistedNumber);
+  await db.exec("rollback");
+  await assert.rejects(rpc("soulvd_onboarding_link", [owner, request, "https://www.ycloud.com/console/#/app/dashboard/account"]), /INVALID_ONBOARDING_URL/);
   await assert.rejects(
     rpc("soulvd_onboarding_link", [
       outsider,
@@ -646,6 +662,7 @@ try {
     "soulvd_confirm_payment(uuid,uuid,text,integer)",
     "soulvd_settle_message(jsonb)",
     "soulvd_onboarding_bind(uuid,uuid,jsonb)",
+    "soulvd_onboarding_assisted(uuid,uuid)",
     "soulvd_request_payment(uuid,uuid,text,integer)",
   ]) {
     for (const role of ["anon", "authenticated"])

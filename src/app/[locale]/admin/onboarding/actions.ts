@@ -87,6 +87,20 @@ export async function saveOnboardingLink(
   });
   return finish(error, "أصبح رابط التفويض ظاهرًا لمالك مساحة العميل.");
 }
+export async function prepareAssistedSession(
+  _state: State,
+  form: FormData,
+): Promise<State> {
+  const user = await owner();
+  const id = z.uuid().safeParse(form.get("id"));
+  if (!user || !id.success || form.get("arranged") !== "on")
+    return { message: "نسّق الجلسة مع مالك الرقم وأكّد أهلية واتساب الأعمال أولًا." };
+  const { error } = await createAdminClient().rpc("soulvd_onboarding_assisted", {
+    p_actor: user.id,
+    p_id: id.data,
+  });
+  return finish(error, "أصبحت تعليمات جلسة الربط ظاهرة للعميل. لا يتم الربط حتى يؤكد التفويض ونتحقق من المزود.");
+}
 export async function verifyAndBind(
   _state: State,
   form: FormData,

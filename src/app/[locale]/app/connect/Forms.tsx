@@ -121,11 +121,15 @@ export function ConnectionReady({ id }: { id: string }) {
   return (
     <form action={action} className="space-y-3 border-t border-sage-100 pt-5">
       <input type="hidden" name="id" value={id} />
+      <label className="flex items-start gap-2 text-sm leading-7">
+        <input type="checkbox" name="authorized" required className="mt-2" />
+        أكملت بنفسي تفويض رقم منشأتي داخل Meta وظهرت لي خطوة الانتهاء.
+      </label>
       <button
         disabled={busy}
         className="rounded-xl border border-sage-300 px-5 py-3 text-sm font-semibold disabled:opacity-50"
       >
-        {busy ? "جارٍ تحديث الطلب…" : "عدت من التفويض · أكملت الخطوات"}
+        {busy ? "جارٍ تحديث الطلب…" : "أكملت التفويض · أرسل للتحقق"}
       </button>
       {state.message && (
         <p role="status" className="text-sm">

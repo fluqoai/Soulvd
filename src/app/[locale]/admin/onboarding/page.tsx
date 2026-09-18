@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Forms from "./Forms";
 import LaunchForm from "./LaunchForm";
 import { launchSettings } from "@/lib/billing/launch";
+import { ycloud } from "@/lib/ycloud/client";
 export default async function OnboardingAdmin() {
   const { db, user } = await currentMerchant();
   const { data: profile } = await db
@@ -15,10 +16,10 @@ export default async function OnboardingAdmin() {
   if (profile?.role !== "owner") redirect("/admin");
   const admin = createAdminClient();
   const launch = await launchSettings();
-  const [requests, tenants, guides] = await Promise.all([
+  const [requests, tenants, guides, contacts, providerBalance] = await Promise.all([
     admin
       .from("whatsapp_onboarding_requests")
-      .select("id,tenant_id,phone,status,note,created_at,number_kind")
+      .select("id,tenant_id,requested_by,phone,status,note,created_at,number_kind,authorization_method,customer_confirmed_at")
       .order("created_at", { ascending: false })
       .limit(100),
     admin.from("tenants").select("id,name"),
@@ -28,12 +29,15 @@ export default async function OnboardingAdmin() {
       .not("submitted_at", "is", null)
       .order("submitted_at", { ascending: false })
       .limit(100),
+    admin.from("users").select("id,email").eq("role", "merchant"),
+    ycloud<{ amount: number; currency: string }>("/balance").catch(() => null),
   ]);
-  if (requests.error || tenants.error || guides.error)
+  if (requests.error || tenants.error || guides.error || contacts.error)
     throw new Error("تعذر تحميل طلبات الربط.");
   const names = new Map(tenants.data.map((t) => [t.id, t.name]));
+  const emails = new Map(contacts.data.map((u) => [u.id, u.email]));
   const statuses: Record<string, string> = {
-    awaiting_link: "بانتظار الرابط",
+    awaiting_link: "بانتظار تجهيز الربط",
     awaiting_customer: "بانتظار العميل",
     review: "جاهز للتحقق",
     connected: "متصل",
@@ -43,6 +47,11 @@ export default async function OnboardingAdmin() {
     <div className="mx-auto max-w-4xl space-y-6">
       <h1 className="text-3xl font-bold">طلبات ربط واتساب</h1>
       <LaunchForm {...launch} />
+      <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-8">
+        <h2 className="font-bold">محفظة المزود الرئيسية</h2>
+        <p>{providerBalance ? `الرصيد الحالي: ${providerBalance.amount} ${providerBalance.currency}` : "تعذر تحميل رصيد المزود الآن؛ راجعه من حساب YCloud."}</p>
+        <p>تأكيد شحن العميل يضيف إلى محفظته في سولفد فقط. موّل محفظة YCloud الرئيسية بصورة مستقلة قبل الرسائل المدفوعة والحملات، وراجع الرصيد أثناء التشغيل.</p>
+      </section>
       <section className="space-y-4">
         <h2 className="text-xl font-bold">طلبات تجهيز التكاملات</h2>
         <p className="text-sm leading-7">
@@ -71,7 +80,7 @@ export default async function OnboardingAdmin() {
         ))}
       </section>
       <p className="text-sm leading-7">
-        أنشئ Onboard Link للعميل من حساب YCloud ثم احفظه هنا. بعد تفويض العميل،
+        نسّق جلسة Coexistence مع العميل، أو احفظ رابط التفويض الخارجي عند توفره. بعد تفويض العميل،
         طابق منشأته ورقمه وWABA قبل التحقق النهائي. لا تضف موظفي المنصة إلى فريق
         العميل لتتمكن من ربطه.
       </p>
@@ -82,6 +91,7 @@ export default async function OnboardingAdmin() {
       {requests.data.map((r) => (
         <article key={r.id} className="rounded-xl border bg-white p-5">
           <h2 className="text-xl font-bold">{names.get(r.tenant_id)}</h2>
+          {emails.get(r.requested_by) && <p dir="ltr" className="mt-2 text-right text-sm text-ink-500">{emails.get(r.requested_by)}</p>}
           <p className="mt-3">
             <bdi>{r.phone}</bdi> · {statuses[r.status]}
             {" · "}
@@ -92,6 +102,7 @@ export default async function OnboardingAdmin() {
                 : "نقل من مزود آخر: مسار مستقل"}
           </p>
           {r.note && <p>{r.note}</p>}
+          {r.customer_confirmed_at && <p className="mt-2 text-xs text-sage-700">أكد العميل إكمال التفويض: {new Date(r.customer_confirmed_at).toLocaleString("ar-SA", { timeZone: "Asia/Riyadh" })}</p>}
           {r.number_kind !== "business_app" && (
             <p className="mt-3 text-sm leading-7">
               لا تستخدم Onboard Link المخصص للـ Coexistence لهذا الطلب. راجع
@@ -102,6 +113,7 @@ export default async function OnboardingAdmin() {
             id={r.id}
             status={r.status}
             coexistence={r.number_kind === "business_app"}
+            method={r.authorization_method}
           />
         </article>
       ))}

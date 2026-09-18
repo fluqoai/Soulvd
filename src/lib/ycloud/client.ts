@@ -13,7 +13,7 @@ export async function ycloud<T>(path: string, body?: unknown): Promise<T> {
   if (!key) throw new YCloudError("PROVIDER_NOT_CONFIGURED");
   const writePath =
     /^\/whatsapp\/(messages\/sendDirectly|templates(?:\?[^#]*)?)$/.test(path);
-  const readPath =
+  const readPath = path === "/balance" ||
     /^\/whatsapp\/(messages\/[a-zA-Z0-9_-]{1,128}|phoneNumbers\/[0-9]+\/(?:%2B|\+)[0-9]{7,15})$/.test(
       path,
     );

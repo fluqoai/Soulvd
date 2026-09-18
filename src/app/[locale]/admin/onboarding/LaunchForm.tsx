@@ -37,7 +37,7 @@ export default function LaunchForm({
             name="onboarding"
             defaultChecked={onboarding}
           />
-          روابط الربط جاهزة للاستخدام مع العملاء
+          الربط بمساعدة الفريق أو روابط التفويض جاهز للعملاء
         </label>
         <label className="flex gap-2">
           <input type="checkbox" name="payments" defaultChecked={payments} />

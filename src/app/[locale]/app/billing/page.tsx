@@ -30,6 +30,9 @@ export default async function BillingPage() {
   return (
     <div className="space-y-6">
       <SetupChecklist compact />
+      {!isActive && launch.payments && <section className="rounded-2xl border border-sage-200 bg-sage-50 p-5 text-sm leading-8">
+        ربط رقم واتساب الأعمال يتم حاليًا في جلسة بمساعدة فريق سولفد، بتفويضك داخل Meta. <Link href="/app/connect" className="font-semibold underline">احفظ رقم نشاطك</Link> قبل التحويل. إذا كان الرقم جديدًا أو مربوطًا بمزود آخر، <Link href="/contact" className="font-semibold underline">راجع أهلية الربط معنا</Link> قبل الدفع. رصيد الرسائل منفصل، ويمكن إضافته مع دفعة الاشتراك.
+      </section>}
       <Link href="/app/ai" className="sv-surface block p-5 font-semibold">مساعد سولفد الذكي · الحصة والشحن الإضافي ←</Link>
       <section className="sv-surface space-y-4 p-6">
         <h1 className="text-3xl font-bold">الباقة والاشتراك</h1>

@@ -41,6 +41,8 @@ export async function connectionReady(
 ): Promise<State> {
   const context = await requireTenant();
   const id = z.uuid().safeParse(form.get("id"));
+  if (form.get("authorized") !== "on")
+    return { message: "أكد إكمال تفويض الرقم بنفسك داخل Meta أولًا." };
   if (!id.success) return { message: "طلب غير صالح." };
   const { error } = await createAdminClient().rpc("soulvd_onboarding_ready", {
     p_actor: context.userId,

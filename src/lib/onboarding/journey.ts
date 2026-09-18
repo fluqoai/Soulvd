@@ -6,6 +6,7 @@ export type ConnectionRequest = {
   onboarding_url: string | null;
   link_expires_at: string | null;
   note: string | null;
+  authorization_method?: string;
 };
 export function connectionStage(
   request: ConnectionRequest | null,
@@ -19,6 +20,7 @@ export function connectionStage(
   if (request.status === "review") return "review";
   if (request.status === "awaiting_customer") {
     if (!ready) return "preparing";
+    if (request.authorization_method === "assisted") return "session";
     return request.onboarding_url &&
       request.link_expires_at &&
       Date.parse(request.link_expires_at) > now

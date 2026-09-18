@@ -13,7 +13,7 @@ export const setupContext = cache(async function setupContext() {
       .eq("tenant_id", context.tenantId),
     db
       .from("whatsapp_onboarding_requests")
-      .select("id,phone,status,number_kind,onboarding_url,link_expires_at,note")
+      .select("id,phone,status,number_kind,onboarding_url,link_expires_at,note,authorization_method")
       .eq("tenant_id", context.tenantId)
       .order("created_at", { ascending: false })
       .limit(1)

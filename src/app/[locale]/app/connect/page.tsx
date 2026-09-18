@@ -33,6 +33,7 @@ export default async function ConnectPage() {
     "preparing",
     "authorize",
     "assisted",
+    "session",
   ].includes(stage);
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -102,7 +103,19 @@ export default async function ConnectPage() {
             </span>
           </div>
           <div className="space-y-5 p-6 sm:p-8">
-            {stage === "authorize" && r ? (
+            {stage === "session" && r ? (
+              <>
+                <h2 className="text-xl font-bold">جلسة ربط واتساب بمساعدتنا</h2>
+                <p className="text-sm leading-8 text-ink-500">نسّق فريق سولفد جلسة الربط معك. جهّز الهاتف الذي عليه واتساب الأعمال، واسم منشأتك كما في السجل وموقعها الإلكتروني. تمسح رمز QR الذي يظهر أثناء الجلسة وتكمل التفويض بنفسك داخل Meta. قد يظهر اسم مزود الربط أثناء التفويض.</p>
+                <ol className="space-y-3 rounded-2xl bg-sage-50 p-5 text-sm leading-7">
+                  <li>1. افتح تطبيق واتساب الأعمال على هاتفك أثناء الجلسة.</li>
+                  <li>2. امسح رمز الربط المعروض على الكمبيوتر واتبع خطوات الموافقة.</li>
+                  <li>3. لا تحذف حساب واتساب الأعمال؛ يظل التطبيق يعمل مع سولفد.</li>
+                  <li>4. بعد ظهور الانتهاء، أكّد أدناه لنراجع الاتصال ونفتح المحادثات.</li>
+                </ol>
+                <ConnectionReady id={r.id} />
+              </>
+            ) : stage === "authorize" && r ? (
               <>
                 <h2 className="text-xl font-bold">خطوتك الآن: تفويض الرقم</h2>
                 <p className="text-sm leading-7 text-ink-500">
@@ -143,9 +156,10 @@ export default async function ConnectPage() {
                   {
                     {
                       authorize: "أكمل التفويض",
+                      session: "جلسة ربط واتساب",
                       connected: "راجع حالة الرقم",
                       preparing: "رقمك محفوظ، ومساحتك جاهزة للتجهيز",
-                      waiting: "نجهّز خطوة التفويض",
+                      waiting: "لنجهّز ربط واتساب معك",
                       assisted: "حفظنا رقمك للمسار المناسب",
                       review: "اكتمل طلبك، نتحقق من الربط",
                       expired: "لنجهّز لك رابطًا جديدًا",
@@ -157,11 +171,12 @@ export default async function ConnectPage() {
                   {
                     {
                       authorize: "أكمل التفويض",
+                      session: "أكمل جلسة التفويض مع الفريق.",
                       connected: "راجع حالة الرقم",
                       preparing:
                         "تفعيل الربط للمنشآت الجديدة متاح قريبًا. لا يلزمك الدفع الآن، ولا إعادة إدخال رقمك. استكشف صندوق المحادثات واختر الباقة أثناء تجهيز الخدمة.",
                       waiting:
-                        "سيظهر زر التفويض في هذه الصفحة بعد تجهيز رابط منشأتك. بياناتك محفوظة ولا تحتاج إلى إعادة الطلب.",
+                        "نربط رقم واتساب الأعمال في جلسة قصيرة بمساعدتنا. جهّز هاتفك وبيانات منشأتك، ثم تواصل معنا لتحديد الجلسة. إذا جهّزنا رابط تفويض مباشرًا فسيظهر هنا. بياناتك محفوظة ولا تحتاج إلى إعادة الطلب.",
                       assisted:
                         "هذا الرقم يحتاج مسارًا مختلفًا عن ربط تطبيق واتساب الأعمال. سيراجع الفريق متطلبات الرقم الجديد أو النقل من المزود الحالي؛ لا تحذف حسابك أو تفصل مزودك الآن.",
                       review:
@@ -173,6 +188,7 @@ export default async function ConnectPage() {
                     }[stage]
                   }
                 </p>
+                {stage === "waiting" && <Link href={isActive ? "/contact" : "/app/billing"} className="inline-flex rounded-xl bg-sage-900 px-5 py-3 text-sm text-white">{isActive ? "تنسيق جلسة الربط" : "متابعة تفعيل الباقة"}</Link>}
                 {r && (stage === "expired" || r.status === "awaiting_link") && (
                   <ConnectionRecovery id={r.id} expired={stage === "expired"} />
                 )}

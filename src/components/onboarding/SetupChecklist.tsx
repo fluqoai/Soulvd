@@ -58,12 +58,16 @@ export default async function SetupChecklist({
       href: "/app/whatsapp",
     },
   ];
-  const nextHref = !connected
+  const nextHref = !isActive && launch.payments
+    ? "/app/billing"
+    : !connected
     ? "/app/connect"
     : !isActive
       ? "/app/billing"
       : "/app/whatsapp";
-  const nextTitle = !connected
+  const nextTitle = !isActive && launch.payments
+    ? "اختيار الباقة وتفعيلها"
+    : !connected
     ? "متابعة ربط واتساب"
     : !isActive
       ? "متابعة الاشتراك"

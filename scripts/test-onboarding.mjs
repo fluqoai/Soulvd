@@ -64,6 +64,10 @@ const authorized = {
 assert.equal(connectionStage(authorized, false, true, now), "authorize");
 assert.equal(connectionStage(authorized, false, false, now), "preparing");
 assert.equal(connectionStage(authorized, false, true, now + 1000), "expired");
+const session = { ...request, status: "awaiting_customer", authorization_method: "assisted" };
+assert.equal(connectionStage(session, false, true, now), "session");
+assert.equal(connectionStage(session, false, false, now), "preparing");
+assert.equal(connectionStage({ ...session, status: "review" }, false, true, now), "review");
 assert.equal(setupProgress(false, false, false).count, 1);
 assert.deepEqual(setupProgress(true, false, false).completed, [
   true,

@@ -1,22 +1,42 @@
 "use client";
 import { useActionState } from "react";
-import { saveOnboardingLink, verifyAndBind, rejectOnboarding } from "./actions";
+import { saveOnboardingLink, prepareAssistedSession, verifyAndBind, rejectOnboarding } from "./actions";
 export default function OnboardingAdminForms({
   id,
   status,
   coexistence = true,
+  method,
 }: {
   id: string;
   status: string;
   coexistence?: boolean;
+  method?: string;
 }) {
   const [link, linkAction, linkBusy] = useActionState(saveOnboardingLink, {}),
     [bind, bindAction, bindBusy] = useActionState(verifyAndBind, {}),
+    [session, sessionAction, sessionBusy] = useActionState(prepareAssistedSession, {}),
     [reject, rejectAction, rejectBusy] = useActionState(rejectOnboarding, {});
   if (["connected", "rejected"].includes(status)) return null;
   return (
     <div className="mt-5 space-y-6">
+      {coexistence && ["awaiting_link", "awaiting_customer"].includes(status) && (
+        <form action={sessionAction} className="space-y-3 rounded-xl bg-sage-50 p-4">
+          <input type="hidden" name="id" value={id} />
+          <h3 className="font-bold">جلسة ربط بمساعدتنا</h3>
+          <p className="text-sm leading-7">من YCloud اختر Create Channel ثم Coexistence. يتولى العميل مسح QR والتفويض ببيانات منشأته. لا تشارك بيانات الدخول، ولا تربط الرقم بمجرد إدخاله.</p>
+          <label className="flex items-start gap-2 text-sm leading-7">
+            <input type="checkbox" name="arranged" required className="mt-2" />
+            نسّقت الجلسة مع مالك الرقم وتأكدت أن لديه تطبيق واتساب الأعمال وبيانات منشأته.
+          </label>
+          <button disabled={sessionBusy} className="rounded-xl bg-sage-900 px-4 py-3 text-sm text-white disabled:opacity-50">
+            {sessionBusy ? "جارٍ الحفظ…" : method === "assisted" ? "تحديث تجهيز الجلسة" : "تجهيز جلسة الربط للعميل"}
+          </button>
+          {session.message && <p role="status" className="text-sm">{session.message}</p>}
+        </form>
+      )}
       {coexistence && (
+        <details>
+          <summary className="cursor-pointer text-sm">استخدام رابط تفويض خارجي عند توفره</summary>
         <form action={linkAction} className="space-y-3">
           <input type="hidden" name="id" value={id} />
           <label className="block">
@@ -34,6 +54,7 @@ export default function OnboardingAdminForms({
           </button>
           {link.message && <p role="status">{link.message}</p>}
         </form>
+        </details>
       )}
       {coexistence && status === "review" && (
         <form action={bindAction} className="space-y-3">

@@ -6,6 +6,7 @@ const ref='lyvoiipsmcbffvpkrxhy';
 const token=process.env.SUPABASE_ACCESS_TOKEN;
 if(!token)throw new Error('Set SUPABASE_ACCESS_TOKEN for the authorized Soulvd account.');
 const files=['20260917211829_subscription_terms.sql','20260917211847_messaging_wallet.sql','20260917211917_managed_onboarding.sql','20260917215705_wallet_operations.sql','20260917221615_payment_lock_order.sql','20260918005715_inbox_experience.sql','20260918075456_guided_customer_setup.sql','20260918084732_growth_workspace.sql','20260918090804_campaign_fair_scheduling.sql','20260918154723_team_invitation_delivery.sql','20260918155126_inbox_media.sql','20260918181151_unified_checkout_welcome_credit.sql','20260918183220_studio_launch_hardening.sql','20260918185529_ai_commercial_credits.sql'];
+files.push('20260918212531_assisted_customer_launch.sql');
 async function request(path,body){
  const response=await fetch('https://api.supabase.com/v1/projects/'+ref+path,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
  if(!response.ok)throw new Error('Supabase Management API HTTP '+response.status);
