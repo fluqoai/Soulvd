@@ -8,14 +8,17 @@ import {
 } from "@/app/[locale]/app/billing/actions";
 import PlanPicker from "./PlanPicker";
 import { sar } from "@/lib/billing/terms";
+import MessageEstimator from './MessageEstimator';
 export function RequestPayment({
   purpose,
   disabled = false,
   subscriptionHalalas = 0,
+  pricingDate,
 }: {
   purpose: "subscription" | "upgrade" | "wallet" | "ai";
   disabled?: boolean;
   subscriptionHalalas?: number;
+  pricingDate?: string;
 }) {
   const [state, action, busy] = useActionState(requestPayment, {});
   const [initialCredit, setInitialCredit] = useState(0);
@@ -33,12 +36,8 @@ export function RequestPayment({
           <h2 className="font-bold">اشتراكك ورصيد البداية · تحويل واحد</h2>
           <label className="block text-sm">
             رصيد واتساب اختياري، يُضاف إلى محفظتك بعد تأكيد التحويل
-            <select name="amount" value={initialCredit} onChange={(event) => setInitialCredit(Number(event.target.value))} className="mt-2 block w-full rounded-xl border bg-white p-3">
-              <option value={0}>الاشتراك فقط · أشحن لاحقًا</option>
-              <option value={50}>50 ريال رصيد بداية</option>
-              <option value={100}>100 ريال رصيد بداية</option>
-              <option value={200}>200 ريال رصيد بداية</option>
-            </select>
+            <input name="amount" type="number" min="0" max="10000" step="0.01" required value={initialCredit} onChange={(event) => setInitialCredit(Number(event.target.value))} className="mt-2 block w-full rounded-xl border bg-white p-3" />
+            <span className="mt-2 block text-xs">اختر المبلغ الذي يناسبك دون حد أدنى للشحن. صفر يعني الاشتراك فقط. المبالغ تُسجّل بالريال والهللة.</span>
           </label>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between gap-3"><dt>اشتراك المدة المختارة</dt><dd>{sar(subscriptionHalalas / 100)} ريال</dd></div>
@@ -54,15 +53,16 @@ export function RequestPayment({
           <input
             name="amount"
             type="number"
-            min={50}
             max={10000}
             step="0.01"
             required
-            defaultValue={100}
+            value={initialCredit || ''}
+            onChange={(event) => setInitialCredit(Number(event.target.value))}
             className="mt-2 block w-full rounded-xl border p-3"
           />
         </label>
       )}
+      {['subscription','wallet'].includes(purpose) && pricingDate && <MessageEstimator amount={Math.max(0, Number.isFinite(initialCredit) ? initialCredit : 0)} date={pricingDate} />}
       <button
         disabled={busy || disabled}
         className="rounded-xl bg-sage-900 px-5 py-3 text-white disabled:opacity-50"

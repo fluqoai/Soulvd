@@ -4,6 +4,7 @@ import { currentMerchant, tenantUsage } from "@/lib/tenancy/context";
 import { launchSettings } from "@/lib/billing/launch";
 import { sar } from "@/lib/billing/terms";
 import BankDetails from "@/components/billing/BankDetails";
+import MessageEstimator from '@/components/billing/MessageEstimator';
 import {
   RequestPayment,
   PaymentRequestCard,
@@ -88,6 +89,7 @@ export default async function WalletPage() {
           </section>
         ))}
       </div>
+      <MessageEstimator amount={Math.max(0,(balance-held)/1000000)} date={new Date().toISOString().slice(0,10)} />
       <section className="sv-surface space-y-3 p-6 text-sm leading-7">
         <h2 className="font-bold">كيف تُحسب التكلفة؟</h2>
         <p>
@@ -135,7 +137,7 @@ export default async function WalletPage() {
           </ol>
           <p className="text-sm text-ink-500">الحد الأدنى للشحن 50 ريالًا. لا يضاف الرصيد بمجرد إرسال المرجع؛ نتحقق من وصول التحويل أولًا.</p>
           <BankDetails />
-          {!open.length && <RequestPayment purpose="wallet" />}
+          {!open.length && <RequestPayment purpose="wallet" pricingDate={new Date().toISOString().slice(0,10)} />}
           {open.map((r) => <PaymentRequestCard key={r.id} item={r} canManage />)}
         </section>
       )}

@@ -14,6 +14,9 @@ export default async function SubscriptionAdmin() {
     .single();
   if (profile?.role !== "owner") redirect("/admin");
   const admin = createAdminClient();
+  const funding = await admin.rpc('soulvd_provider_funding_summary', { p_actor: user.id });
+  if(funding.error) throw new Error('تعذر تحميل تخصيص رصيد الرسائل.');
+  const allocation = funding.data as {collected_halalas:number;provider_halalas:number;platform_halalas:number;gift_halalas:number};
   const aiBudget = await admin.rpc('soulvd_ai_budget_status', { p_actor: user.id });
   if(aiBudget.error) throw new Error('تعذر تحميل ميزانية المساعد الذكي.');
   const [tenants, subscriptions, requests] = await Promise.all([
@@ -67,6 +70,12 @@ export default async function SubscriptionAdmin() {
       </Link>
       <section className="space-y-3">
         <h2 className="text-xl font-bold">تحويلات بانتظار المراجعة</h2>
+        <div className="sv-surface space-y-2 p-5 text-sm leading-7">
+          <h3 className="font-bold">تخصيص التحويلات المؤكدة لمحفظة المزود</h3>
+          <p>رصيد رسائل محصّل: {sar(allocation.collected_halalas/100)} ريال · حصة المزود: {sar(allocation.provider_halalas/100)} ريال · زيادة خدمة المنصة: {sar(allocation.platform_halalas/100)} ريال.</p>
+          <p>هذه إجماليات تاريخية لتخصيص المبالغ، وليست رصيد YCloud الحالي أو مبلغًا جديدًا يجب شحنه بالكامل. حصة المزود = الرصيد ÷ 1.15. هدايا الترحيب بقيمة {sar(allocation.gift_halalas/100)} ريال تمولها المنصة ولا تدخل في المبالغ المحصّلة.</p>
+          <p>بعد مطابقة وصول التحويل، يُضاف رصيد العميل كاملًا إلى Soulvd. اشحن المحفظة المركزية في YCloud من المبلغ المخصص حسب رصيدها الفعلي والاستهلاك. الشحن عند المزود يدوي حاليًا؛ تأكيد التحويل هنا لا ينفذ دفعًا إلى YCloud. زيادة الخدمة ليست ربحًا صافيًا محققًا قبل الاستخدام.</p>
+        </div>
         {!requests.data.length && <p>لا توجد تحويلات مرسلة للمراجعة.</p>}
         {requests.data
           .filter((r) => names.has(r.tenant_id))

@@ -53,13 +53,13 @@ export async function requestPayment(
       .number()
       .min(0)
       .max(10000)
-      .refine((n) => n >= 50 || (purpose.data === "subscription" && n === 0))
+      .refine((n) => n > 0 || purpose.data === "subscription")
       .refine((n) => Math.abs(n * 100 - Math.round(n * 100)) < 0.00001)
       .safeParse(form.get("amount"));
     if (!value.success)
       return {
         message:
-          "اختر مبلغًا من 50 إلى 10,000 ريال، بمنزلتين عشريتين كحد أقصى.",
+          "أدخل مبلغًا موجبًا بمنزلتين عشريتين كحد أقصى (حتى 10,000 ريال). يمكنك اختيار الاشتراك فقط دون شحن.",
       };
     amount = Math.round(value.data * 100);
   }

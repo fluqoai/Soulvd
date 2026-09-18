@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {fundingSplit,messageRates} from '../src/lib/billing/message-estimate.ts';
+assert.deepEqual(fundingSplit(5000), {providerHalalas:4348,platformHalalas:652});
+assert.equal(fundingSplit(1).providerHalalas+fundingSplit(1).platformHalalas,1);
+const september=messageRates('2026-09-19');
+const october=messageRates('2026-10-01');
+assert.equal(september.find(r=>r.key==='service').sar,0);
+assert.ok(october.find(r=>r.key==='service').sar>0);
+assert.ok(october.find(r=>r.key==='marketing').sar>september.find(r=>r.key==='marketing').sar);
+assert.equal(messageRates('2027-01-01'),null);
+console.log('PASS: provider allocation, rounding conservation, dated Saudi rates and expiry');

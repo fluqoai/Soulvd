@@ -123,7 +123,7 @@ export default async function BillingPage() {
               <ContractForm plan={s.plan_id} months={s.billing_months} />
             </div>
           </details>
-          <RequestPayment purpose="subscription" subscriptionHalalas={s.term_price_halalas} disabled={!launch.payments} />
+          <RequestPayment purpose="subscription" pricingDate={new Date().toISOString().slice(0,10)} subscriptionHalalas={s.term_price_halalas} disabled={!launch.payments} />
         </>
       )}
       {manage && open.some((r) => r.status === "pending") && <BankDetails />}

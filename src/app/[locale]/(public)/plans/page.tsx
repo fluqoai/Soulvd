@@ -1,4 +1,5 @@
 import PlanPicker from "@/components/billing/PlanPicker";
+import MessageBudget from '@/components/billing/MessageBudget';
 export const metadata = { title: "باقات Soulvd | ابدأ من 299 ريال شهريًا" };
 export default function PlansPage() {
   return (
@@ -13,6 +14,7 @@ export default function PlansPage() {
         </p>
       </header>
       <PlanPicker />
+      <MessageBudget date={new Date().toISOString().slice(0,10)} />
     </main>
   );
 }

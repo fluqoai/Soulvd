@@ -383,7 +383,12 @@ try {
     /REFERENCE_ALREADY_USED/,
   );
   // One transfer, separate accounting; no credit before verified receipt.
-  await assert.rejects(rpc("soulvd_request_payment", [outsider, other, "subscription", 4999]), /INVALID_AMOUNT/);
+  await assert.rejects(rpc("soulvd_request_payment", [outsider, other, "subscription", -1]), /INVALID_AMOUNT/);
+  const tinyBundle = await rpc("soulvd_request_payment", [outsider, other, "subscription", 1]);
+  assert.equal((await db.query('select wallet_amount_halalas from public.payment_requests where id=$1', [tinyBundle])).rows[0].wallet_amount_halalas, 1);
+  await assert.rejects(rpc('soulvd_provider_funding_summary',[outsider]), /FORBIDDEN/);
+  const allocation = await rpc('soulvd_provider_funding_summary',[owner]);
+  assert.equal(Number(allocation.provider_halalas)+Number(allocation.platform_halalas),Number(allocation.collected_halalas));
   const oldBundle = await rpc("soulvd_request_payment", [outsider, other, "subscription", 10000]);
   const bundle = await rpc("soulvd_request_payment", [outsider, other, "subscription", 5000]);
   assert.notEqual(oldBundle, bundle);
