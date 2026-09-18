@@ -13,7 +13,7 @@ export function RequestPayment({
   disabled = false,
   subscriptionHalalas = 0,
 }: {
-  purpose: "subscription" | "upgrade" | "wallet";
+  purpose: "subscription" | "upgrade" | "wallet" | "ai";
   disabled?: boolean;
   subscriptionHalalas?: number;
 }) {
@@ -22,6 +22,12 @@ export function RequestPayment({
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="purpose" value={purpose} />
+      {purpose === 'ai' && <fieldset className="grid gap-3 sm:grid-cols-2">
+        <legend className="mb-3 font-semibold">شحن ردود إضافية · دفعة واحدة</legend>
+        <label className="cursor-pointer rounded-2xl border border-sage-200 p-4 has-checked:border-sage-700 has-checked:bg-sage-50"><input type="radio" name="pack" value="1000" defaultChecked /> <strong>1,000 رد · 29 ريالًا</strong><span className="mt-2 block text-sm">لزيادة بسيطة عند الحاجة</span></label>
+        <label className="cursor-pointer rounded-2xl border-2 border-sage-400 p-4 has-checked:bg-sage-50"><input type="radio" name="pack" value="5000" /> <strong>5,000 رد · 99 ريالًا</strong><span className="mt-2 block text-sm">أفضل قيمة · توفير 46 ريالًا مقارنة بخمس حزم صغيرة</span></label>
+        <p className="text-xs leading-6 sm:col-span-2">صالحة 12 شهرًا من تأكيد الدفع، وتحتاج اشتراك منصة نشطًا للاستخدام. لا تجديد تلقائي. رصيد واتساب وتطوير التكاملات منفصلان. الرد يشمل مسودة ذكية صالحة أو ردًا آليًا مقبولًا للإرسال، ولا تُحسب أعطال التوليد أو التحويل للموظف.</p>
+      </fieldset>}
       {purpose === "subscription" && (
         <section className="sv-surface space-y-4 p-5">
           <h2 className="font-bold">اشتراكك ورصيد البداية · تحويل واحد</h2>
@@ -63,7 +69,7 @@ export function RequestPayment({
       >
         {busy
           ? "جارٍ إنشاء الطلب…"
-          : purpose === "wallet"
+          : purpose === "ai" ? "إنشاء طلب شحن الردود الذكية" : purpose === "wallet"
             ? "إنشاء طلب شحن الرصيد"
             : purpose === "upgrade"
               ? "احصل على مبلغ الترقية"
@@ -83,6 +89,7 @@ export type PaymentRequest = {
   amount_halalas: number;
   wallet_amount_halalas: number;
   welcome_amount_halalas: number;
+  ai_reply_count?: number;
   status: string;
   bank_reference: string | null;
   expires_at: string;
@@ -106,7 +113,7 @@ export function PaymentRequestCard({
     <article className="space-y-4 rounded-xl border border-sage-200 bg-white p-5">
       <div className="flex flex-wrap justify-between gap-2">
         <h3 className="font-bold">
-          {item.purpose === "wallet"
+          {item.purpose === "ai" ? `شحن ${item.ai_reply_count?.toLocaleString('ar-SA')} رد ذكي` : item.purpose === "wallet"
             ? "شحن رصيد واتساب"
             : item.purpose === "upgrade"
               ? "ترقية الباقة"

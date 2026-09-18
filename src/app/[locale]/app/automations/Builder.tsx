@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   saveStudio,
   contactAutomation,
@@ -121,7 +122,7 @@ export default function Builder({
           ['البوت', settings?.enabled ? 'مفعّل' : 'متوقف'],
           [
             'الذكاء الاصطناعي',
-            !aiAvailable ? 'غير مفعّل حاليًا' : allowance?.enabled ? `${allowance.remaining} طلب متبقٍ` : 'يلزم تفعيل حصة مستقلة',
+            !aiAvailable ? 'غير مفعّل حاليًا' : allowance?.enabled ? `${allowance.remaining} رد متبقٍ` : 'الحصة غير متاحة أو انتهت',
           ],
           [
             'المسارات',
@@ -134,6 +135,10 @@ export default function Builder({
           </div>
         ))}
       </div>
+      {allowance && <div className="rounded-2xl border border-sage-300 bg-sage-50 p-5">
+        <Link href="/app/ai" className="font-bold underline">مساعد سولفد الذكي · الحصة والشحن الإضافي ←</Link>
+        {allowance.total>0 && allowance.remaining<=allowance.total*0.2 && <p role="status" className="mt-2 text-sm">{allowance.remaining===0?'انتهت حصة الردود الذكية. أضف رصيدًا لاستئناف المساعد.':'اقتربت من نهاية حصة الردود الذكية؛ استهلكت 80% أو أكثر.'}</p>}
+      </div>}
       {canManage && (
         <>
           <form
@@ -179,7 +184,7 @@ export default function Builder({
                   name="daily_limit"
                   type="number"
                   min={1}
-                  max={100}
+                  max={1000}
                   defaultValue={settingsValue.daily_limit}
                   required
                 />

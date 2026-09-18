@@ -21,7 +21,7 @@ export default async function BillingPage() {
   const { context, subscription: s, plan, isActive } = await tenantUsage();
   const launch = await launchSettings();
   const requests = (await paymentRequests()).filter(
-    (r) => r.purpose !== "wallet",
+    (r) => ['subscription','upgrade'].includes(r.purpose),
   );
   const open = requests.filter((r) =>
     ["pending", "submitted"].includes(r.status),
@@ -30,6 +30,7 @@ export default async function BillingPage() {
   return (
     <div className="space-y-6">
       <SetupChecklist compact />
+      <Link href="/app/ai" className="sv-surface block p-5 font-semibold">مساعد سولفد الذكي · الحصة والشحن الإضافي ←</Link>
       <section className="sv-surface space-y-4 p-6">
         <h1 className="text-3xl font-bold">الباقة والاشتراك</h1>
         <h2 className="text-xl">

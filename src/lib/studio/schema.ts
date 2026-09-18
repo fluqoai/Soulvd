@@ -24,7 +24,7 @@ export const flowSchema = z.object({
 export const settingsSchema = z.object({
   enabled: z.boolean(),
   instructions: z.string().max(4000),
-  daily_limit: z.coerce.number().int().min(1).max(100),
+  daily_limit: z.coerce.number().int().min(1).max(1000),
   cooldown_seconds: z.coerce.number().int().min(10).max(86400),
 });
 export function parameterCount(body: string) {

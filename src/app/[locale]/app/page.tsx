@@ -311,8 +311,8 @@ export default async function MerchantOverview() {
               aria-hidden="true"
             />
             <p className="text-xs leading-6 text-ink-500">
-              الردود الذكية تتطلب حصة مستقلة مفعّلة من المنصة. رسوم واتساب أيضًا
-              منفصلة عن الاشتراك.
+              مساعد سولفد الذكي: 100 رد للتجربة في الانطلاق بعد أول دفع، أو 1,000 رد شهريًا في النمو.
+              <Link href="/app/ai" className="mx-1 underline">عرض الحصة والشحن الإضافي</Link> · رصيد واتساب منفصل.
             </p>
           </div>
         </div>

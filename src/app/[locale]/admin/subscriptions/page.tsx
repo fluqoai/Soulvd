@@ -14,6 +14,8 @@ export default async function SubscriptionAdmin() {
     .single();
   if (profile?.role !== "owner") redirect("/admin");
   const admin = createAdminClient();
+  const aiBudget = await admin.rpc('soulvd_ai_budget_status', { p_actor: user.id });
+  if(aiBudget.error) throw new Error('تعذر تحميل ميزانية المساعد الذكي.');
   const [tenants, subscriptions, requests] = await Promise.all([
     admin
       .from("tenants")
@@ -28,7 +30,7 @@ export default async function SubscriptionAdmin() {
     admin
       .from("payment_requests")
       .select(
-        "id,tenant_id,purpose,status,amount_halalas,wallet_amount_halalas,welcome_amount_halalas,bank_reference,created_at",
+        "id,tenant_id,purpose,status,amount_halalas,wallet_amount_halalas,welcome_amount_halalas,ai_reply_count,bank_reference,created_at",
       )
       .eq("status", "submitted")
       .order("created_at")
@@ -51,6 +53,11 @@ export default async function SubscriptionAdmin() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <h1 className="text-3xl font-bold">الاشتراكات والتحويل البنكي</h1>
+      <section className="rounded-2xl border border-sage-300 bg-sage-50 p-5 text-sm leading-7">
+        <h2 className="font-bold">ميزانية مزود المساعد الذكي</h2>
+        <p>المستهلك والمحجوز: {Number(aiBudget.data.spentUsd).toFixed(4)} من {aiBudget.data.limitUsd} دولار · اليوم: {Number(aiBudget.data.dailySpentUsd).toFixed(4)} من {aiBudget.data.dailyLimitUsd} دولار.</p>
+        <p>يتوقف التوليد عند السقف؛ لا تُضاف ميزانية تلقائيًا. هذا سجل تكلفة سولفد ولا يمثل الرصيد المتبقي لدى المزود. راجع الميزانية قبل زيادة عدد العملاء.</p>
+      </section>
       <p className="text-sm leading-7">
         راجع كشف البنك ثم طابق المبلغ والمرجع مع طلب العميل. التفعيل وشحن الرصيد
         لا يعتمدان على الإيصال وحده. مساحات الاختبار لا تُحصّل عليها دفعات.
@@ -67,7 +74,7 @@ export default async function SubscriptionAdmin() {
             <article key={r.id} className="rounded-xl border bg-white p-5">
               <h3 className="font-bold">
                 {names.get(r.tenant_id)} ·{" "}
-                {r.purpose === "wallet"
+                {r.purpose === "ai" ? `شحن ${r.ai_reply_count} رد ذكي` : r.purpose === "wallet"
                   ? "شحن رصيد واتساب"
                   : r.purpose === "upgrade"
                     ? "ترقية الباقة"

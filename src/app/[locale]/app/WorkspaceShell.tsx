@@ -43,6 +43,7 @@ const navigation = [
   { href: "/app/connect", label: "ربط الرقم", icon: Smartphone },
   { href: "/app/explore", label: "استكشف سولفد", icon: Play },
   { href: "/app/automations", label: "الأتمتة والبوتات", icon: Bot },
+  { href: "/app/ai", label: "المساعد الذكي", icon: Bot },
   { href: "/app/templates", label: "مكتبة القوالب", icon: PanelsTopLeft },
   { href: "/app/integrations", label: "التكاملات", icon: Cable },
   { href: "/app/team", label: "فريق العمل", icon: Users },

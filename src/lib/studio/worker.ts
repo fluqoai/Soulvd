@@ -64,6 +64,14 @@ export async function automationOne() {
     await finish('handoff', code);
   };
   let usingAI = false;
+  let aiReserved = false;
+  let aiCost: number | null = null;
+  const settleAI = async (charge: boolean) => {
+    if (!aiReserved) return;
+    const settled = await db.rpc('soulvd_ai_finalize', { p_run: r.id, p_charge: charge, p_cost_micro: aiCost });
+    if (settled.error) throw new Error('AI_SETTLEMENT_UNAVAILABLE');
+    aiReserved = false;
+  };
   try {
     const s = r.subscription;
     if (
@@ -181,6 +189,7 @@ export async function automationOne() {
         await handoff('AI_ACCESS_OR_LIMIT');
         return true;
       }
+      aiReserved = true;
       const result = await generateText({
         model: createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })(
           process.env.SOULVD_AI_MODEL!,
@@ -195,9 +204,16 @@ export async function automationOne() {
           .join('\n')}`,
         maxOutputTokens: 500,
         maxRetries: 0,
+        providerOptions: { openrouter: {
+          reasoning: { enabled: false, effort: 'none' },
+          provider: { data_collection: 'deny', max_price: { prompt: 0.1, completion: 0.4 } },
+        } },
         abortSignal: AbortSignal.timeout(20_000),
       });
       output = result.text.trim();
+      const accounting = result.providerMetadata?.openrouter?.usage as { cost?: number } | undefined;
+      if (typeof accounting?.cost === 'number' && Number.isFinite(accounting.cost) && accounting.cost >= 0)
+        aiCost = Math.ceil(accounting.cost * 1_000_000);
       const usage = await db
         .from('automation_runs')
         .update({
@@ -207,6 +223,7 @@ export async function automationOne() {
         .eq('id', r.id);
       if (usage.error) throw new Error('USAGE_PERSISTENCE_UNAVAILABLE');
       if (output.includes('[HANDOFF]') || !output) {
+        await settleAI(false);
         const paused = await db
           .from('whatsapp_contacts')
           .update({ bot_paused: true })
@@ -220,6 +237,7 @@ export async function automationOne() {
     output = output.slice(0, 4096);
     if (flow.definition.mode === 'draft') {
       await finish('draft', null, output);
+      await settleAI(true);
       return true;
     }
     const send = await db.rpc('soulvd_automation_send', {
@@ -229,8 +247,10 @@ export async function automationOne() {
       p_manual: false,
     });
     if (send.error) throw new Error('SEND_ADMISSION_FAILED');
+    await settleAI(Boolean(send.data?.allowed));
     if (send.data?.allowed) await dispatchOne(send.data.id);
   } catch {
+    await settleAI(false);
     if (usingAI) await handoff('AI_PROVIDER_UNAVAILABLE');
     else await finish('failed', 'AUTOMATION_FAILED');
   }

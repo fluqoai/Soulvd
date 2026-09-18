@@ -30,6 +30,7 @@ globalThis.studioMocks = {
       if (name === 'soulvd_automation_claim')
         return { data: structuredClone(run), error: null };
       if (name === 'soulvd_ai_reserve') return { data: aiAllowed, error: null };
+      if (name === 'soulvd_ai_finalize') return { data: null, error: null };
       if (name === 'soulvd_automation_send') {
         sendCount++;
         return { data: { allowed: true, id: 'job' }, error: null };
@@ -82,7 +83,8 @@ globalThis.studioMocks = {
     assert.equal(options.maxOutputTokens, 500);
     assert.equal(options.model.modelId, 'test/provider');
     assert.ok(options.model.provider.startsWith('openrouter'));
-    return { text: generated, usage: { inputTokens: 10, outputTokens: 5 } };
+    assert.equal(options.providerOptions.openrouter.provider.max_price.prompt,0.1);
+    return { text: generated, usage: { inputTokens: 10, outputTokens: 5 }, providerMetadata:{openrouter:{usage:{cost:0.000003}}} };
   },
   dispatch: async () => {
     dispatchCount++;
@@ -206,11 +208,13 @@ assert.equal(aiCount, 1);
 assert.equal(state().state, 'draft');
 assert.equal(sendCount, 0);
 assert.ok(updates.some((u) => u.value.input_tokens === 10));
+assert.deepEqual(requests.find(r=>r.name==='soulvd_ai_finalize').args,{p_run:'run',p_charge:true,p_cost_micro:3});
 reset('ai', 'auto');
 generated = '[HANDOFF]';
 await worker.automationOne();
 assert.equal(state().state, 'handoff');
 assert.equal(sendCount, 0);
+assert.equal(requests.find(r=>r.name==='soulvd_ai_finalize').args.p_charge,false);
 reset('ai', 'auto');
 run.contact.bot_paused = true;
 await worker.automationOne();
@@ -229,6 +233,7 @@ assert.equal(state().state, 'handoff');
 assert.equal(state().error_code, 'AI_PROVIDER_UNAVAILABLE');
 assert.equal(aiCount,1);
 assert.equal(sendCount,0);
+assert.equal(requests.find(r=>r.name==='soulvd_ai_finalize').args.p_charge,false);
 assert.ok(updates.some(u=>u.table==='whatsapp_contacts' && u.value.bot_paused));
 for (const [code,attempt,expected] of [[204,1,'delivered'],[500,1,'queued'],[429,5,'failed'],[400,1,'failed'],[0,1,'queued']]) {
   updates=[];webhookCalls=[];webhookCode=code;

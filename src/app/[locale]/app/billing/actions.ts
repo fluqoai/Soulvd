@@ -3,8 +3,11 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { currentMerchant, requireTenant } from "@/lib/tenancy/context";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { aiReady } from '@/lib/studio/worker';
 export type PaymentState = { message?: string };
 const errors: Record<string, string> = {
+  ACTIVE_SUBSCRIPTION_REQUIRED: "فعّل اشتراك المنصة أولًا لشراء الردود الذكية.",
+  PAID_SUBSCRIPTION_REQUIRED: "تتاح الردود الذكية بعد تأكيد أول اشتراك مدفوع.",
   PAYMENTS_NOT_READY:
     "مساحتك في مرحلة التجهيز. سنتيح طلب التحويل بعد فتح التفعيل؛ لا تحوّل أي مبلغ الآن.",
   TEST_WORKSPACE: "هذه مساحة اختبار؛ لا تُسجل عليها دفعات العملاء.",
@@ -34,11 +37,17 @@ export async function requestPayment(
 ): Promise<PaymentState> {
   const context = await requireTenant();
   const purpose = z
-    .enum(["subscription", "upgrade", "wallet"])
+    .enum(["subscription", "upgrade", "wallet", "ai"])
     .safeParse(form.get("purpose"));
   if (context.role !== "owner" || !purpose.success)
     return { message: "متاح لمالك مساحة العمل فقط." };
   let amount: number | null = null;
+  if (purpose.data === 'ai') {
+    if (!aiReady()) return {message: 'المساعد الذكي قيد التجهيز؛ لا تحوّل مبلغًا له الآن.'};
+    const pack = z.enum(['1000', '5000']).safeParse(form.get('pack'));
+    if (!pack.success) return {message: 'اختر حزمة الردود الذكية.'};
+    amount = pack.data === '1000' ? 2900 : 9900;
+  }
   if (purpose.data === "wallet" || purpose.data === "subscription") {
     const value = z.coerce
       .number()
@@ -130,7 +139,7 @@ export async function paymentRequests() {
   const { data, error } = await db
     .from("payment_requests")
     .select(
-      "id,purpose,amount_halalas,wallet_amount_halalas,welcome_amount_halalas,status,bank_reference,created_at,expires_at",
+      "id,purpose,amount_halalas,wallet_amount_halalas,welcome_amount_halalas,ai_reply_count,status,bank_reference,created_at,expires_at",
     )
     .eq("tenant_id", context.tenantId)
     .order("created_at", { ascending: false })
