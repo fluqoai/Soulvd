@@ -22,9 +22,15 @@
 
 ## Still required
 
-- A fresh inbound WhatsApp message and actual reply/delivery receipt. The user was asked to send a unique test message and identify their sending number.
-- The owner's Soulvd messaging wallet has no balance record. An actual reply will require legitimate wallet funding or an explicitly designed, recorded test-credit mechanism; no fictitious bank confirmation was created.
 - Onboarding a separate customer's authorized number. The existing number status and transaction fixture do not substitute for Meta authorization or a real YCloud Onboard Link.
 - Local Chrome navigation to `/app` was blocked by the browser (`ERR_BLOCKED_BY_CLIENT`); no bypass was attempted. The corrected form was instead verified on production after deployment.
 
 No YCloud purchase was made. The checkout remained at Pro Monthly USD 118. The test account remains available for continued verification, with Growth selected but unpaid; annual and three-month selections were both saved during browser checks.
+
+## Follow-up: unified checkout and actual free reply
+
+- Migration `20260918181151` applied to Soulvd with checksum tracking after a rollback deployment check. Live PostgreSQL rollback acceptance passed for combined payment, welcome gift, duplicate confirmation, exact settlement and dispatch-time expiry of free-reply eligibility.
+- Code `8e7cc3f` deployed successfully to both production projects. Platform test suites, production build and changed-file ESLint passed. Chrome's existing authenticated tab timed out, so the new checkout has not yet received a production visual browser check.
+- A real inbound test arrived from the user's identified number ending 9350. The authorized reply used request `47a15924-4dbd-4eec-a947-d215cc7329ba`, job `6d4e27a0-14fc-49ba-b33f-42179f77e3d1`, and message `f6601303-7923-4340-9299-5de81f2add09`.
+- The normal production worker sent it. The final database state is job `accepted`, message `delivered`, hold `settled`, held amount 0, charged amount 0, no billing error. No artificial credit or bank confirmation was created.
+- Free replies are date-bounded as documented in `unified-checkout.md`; this result does not promise unlimited free messaging after the provider pricing change.
