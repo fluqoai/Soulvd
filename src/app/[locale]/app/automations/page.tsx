@@ -33,7 +33,7 @@ export default async function AutomationsPage() {
       .limit(30),
     db
       .from('whatsapp_contacts')
-      .select('id,wa_id,bot_paused')
+      .select('id,wa_id,bot_paused,handoff_at,handoff_assignee_email')
       .eq('tenant_id', context.tenantId)
       .order('last_inbound_at', { ascending: false })
       .limit(50),

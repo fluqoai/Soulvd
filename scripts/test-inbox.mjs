@@ -86,8 +86,10 @@ try {
     `set timezone='UTC';create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth to authenticated,service_role;create table auth.users(id uuid primary key,email text,raw_user_meta_data jsonb default '{}');create table public.users(id uuid primary key,email text,full_name text,role text default 'editor' constraint users_role_check check(role in ('owner','editor')));create function public.tg_handle_new_user() returns trigger language plpgsql as $$begin return new;end$$;`,
   );
   const migration = "20260918005715_inbox_experience.sql";
+  const handoffMigration = "20260920170000_bot_handoff_queue.sql";
+  const handoffMailMigration = "20260920171000_bot_handoff_mail.sql";
   for (const name of (await readdir("supabase/migrations"))
-    .filter((n) => n.startsWith("2026") && n !== migration)
+    .filter((n) => n.startsWith("2026") && n !== migration && n !== handoffMigration && n !== handoffMailMigration)
     .sort())
     await db.exec(await readFile("supabase/migrations/" + name, "utf8"));
   await db.exec(
@@ -96,7 +98,11 @@ try {
   await add(old, "inbound", "2026-09-01T00:00:00Z");
   await add(out, "outbound", "2026-09-02T00:00:00Z");
   await db.exec(await readFile("supabase/migrations/" + migration, "utf8"));
+  await db.exec(await readFile("supabase/migrations/" + handoffMigration, "utf8"));
+  await db.exec(await readFile("supabase/migrations/" + handoffMailMigration, "utf8"));
+  await db.query("update public.whatsapp_contacts set bot_paused=true,handoff_at=now(),handoff_reason='AI_HANDOFF',handoff_assignee_email='staff@test.invalid' where id=$1", [contact]);
   await role(actor);
+  assert.equal(await q('select handoff_assignee_email result from public.inbox_overview where contact_id=$1', [contact]), 'staff@test.invalid');
   for (const input of ['0511111111', '٠٥١١١١١١١١', '+966 51 111 1111']) {
     const search = contactSearch(input);
     assert.equal(search.column, 'phone');

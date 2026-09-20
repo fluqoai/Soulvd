@@ -131,9 +131,16 @@ export async function contactAutomation(
     !z.uuid().safeParse(id).success
   )
     return fail('FORBIDDEN');
-  const { error } = await createAdminClient()
+  const db = createAdminClient();
+  const { data: settings, error: settingsError } = paused
+    ? await db.from('bot_settings').select('handoff_email').eq('tenant_id', context.tenantId).maybeSingle()
+    : { data: null, error: null };
+  if (settingsError) return fail('HANDOFF_SETTINGS_UNAVAILABLE');
+  const { error } = await db
     .from('whatsapp_contacts')
-    .update({ bot_paused: paused })
+    .update(paused
+      ? { bot_paused: true, handoff_at: new Date().toISOString(), handoff_reason: 'MANUAL', handoff_assignee_email: settings?.handoff_email ?? null, handoff_notified_at: null }
+      : { bot_paused: false, handoff_at: null, handoff_reason: null, handoff_assignee_email: null, handoff_notified_at: null })
     .eq('id', id)
     .eq('tenant_id', context.tenantId);
   if (error) return fail(error.message);

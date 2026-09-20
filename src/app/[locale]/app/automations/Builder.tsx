@@ -61,7 +61,7 @@ export default function Builder({
   settings: Settings | null;
   knowledge: { id: string; title: string; content: string }[];
   runs: Run[];
-  contacts: { id: string; wa_id: string; bot_paused: boolean }[];
+  contacts: { id: string; wa_id: string; bot_paused: boolean; handoff_at: string | null; handoff_assignee_email: string | null }[];
   canManage: boolean;
   aiAvailable: boolean;
   allowance: AIStatus | null;
@@ -529,7 +529,7 @@ export default function Builder({
               className="flex flex-wrap items-center justify-between gap-3 border-b py-3"
             >
               <bdi>{c.wa_id}</bdi>
-              <span>{c.bot_paused ? 'البوت متوقف' : 'البوت متاح'}</span>
+              <span>{c.handoff_at ? `بانتظار موظف${c.handoff_assignee_email ? ` · ${c.handoff_assignee_email}` : ''}` : c.bot_paused ? 'البوت متوقف' : 'البوت متاح'}</span>
               <button
                 className="underline"
                 disabled={pending}

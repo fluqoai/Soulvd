@@ -25,6 +25,7 @@ type Run = {
     enabled: boolean;
     instructions: string;
     cooldown_seconds: number;
+    handoff_email?: string | null;
   };
   subscription: {
     status: string;
@@ -58,10 +59,21 @@ export async function automationOne() {
     if (result.error) throw new Error('RUN_PERSISTENCE_UNAVAILABLE');
   };
   const handoff = async (code: string) => {
-    const paused = await db.from('whatsapp_contacts').update({ bot_paused: true })
+    const paused = await db.from('whatsapp_contacts').update({
+      bot_paused: true,
+      handoff_at: new Date().toISOString(),
+      handoff_reason: code,
+      handoff_assignee_email: r.settings.handoff_email ?? null,
+      handoff_notified_at: null,
+    })
       .eq('tenant_id', r.tenant_id).eq('id', r.message.contact_id);
     if (paused.error) throw new Error('PAUSE_FAILED');
     await finish('handoff', code);
+    if (r.settings.handoff_email) {
+      const notice = await db.functions.invoke('handoff-mail', { body: { run: r.id } });
+      if (notice.error || notice.data?.allowed !== true)
+        console.error('HANDOFF_MAIL_FAILED', r.id);
+    }
   };
   let usingAI = false;
   let aiReserved = false;
@@ -95,13 +107,7 @@ export async function automationOne() {
         r.message.body.trim(),
       )
     ) {
-      const paused = await db
-        .from('whatsapp_contacts')
-        .update({ bot_paused: true })
-        .eq('tenant_id', r.tenant_id)
-        .eq('id', r.message.contact_id);
-      if (paused.error) throw new Error('PAUSE_FAILED');
-      await finish('handoff', 'CUSTOMER_REQUEST');
+      await handoff('CUSTOMER_REQUEST');
       return true;
     }
     const recent = await db
@@ -136,13 +142,7 @@ export async function automationOne() {
       .eq('state', 'processing');
     if (linked.error) throw new Error('RUN_PERSISTENCE_UNAVAILABLE');
     if (flow.definition.action === 'handoff') {
-      const paused = await db
-        .from('whatsapp_contacts')
-        .update({ bot_paused: true })
-        .eq('tenant_id', r.tenant_id)
-        .eq('id', r.message.contact_id);
-      if (paused.error) throw new Error('PAUSE_FAILED');
-      await finish('handoff', 'FLOW_HANDOFF');
+      await handoff('FLOW_HANDOFF');
       return true;
     }
     let output = flow.definition.reply;
@@ -171,13 +171,7 @@ export async function automationOne() {
       if (knowledge.error || history.error)
         throw new Error('KNOWLEDGE_UNAVAILABLE');
       if (!knowledge.data.length) {
-        const paused = await db
-          .from('whatsapp_contacts')
-          .update({ bot_paused: true })
-          .eq('tenant_id', r.tenant_id)
-          .eq('id', r.message.contact_id);
-        if (paused.error) throw new Error('PAUSE_FAILED');
-        await finish('handoff', 'KNOWLEDGE_REQUIRED');
+        await handoff('KNOWLEDGE_REQUIRED');
         return true;
       }
       const tenant = await db.from('tenants').select('is_test')
@@ -235,13 +229,7 @@ export async function automationOne() {
       if (usage.error) throw new Error('USAGE_PERSISTENCE_UNAVAILABLE');
       if (output.includes('[HANDOFF]') || !output) {
         await settleAI(false);
-        const paused = await db
-          .from('whatsapp_contacts')
-          .update({ bot_paused: true })
-          .eq('tenant_id', r.tenant_id)
-          .eq('id', r.message.contact_id);
-        if (paused.error) throw new Error('PAUSE_FAILED');
-        await finish('handoff', 'AI_HANDOFF');
+        await handoff('AI_HANDOFF');
         return true;
       }
     }

@@ -10,6 +10,9 @@ export type Conversation = {
   preview: string;
   direction: string;
   status: string;
+  handoff_at?: string | null;
+  handoff_reason?: string | null;
+  handoff_assignee_email?: string | null;
 };
 export type ChatMessage = {
   media?: { mime: string | null; filename: string | null } | null;
