@@ -21,7 +21,7 @@ const retrieved = knowledgeContext(
 );
 assert.ok(retrieved.startsWith('Returns'));
 assert.ok(retrieved.length <= 16000);
-let run, updates, requests, sendCount, aiCount, dispatchCount, generated, aiAllowed, knowledgeRows, generationFails, delivery, webhookCode, webhookCalls;
+let run, updates, requests, sendCount, aiCount, dispatchCount, generated, aiAllowed, knowledgeRows, generationFails, delivery, webhookCode, webhookCalls, testTenant;
 globalThis.studioMocks = {
   db: {
     rpc: async (name, args) => {
@@ -61,6 +61,9 @@ globalThis.studioMocks = {
         limit() {
           return query;
         },
+        single() {
+          return Promise.resolve({error:null,data:{is_test:testTenant}});
+        },
         then(resolve) {
           return Promise.resolve({
             error: null,
@@ -81,10 +84,10 @@ globalThis.studioMocks = {
     assert.ok(options.instructions.includes('لا تخترع'));
     assert.ok(options.prompt.includes('Within 2 days'));
     assert.equal(options.maxOutputTokens, 500);
-    assert.equal(options.model.modelId, 'test/provider');
+    assert.equal(options.model.modelId, testTenant ? 'nex-agi/nex-n2.5-mini:free' : 'test/provider');
     assert.ok(options.model.provider.startsWith('openrouter'));
-    assert.equal(options.providerOptions.openrouter.provider.max_price.prompt,0.1);
-    return { text: generated, usage: { inputTokens: 10, outputTokens: 5 }, providerMetadata:{openrouter:{usage:{cost:0.000003}}} };
+    assert.equal(options.providerOptions.openrouter.provider.max_price.prompt,testTenant ? 0 : 0.1);
+    return { text: generated, usage: { inputTokens: 10, outputTokens: 5 }, providerMetadata:{openrouter:{usage:{cost:testTenant ? 0 : 0.000003}}} };
   },
   dispatch: async () => {
     dispatchCount++;
@@ -125,6 +128,7 @@ function reset(action = 'text', mode = 'draft') {
   generated = 'Within 2 days.';
   aiAllowed = true;
   generationFails = false;
+  testTenant = false;
   knowledgeRows = [{ title: 'Shipping', content: 'Within 2 days.' }];
   run = {
     id: 'run',
@@ -209,6 +213,12 @@ assert.equal(state().state, 'draft');
 assert.equal(sendCount, 0);
 assert.ok(updates.some((u) => u.value.input_tokens === 10));
 assert.deepEqual(requests.find(r=>r.name==='soulvd_ai_finalize').args,{p_run:'run',p_charge:true,p_cost_micro:3});
+reset('ai');
+testTenant = true;
+await worker.automationOne();
+assert.equal(state().state, 'draft');
+assert.equal(sendCount, 0);
+assert.equal(requests.find(r=>r.name==='soulvd_ai_finalize').args.p_cost_micro,0);
 reset('ai', 'auto');
 generated = '[HANDOFF]';
 await worker.automationOne();
